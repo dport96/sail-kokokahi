@@ -12,3 +12,26 @@ body {
   display: flex;
   flex-direction: column;
 }
+.background {
+  background-image: url(https://images.squarespace-cdn.com/content/v1/585d8ae8d2b857ddbd61ebf4/1637733891426-7PQCRKW4SP6FXSTBSWYZ/IMG_6638.jpeg?format=750w);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+}
+
+.center {
+  text-align: center;
+  justify-content: center;
+}
+
+.box {
+  border: 2px solid rgb(33, 33, 33);
+  border-radius: 10px;
+  background-color: rgb(221, 221, 221);
+}
+
+.hr {
+  margin: 0;
+  padding: 0;
+}
