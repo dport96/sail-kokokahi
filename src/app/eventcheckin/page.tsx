@@ -5,7 +5,6 @@ import StuffItem from '@/components/StuffItem';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 
-/** Render a list of stuff for the logged in user. */
 const EventCheckInPage = async () => {
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);

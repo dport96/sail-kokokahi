@@ -19,6 +19,8 @@ async function main() {
       create: {
         email: account.email,
         password,
+        pendingHours: account.pendingHours,
+        approvedHours: account.approvedHours,
         role,
       },
     });
