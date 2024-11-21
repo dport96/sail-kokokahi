@@ -60,3 +60,20 @@ th {
   text-decoration: underline;
   font-size: 1.5rem;
 }
+
+.background {
+  background-image: url(https://getwallpapers.com/wallpaper/full/a/3/5/1204058-hd-sailing-wallpaper-2400x1600-samsung.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  filter: brightness(90%);
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
