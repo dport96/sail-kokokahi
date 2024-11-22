@@ -1,7 +1,7 @@
 {
   "defaultAccounts": [
-    { "email": "admin@foo.com", "password": "changeme", "role": "ADMIN" },
-    { "email": "john@foo.com", "password": "changeme" }
+    { "email": "admin@foo.com", "password": "changeme", "role": "ADMIN", "pendingHours": 3, "approvedHours": 1.5 },
+    { "email": "john@foo.com", "password": "changeme", "pendingHours": 1, "approvedHours": 2.5 }
   ],
 
   "defaultData": [
@@ -9,5 +9,26 @@
     { "name": "Bicycle", "quantity": 2, "owner": "john@foo.com", "condition": "poor" },
     { "name": "Banana", "quantity": 2, "owner": "admin@foo.com", "condition": "good" },
     { "name": "Boogie Board", "quantity": 2, "owner": "admin@foo.com", "condition": "excellent" }
+  ],
+  "defaultEvents": [
+    {
+      "title": "Sail Kokokahi - Fun Race",
+      "description": "Fun sailing race for members",
+      "date": "Nov 23",
+      "location": "Kokokahi Bay",
+      "hours": 1,
+      "time": "10:00 AM - 11:00 AM",
+      "owner": "admin@foo.com"
+    },
+    {
+      "title": "Sail Kokokahi - Club Day",
+      "description": "Monthly club event for members",
+      "date": "Dec 08",
+      "location": "Kokokahi Clubhouse",
+      "hours": 1.5,
+      "time": "12:00 PM - 1:30 PM",
+      "owner": "john@foo.com"
+    }
   ]
+
 }

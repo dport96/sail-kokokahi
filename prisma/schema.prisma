@@ -38,6 +38,7 @@ model Event {
   id          Int      @id @default(autoincrement())
   eventId     Int
   hours       Int
+  time        String
   title       String
   description String
   date        String

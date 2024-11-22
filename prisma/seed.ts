@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { PrismaClient, Role, Condition } from '@prisma/client';
 import { hash } from 'bcrypt';
 import * as config from '../config/settings.development.json';
@@ -19,6 +20,8 @@ async function main() {
       create: {
         email: account.email,
         password,
+        pendingHours: account.pendingHours,
+        approvedHours: account.approvedHours,
         role,
       },
     });
@@ -45,7 +48,56 @@ async function main() {
       },
     });
   });
+
+  // Seed the Event table
+  config.defaultEvents.forEach(async (event, index) => {
+    console.log(`  Adding event: ${event.title}`);
+    const user = await prisma.user.findUnique({
+      where: {
+        email: event.owner,
+      },
+    });
+
+    if (user) {
+      await prisma.event.upsert({
+        where: {
+          id: index + 1,
+        },
+        update: {
+          title: event.title,
+          description: event.description,
+          date: event.date,
+          location: event.location,
+          hours: event.hours,
+          time: event.time,
+          owner: event.owner,
+          User: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+        create: {
+          title: event.title,
+          description: event.description,
+          date: event.date,
+          location: event.location,
+          hours: event.hours,
+          time: event.time,
+          owner: event.owner,
+          User: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+    } else {
+      console.error(`User with email ${event.owner} not found.`);
+    }
+  });
 }
+
 main()
   .then(() => prisma.$disconnect())
   .catch(async (e) => {
