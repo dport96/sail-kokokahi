@@ -46,18 +46,14 @@ const MemberDashboard = async () => {
         </Container>
         <Container>
           <p className="custom-text">Event History:</p>
-          { /* Need to add a way to display the event history */ }
-          (Pending) 11/23: Sail Kokokahi &quot;Fun Race&quot;
-          <br />
-          <br />
-          12/8: Sail Kokokahi &quot;Club Day&quot; & Annual General Meeting
-          <br />
-          <br />
-          12/19: Kahana Bay Sail & Potluck Lunch
           {events?.map(event => (
             <div key={event.id}>
               {event.date}
+              :
+              {' '}
               {event.title}
+              <br />
+              <br />
             </div>
           ))}
         </Container>

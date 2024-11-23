@@ -28,14 +28,14 @@ model User {
   lastName      String  @default("Doe")
   email         String  @unique
   password      String
-  pendingHours  Int     @default(0)
-  approvedHours Int     @default(0)
+  pendingHours  Float   @default(0)
+  approvedHours Float   @default(0)
   role          Role    @default(USER)
   events        Event[]
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   eventId     Int
   hours       Int
   time        String
@@ -44,7 +44,7 @@ model Event {
   date        String
   location    String
   owner       String
-  User        User     @relation(fields: [eventId], references: [id])
+  User        User   @relation(fields: [eventId], references: [id])
 }
 
 enum Condition {
