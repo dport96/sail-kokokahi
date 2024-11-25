@@ -1,44 +1,74 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface Notifications {
-  email: boolean;
+  emailNotifications: boolean;
   reminders: boolean;
   billing: boolean;
 }
 
 const NotificationSettings: React.FC = () => {
+  const { data: session } = useSession(); // Use NextAuth to get the current user session
+  const userEmail = session?.user?.email; // Get the email of the logged-in user
+
   const [notifications, setNotifications] = useState<Notifications>({
-    email: false,
+    emailNotifications: false,
     reminders: false,
     billing: false,
   });
 
   useEffect(() => {
-    const fetchNotifications = async (): Promise<void> => {
-      try {
-        const res = await fetch('/api/user/notifications');
-        const data = await res.json();
-        setNotifications(data);
-      } catch (err) {
-        console.error('Error fetching notifications:', err);
-      }
-    };
+    if (userEmail) {
+      const fetchNotifications = async (): Promise<void> => {
+        try {
+          const res = await fetch(`/api/user/notifications?email=${userEmail}`);
+          if (res.ok) {
+            const data = await res.json();
+            console.log('Fetched notifications:', data);
+            setNotifications(data);
+          } else {
+            console.error(`Failed to fetch notifications. Status: ${res.status}`);
+          }
+        } catch (err) {
+          console.error('Error fetching notifications:', err);
+        }
+      };
 
-    fetchNotifications();
-  }, []);
+      fetchNotifications();
+    } else {
+      console.error('No user email found in session');
+    }
+  }, [userEmail]); // Trigger fetch whenever the userEmail changes
 
   const handleToggle = async (field: keyof Notifications): Promise<void> => {
     const updated = { ...notifications, [field]: !notifications[field] };
     setNotifications(updated);
 
-    try {
-      await fetch('/api/user/notifications', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-    } catch (err) {
-      console.error('Error updating notifications:', err);
+    if (userEmail) {
+      try {
+        const res = await fetch('/api/user/notifications', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            emailNotifications: updated.emailNotifications,
+            reminders: updated.reminders,
+            billing: updated.billing,
+          }),
+        });
+
+        if (res.ok) {
+          console.log(`Successfully updated ${field}`);
+        } else {
+          console.error(`Failed to update notifications. Status: ${res.status}`);
+        }
+      } catch (err) {
+        console.error(`Error updating ${field} notification:`, err);
+      }
+    } else {
+      console.error('No user email found in session for update');
     }
   };
 
@@ -50,8 +80,8 @@ const NotificationSettings: React.FC = () => {
           type="checkbox"
           id="email-notifications"
           className="form-check-input"
-          checked={notifications.email}
-          onChange={() => handleToggle('email')}
+          checked={notifications.emailNotifications}
+          onChange={() => handleToggle('emailNotifications')}
         />
         <label htmlFor="email-notifications" className="form-check-label">
           Email Notifications

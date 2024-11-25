@@ -3,9 +3,13 @@ import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert';
 
 interface ProfileFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCVV?: string;
 }
 
 const ProfileForm: React.FC = () => {
@@ -15,26 +19,18 @@ const ProfileForm: React.FC = () => {
   const onSubmit = async (data: ProfileFormData): Promise<void> => {
     setLoading(true);
     try {
-      console.log('Submitting data:', data); // Debug log
-
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data), // Send the form data
+        body: JSON.stringify(data),
       });
 
-      console.log('API response status:', response.status); // Debug log
       if (response.ok) {
-        const responseData = await response.json();
-        console.log('Profile updated successfully:', responseData); // Debug log
         Swal('Success!', 'Profile updated successfully.', 'success');
       } else {
-        const errorData = await response.json();
-        console.error('Failed to update profile:', errorData); // Debug log
-        Swal('Error!', errorData.error || 'Failed to update profile.', 'error');
+        Swal('Error!', 'Failed to update profile.', 'error');
       }
     } catch (error) {
-      console.error('Unexpected error:', error); // Debug log
       Swal('Error!', 'An unexpected error occurred.', 'error');
     } finally {
       setLoading(false);
@@ -43,15 +39,28 @@ const ProfileForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mt-3">
+      {/* Personal Information Section */}
+      <h3>Personal Information</h3>
       <div className="mb-3">
-        <label htmlFor="user-name" className="form-label">
-          Name
+        <label htmlFor="user-first-name" className="form-label">
+          First Name
         </label>
         <input
           type="text"
-          id="user-name"
+          id="user-first-name"
           className="form-control"
-          {...register('name', { required: true })}
+          {...register('firstName', { required: true })}
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="user-last-name" className="form-label">
+          Last Name
+        </label>
+        <input
+          type="text"
+          id="user-last-name"
+          className="form-control"
+          {...register('lastName', { required: true })}
         />
       </div>
       <div className="mb-3">
@@ -76,6 +85,43 @@ const ProfileForm: React.FC = () => {
           {...register('phone')}
         />
       </div>
+
+      {/* Payment Information Section */}
+      <h3>Payment Information</h3>
+      <div className="mb-3">
+        <label htmlFor="card-number" className="form-label">
+          Card Number
+        </label>
+        <input
+          type="text"
+          id="card-number"
+          className="form-control"
+          {...register('cardNumber')}
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="card-expiry" className="form-label">
+          Expiry Date (MM/YY)
+        </label>
+        <input
+          type="text"
+          id="card-expiry"
+          className="form-control"
+          {...register('cardExpiry')}
+        />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="card-cvv" className="form-label">
+          CVV
+        </label>
+        <input
+          type="text"
+          id="card-cvv"
+          className="form-control"
+          {...register('cardCVV')}
+        />
+      </div>
+
       <button type="submit" className="btn btn-primary" disabled={loading}>
         {loading ? 'Saving...' : 'Save Changes'}
       </button>
