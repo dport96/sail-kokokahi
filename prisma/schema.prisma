@@ -12,13 +12,13 @@ model User {
   email                String    @unique
   password             String
   role                 Role      @default(USER)
-  firstName            String
-  lastName             String
-  approvedHours        Int       @default(0)
-  pendingHours         Int       @default(0)
+  firstName            String    @default("John")
+  lastName             String    @default("Doe")
+  approvedHours        Float     @default(0)
+  pendingHours         Float     @default(0)
   billingNotifications Boolean   @default(false)
   emailNotifications   Boolean   @default(false)
-  reminders            Boolean   @default(false) // Add this field for reminders
+  reminders            Boolean   @default(false) // Added for notifications
   phone                String?
   billings             Billing[]
   events               Event[]
@@ -28,7 +28,7 @@ model User {
 }
 
 model Event {
-  id          Int    @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   eventId     Int
   title       String
   description String
@@ -37,7 +37,7 @@ model Event {
   owner       String
   hours       Int
   time        String
-  User        User   @relation(fields: [eventId], references: [id])
+  User        User      @relation(fields: [eventId], references: [id])
 }
 
 model Stuff {
