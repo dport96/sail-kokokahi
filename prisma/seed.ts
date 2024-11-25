@@ -1,101 +1,45 @@
 /* eslint-disable no-await-in-loop */
-import { PrismaClient, Role, Condition } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
-import * as config from '../config/settings.development.json';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding the database');
+  console.log('Seeding users with payment details...');
+
   const password = await hash('changeme', 10);
-  config.defaultAccounts.forEach(async (account) => {
-    let role: Role = 'USER';
-    if (account.role === 'ADMIN') {
-      role = 'ADMIN';
-    }
-    console.log(`  Creating user: ${account.email} with role: ${role}`);
-    await prisma.user.upsert({
-      where: { email: account.email },
-      update: {},
-      create: {
-        email: account.email,
-        password,
-        pendingHours: account.pendingHours,
-        approvedHours: account.approvedHours,
-        role,
-      },
-    });
-    // console.log(`  Created user: ${user.email} with role: ${user.role}`);
-  });
-  config.defaultData.forEach(async (data, index) => {
-    let condition: Condition = 'good';
-    if (data.condition === 'poor') {
-      condition = 'poor';
-    } else if (data.condition === 'excellent') {
-      condition = 'excellent';
-    } else {
-      condition = 'fair';
-    }
-    console.log(`  Adding stuff: ${data.name} (${data.owner})`);
-    await prisma.stuff.upsert({
-      where: { id: index + 1 },
-      update: {},
-      create: {
-        name: data.name,
-        quantity: data.quantity,
-        owner: data.owner,
-        condition,
-      },
-    });
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@foo.com' },
+    update: {},
+    create: {
+      firstName: 'Admin',
+      lastName: 'User',
+      email: 'admin@foo.com',
+      password,
+      role: Role.ADMIN,
+      cardNumber: '4111111111111111',
+      cardExpiry: '12/24',
+      cardCVV: '123',
+    },
   });
 
-  // Seed the Event table
-  config.defaultEvents.forEach(async (event, index) => {
-    console.log(`  Adding event: ${event.title}`);
-    const user = await prisma.user.findUnique({
-      where: {
-        email: event.owner,
-      },
-    });
-
-    if (user) {
-      await prisma.event.upsert({
-        where: {
-          id: index + 1,
-        },
-        update: {
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          location: event.location,
-          hours: event.hours,
-          time: event.time,
-          owner: event.owner,
-          User: {
-            connect: {
-              id: user.id,
-            },
-          },
-        },
-        create: {
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          location: event.location,
-          hours: event.hours,
-          time: event.time,
-          owner: event.owner,
-          User: {
-            connect: {
-              id: user.id,
-            },
-          },
-        },
-      });
-    } else {
-      console.error(`User with email ${event.owner} not found.`);
-    }
+  const johnUser = await prisma.user.upsert({
+    where: { email: 'john@foo.com' },
+    update: {},
+    create: {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@foo.com',
+      password,
+      role: Role.USER,
+      cardNumber: '4111111111112222',
+      cardExpiry: '01/25',
+      cardCVV: '456',
+    },
   });
+
+  console.log('Users seeded:', adminUser, johnUser);
 }
 
 main()

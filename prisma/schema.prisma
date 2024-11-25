@@ -1,57 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  // for local development
   url      = env("DATABASE_URL")
-  // for Vercel
-  // url       = env("POSTGRES_PRISMA_URL")
-  // directUrl = env("POSTGRES_URL_NON_POOLING")
-}
-
-enum Role {
-  USER
-  ADMIN
 }
 
 model User {
-  id            Int     @id @default(autoincrement())
-  firstName     String  @default("John")
-  lastName      String  @default("Doe")
-  email         String  @unique
-  password      String
-  pendingHours  Float   @default(0)
-  approvedHours Float   @default(0)
-  role          Role    @default(USER)
-  events        Event[]
+  id                   Int       @id @default(autoincrement())
+  email                String    @unique
+  password             String
+  role                 Role      @default(USER)
+  firstName            String    @default("John")
+  lastName             String    @default("Doe")
+  approvedHours        Float     @default(0)
+  pendingHours         Float     @default(0)
+  billingNotifications Boolean   @default(false)
+  emailNotifications   Boolean   @default(false)
+  reminders            Boolean   @default(false) // Added for notifications
+  phone                String?
+  billings             Billing[]
+  events               Event[]
+  cardNumber           String?   // Card number for payment details
+  cardExpiry           String?   // Expiry date for payment details (format: MM/YY)
+  cardCVV              String?   // CVV for payment details
 }
 
 model Event {
-  id          Int    @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   eventId     Int
-  hours       Int
-  time        String
   title       String
   description String
   date        String
   location    String
   owner       String
-  User        User   @relation(fields: [eventId], references: [id])
-}
-
-enum Condition {
-  excellent
-  good
-  fair
-  poor
+  hours       Int
+  time        String
+  User        User      @relation(fields: [eventId], references: [id])
 }
 
 model Stuff {
@@ -60,4 +46,25 @@ model Stuff {
   quantity  Int
   condition Condition
   owner     String
+}
+
+model Billing {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Condition {
+  excellent
+  good
+  fair
+  poor
 }

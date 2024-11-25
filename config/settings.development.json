@@ -1,15 +1,51 @@
 {
   "defaultAccounts": [
-    { "email": "admin@foo.com", "password": "changeme", "role": "ADMIN", "pendingHours": 3, "approvedHours": 1.5 },
-    { "email": "john@foo.com", "password": "changeme", "pendingHours": 1, "approvedHours": 2.5 }
+    {
+      "email": "admin@foo.com",
+      "password": "changeme",
+      "firstName": "Admin",
+      "lastName": "User",
+      "role": "ADMIN",
+      "pendingHours": 3,
+      "approvedHours": 1.5
+    },
+    {
+      "email": "john@foo.com",
+      "password": "changeme",
+      "firstName": "John",
+      "lastName": "Doe",
+      "pendingHours": 1,
+      "approvedHours": 2.5
+    }
   ],
 
   "defaultData": [
-    { "name": "Basket", "quantity": 3, "owner": "john@foo.com", "condition": "excellent" },
-    { "name": "Bicycle", "quantity": 2, "owner": "john@foo.com", "condition": "poor" },
-    { "name": "Banana", "quantity": 2, "owner": "admin@foo.com", "condition": "good" },
-    { "name": "Boogie Board", "quantity": 2, "owner": "admin@foo.com", "condition": "excellent" }
+    {
+      "name": "Basket",
+      "quantity": 3,
+      "owner": "john@foo.com",
+      "condition": "excellent"
+    },
+    {
+      "name": "Bicycle",
+      "quantity": 2,
+      "owner": "john@foo.com",
+      "condition": "poor"
+    },
+    {
+      "name": "Banana",
+      "quantity": 2,
+      "owner": "admin@foo.com",
+      "condition": "good"
+    },
+    {
+      "name": "Boogie Board",
+      "quantity": 2,
+      "owner": "admin@foo.com",
+      "condition": "excellent"
+    }
   ],
+
   "defaultEvents": [
     {
       "title": "Sail Kokokahi - Fun Race",
@@ -30,5 +66,4 @@
       "owner": "john@foo.com"
     }
   ]
-
 }
