@@ -39,13 +39,13 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
+  border: 2px solid black; /* Adds a thicker border around the entire table */
 }
 
 th, td {
-  border: 1px solid black;
+  border: 2px solid black;
   padding: 8px;
-  text-align: left;
+  text-align: center;
 }
 
 th {

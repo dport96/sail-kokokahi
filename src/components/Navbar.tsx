@@ -13,8 +13,9 @@ const NavBar: React.FC = () => {
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
+
   return (
-    <Navbar bg="dark" expand="lg py-4">
+    <Navbar bg="dark" expand="lg" className="py-4">
       <Container>
       {currentUser && role === 'USER' ? [
         <Navbar.Brand className="text-white" href="/member-landingpage">
@@ -35,45 +36,46 @@ const NavBar: React.FC = () => {
         />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto justify-content-start">
-            {currentUser && role === 'USER'
-              ? [
-                  <Nav.Link
-                    className="text-white"
-                    id="add-stuff-nav"
-                    href="/member-dashboard"
-                    key="add"
-                    active={pathName === '/member-dashboard'}
-                  >
-                    Member Dashboard
-                  </Nav.Link>,
-                  <Nav.Link
-                    className="text-white"
-                    id="add-stuff-nav"
-                    href="/eventsignup"
-                    key="add"
-                    active={pathName === '/eventsignup'}
-                  >
-                    Event Sign-Up
-                  </Nav.Link>,
-                ]
-              : ''}
-            {currentUser && role === 'ADMIN' ? (
+            {currentUser && role === 'USER' && (
+              <>
+                <Nav.Link
+                  className="text-white"
+                  id="member-dashboard-nav"
+                  href="/member-dashboard"
+                  key="member-dashboard"
+                  active={pathName === '/member-dashboard'}
+                >
+                  Member Dashboard
+                </Nav.Link>
+                <Nav.Link
+                  className="text-white"
+                  id="event-signup-nav"
+                  href="/eventsignup"
+                  key="event-signup"
+                  active={pathName === '/eventsignup'}
+                >
+                  Event Sign-Up
+                </Nav.Link>
+              </>
+            )}
+            {currentUser && role === 'ADMIN' && (
               <Nav.Link
                 className="text-white"
-                id="admin-stuff-nav"
+                id="admin-dashboard-nav"
                 href="/admin-dashboard"
-                key="admin"
+                key="admin-dashboard"
                 active={pathName === '/admin-dashboard'}
               >
                 Admin Dashboard
               </Nav.Link>
-            ) : (
-              ''
             )}
           </Nav>
           <Nav>
             {session ? (
-              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>{currentUser}</span>}>
+              <NavDropdown
+                id="login-dropdown"
+                title={<span style={{ color: 'white' }}>{currentUser}</span>}
+              >
                 <NavDropdown.Item id="login-dropdown-sign-out" href="/api/auth/signout">
                   <BoxArrowRight />
                   Sign Out
@@ -84,12 +86,15 @@ const NavBar: React.FC = () => {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>Login</span>}>
+              <NavDropdown
+                id="login-dropdown"
+                title={<span style={{ color: 'white' }}>Login</span>}
+              >
                 <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
                   <PersonFill />
                   Sign in
                 </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
+                <NavDropdown.Item id="login-dropdown-sign-up" href="/register">
                   <PersonPlusFill />
                   Sign up
                 </NavDropdown.Item>

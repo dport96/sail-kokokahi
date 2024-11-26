@@ -1,26 +1,48 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "target": "esnext", // Specify target for the latest ECMAScript version
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ], // Include necessary libraries
+    "allowJs": true, // Allow JavaScript files
+    "skipLibCheck": true, // Skip type checking for libraries
+    "strict": true, // Enable all strict type-checking options
+    "noEmit": true, // Do not emit output
+    "esModuleInterop": true, // Enable interoperability between CommonJS and ESModules
+    "module": "esnext", // Specify the module code generation
+    "moduleResolution": "node", // Use Node.js module resolution
+    "resolveJsonModule": true, // Allow importing JSON modules
+    "isolatedModules": true, // Ensure each file is treated as a separate module
+    "jsx": "preserve", // Preserve JSX syntax
+    "incremental": true, // Enable incremental compilation for faster builds
+    "baseUrl": ".", // Set base directory for paths
+    "paths": {
+      "@/*": [
+        "src/*"
+      ] // Alias for the src directory
+    },
+    "types": [
+      "node",
+      "jest"
+    ] // Include type declarations for Node.js and Jest
+    ,
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts", // Include Next.js environment declarations
+    "**/*.ts", // Include all TypeScript files
+    "**/*.tsx", // Include all TypeScript JSX files
+    ".next/types/**/*.ts" // Include Next.js generated types
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ] // Exclude node_modules and test files
 }
