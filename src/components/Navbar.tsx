@@ -17,9 +17,16 @@ const NavBar: React.FC = () => {
   return (
     <Navbar bg="dark" expand="lg" className="py-4">
       <Container>
-        <Navbar.Brand className="text-white" href="/">
-          Sail Kokokahi Volunteer Portal
-        </Navbar.Brand>
+      {currentUser && role === 'USER' ? [
+        <Navbar.Brand className="text-white" href="/member-landingpage">
+        Sail Kokokahi Volunteer Portal
+        </Navbar.Brand>,
+      ] : ''}
+      {currentUser && role === 'ADMIN' ? [
+        <Navbar.Brand className="text-white" href="/admin-landingpage">
+        Sail Kokokahi Volunteer Portal
+        </Navbar.Brand>,
+      ] : ''}
         <Navbar.Toggle
           aria-controls="basic-navbar-nav"
           style={{

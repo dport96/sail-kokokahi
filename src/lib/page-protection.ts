@@ -20,3 +20,10 @@ export const adminProtectedPage = (session: { user: { email: string; id: string;
     redirect('/not-authorized');
   }
 };
+
+export const memberProtectedPage = (session: { user: { email: string; id: string; randomKey: string } } | null) => {
+  loggedInProtectedPage(session);
+  if (session && session.user.randomKey !== Role.USER) {
+    redirect('/not-authorized');
+  }
+};
