@@ -8,27 +8,32 @@ datasource db {
 }
 
 model User {
-  id                   Int       @id @default(autoincrement())
-  email                String    @unique
+  id                   Int        @id @default(autoincrement())
+  email                String     @unique
   password             String
-  role                 Role      @default(USER)
-  firstName            String    @default("John")
-  lastName             String    @default("Doe")
-  approvedHours        Float     @default(0)
-  pendingHours         Float     @default(0)
-  billingNotifications Boolean   @default(false)
-  emailNotifications   Boolean   @default(false)
-  reminders            Boolean   @default(false) // Added for notifications
+  role                 Role       @default(USER)
+  firstName            String     @default("John")
+  lastName             String     @default("Doe")
+  approvedHours        Float      @default(0)
+  pendingHours         Float      @default(0)
+  billingNotifications Boolean    @default(false)
+  emailNotifications   Boolean    @default(false)
+  reminders            Boolean    @default(false) // Added for notifications
   phone                String?
   billings             Billing[]
   events               Event[]
-  cardNumber           String?   // Card number for payment details
-  cardExpiry           String?   // Expiry date for payment details (format: MM/YY)
-  cardCVV              String?   // CVV for payment details
+  hoursLogs            HoursLog[] // Added opposite relation field
+  cardNumber           String? // Card number for payment details
+  cardExpiry           String? // Expiry date for payment details (format: MM/YY)
+  cardCVV              String? // CVV for payment details
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  status               String     @default("pending") // Add this field if required
+
 }
 
 model Event {
-  id          Int       @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   eventId     Int
   title       String
   description String
@@ -37,7 +42,8 @@ model Event {
   owner       String
   hours       Int
   time        String
-  User        User      @relation(fields: [eventId], references: [id])
+  status      String @default("pending")
+  User        User   @relation(fields: [eventId], references: [id])
 }
 
 model Stuff {
@@ -53,6 +59,16 @@ model Billing {
   userId      Int
   amount      Float
   description String
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+}
+
+model HoursLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  action      String
+  hours       Float
+  performedBy String
   createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
 }
