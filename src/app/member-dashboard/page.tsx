@@ -45,7 +45,7 @@ const MemberDashboard = async () => {
           </Row>
         </Container>
         <Container>
-          <p className="custom-text">Event History:</p>
+          <p className="custom-text">Upcoming Events:</p>
           {events?.map(event => (
             <div key={event.id}>
               {event.date}

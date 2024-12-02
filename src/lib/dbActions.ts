@@ -6,6 +6,33 @@ import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
 
 /**
+ * Adds a new Event to the database.
+ * @param event, an object with the following properties:
+ * eventId, title, description, date, location, owner, hours, time.
+ */
+export async function addEvent(event: {
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  hours: number;
+  time: string;
+}) {
+  await prisma.event.create({
+    data: {
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      location: event.location,
+      hours: event.hours,
+      time: event.time,
+    },
+  });
+  // After adding, redirect to the event page
+  redirect('/eventsignup');
+}
+
+/**
  * Adds a new stuff to the database.
  * @param stuff, an object with the following properties: name, quantity, owner, condition.
  */
