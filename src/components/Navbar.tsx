@@ -17,16 +17,20 @@ const NavBar: React.FC = () => {
   return (
     <Navbar bg="dark" expand="lg" className="py-4">
       <Container>
-      {currentUser && role === 'USER' ? [
-        <Navbar.Brand className="text-white" href="/member-landingpage">
-        Sail Kokokahi Volunteer Portal
-        </Navbar.Brand>,
-      ] : ''}
-      {currentUser && role === 'ADMIN' ? [
-        <Navbar.Brand className="text-white" href="/admin-landingpage">
-        Sail Kokokahi Volunteer Portal
-        </Navbar.Brand>,
-      ] : ''}
+        {currentUser && role === 'USER'
+          ? [
+              <Navbar.Brand className="text-white" href="/member-landingpage">
+                Sail Kokokahi Volunteer Portal
+              </Navbar.Brand>,
+            ]
+          : ''}
+        {currentUser && role === 'ADMIN'
+          ? [
+              <Navbar.Brand className="text-white" href="/admin-landingpage">
+                Sail Kokokahi Volunteer Portal
+              </Navbar.Brand>,
+            ]
+          : ''}
         <Navbar.Toggle
           aria-controls="basic-navbar-nav"
           style={{
@@ -59,23 +63,31 @@ const NavBar: React.FC = () => {
               </>
             )}
             {currentUser && role === 'ADMIN' && (
-              <Nav.Link
-                className="text-white"
-                id="admin-dashboard-nav"
-                href="/admin-dashboard"
-                key="admin-dashboard"
-                active={pathName === '/admin-dashboard'}
-              >
-                Admin Dashboard
-              </Nav.Link>
+              <>
+                <Nav.Link
+                  className="text-white"
+                  id="admin-dashboard-nav"
+                  href="/admin-dashboard"
+                  key="admin-dashboard"
+                  active={pathName === '/admin-dashboard'}
+                >
+                  Admin Dashboard
+                </Nav.Link>
+                <Nav.Link
+                  className="text-white"
+                  id="add-event-nav"
+                  href="/add-event"
+                  key="add-event"
+                  active={pathName === '/add-event'}
+                >
+                  Add Event
+                </Nav.Link>
+              </>
             )}
           </Nav>
           <Nav>
             {session ? (
-              <NavDropdown
-                id="login-dropdown"
-                title={<span style={{ color: 'white' }}>{currentUser}</span>}
-              >
+              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>{currentUser}</span>}>
                 <NavDropdown.Item id="login-dropdown-sign-out" href="/api/auth/signout">
                   <BoxArrowRight />
                   Sign Out
@@ -86,10 +98,7 @@ const NavBar: React.FC = () => {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <NavDropdown
-                id="login-dropdown"
-                title={<span style={{ color: 'white' }}>Login</span>}
-              >
+              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>Login</span>}>
                 <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
                   <PersonFill />
                   Sign in

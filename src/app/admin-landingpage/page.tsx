@@ -23,6 +23,11 @@ const AdminLandingPage = async () => {
               <a href="/admin-dashboard">Admin Dashboard</a>
             </button>
           </Col>
+          <Col>
+            <button type="button" className="m-3">
+              <a href="/add-event">Add Event</a>
+            </button>
+          </Col>
           {/* <Col>
             <button type="button" className="m-3">
               <a href="/eventsignup">
