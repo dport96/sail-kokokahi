@@ -22,19 +22,24 @@ model User {
   phone                String?
   billings             Billing[]
   events               UserEvent[] // Connects users to the events they sign up for
-  cardNumber           String?     // Card number for payment details
-  cardExpiry           String?     // Expiry date for payment details (format: MM/YY)
-  cardCVV              String?     // CVV for payment details
+  hoursLogs            HoursLog[] // Added opposite relation field
+  cardNumber           String? // Card number for payment details
+  cardExpiry           String? // Expiry date for payment details (format: MM/YY)
+  cardCVV              String? // CVV for payment details
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  status               String     @default("pending") // Add this field if required
 }
 
 model Event {
-  id          Int         @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   title       String
   description String
   date        String
   location    String
   hours       Int
   time        String
+  status      String @default("pending")
   users       UserEvent[]  // Connects events to the users signed up for them
 }
 
@@ -62,6 +67,16 @@ model Billing {
   userId      Int
   amount      Float
   description String
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+}
+
+model HoursLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  action      String
+  hours       Float
+  performedBy String
   createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
 }
