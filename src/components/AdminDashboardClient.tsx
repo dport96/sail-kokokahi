@@ -98,7 +98,6 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   return (
     <>
       <Container>
-        <h2>Admin Dashboard</h2>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <Button onClick={exportToExcel}>Export as Excel</Button>
         </div>
