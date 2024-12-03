@@ -7,6 +7,10 @@ on:
       - issue-46
   pull_request:
 
+env:
+  NEXTAUTH_SECRET: secret
+  NEXTAUTH_URL: http://localhost:3000
+
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
