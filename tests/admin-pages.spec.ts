@@ -5,5 +5,15 @@ test.use({
 });
 
 test('Admin Pages', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  const adminPages = [
+    'http://localhost:3000/add-event',
+    'http://localhost:3000/admin-dashboard',
+    'http://localhost:3000/admin-landingpage',
+    'http://localhost:3000/settings'
+  ];
+
+  for (const pageUrl of adminPages) {
+    await page.goto(pageUrl);
+    await expect(page).toHaveURL(pageUrl);
+  }
 });
