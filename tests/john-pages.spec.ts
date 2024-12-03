@@ -5,12 +5,15 @@ test.use({
 });
 
 test('User Pages', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
-  await expect(page.getByRole('link', { name: 'Add Stuff' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'List Stuff' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'john@foo.com' })).toBeVisible();
-  await page.getByRole('link', { name: 'Add Stuff' }).click();
-  await expect(page.getByRole('heading', { name: 'Add Stuff' })).toBeVisible();
-  await page.getByRole('link', { name: 'List Stuff' }).click();
-  await expect(page.getByRole('heading', { name: 'Stuff' })).toBeVisible();
+  const pages = [
+    'http://localhost:3000/member-dashboard',
+    'http://localhost:3000/eventsignup',
+    'http://localhost:3000/member-landingpage',
+    'http://localhost:3000/settings',
+  ];
+
+  for (const url of pages) {
+    await page.goto(url);
+    await expect(page).toHaveURL(url);
+  }
 });
