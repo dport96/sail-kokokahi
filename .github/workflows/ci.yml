@@ -1,7 +1,9 @@
 name: ci-nextjs-application-template
 on:
   push:
-    branches: [main, master]
+    branches: 
+      - main
+      - issue-46
   pull_request:
     branches: [main, master]
 jobs:
