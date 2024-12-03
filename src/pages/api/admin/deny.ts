@@ -18,9 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     await prisma.event.updateMany({
-      where: {
-        User: { id: userId },
-      },
+      where: { id: userId },
       data: { status: 'denied' },
     });
 

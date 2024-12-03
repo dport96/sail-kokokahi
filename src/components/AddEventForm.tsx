@@ -4,23 +4,7 @@ import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import swal from 'sweetalert';
-import { addEvent } from '@/lib/dbActions';
 import { AddEventSchema } from '@/lib/validationSchemas';
-
-const onSubmit = async (data: {
-  title: string;
-  description: string;
-  date: string;
-  location: string;
-  hours: number;
-  time: string;
-}) => {
-  // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
-  await addEvent(data);
-  swal('Success', 'Your event has been added', 'success', {
-    timer: 2000,
-  });
-};
 
 const AddEventForm: React.FC = () => {
   const {
@@ -31,6 +15,36 @@ const AddEventForm: React.FC = () => {
   } = useForm({
     resolver: yupResolver(AddEventSchema),
   });
+
+  const onSubmit = async (data: {
+    title: string;
+    description: string;
+    date: string;
+    location: string;
+    hours: number;
+    time: string;
+  }) => {
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        swal('Success', `Event created with barcode: ${result.event.barcode}`, 'success', {
+          timer: 2000,
+        });
+        reset(); // Clear the form
+      } else {
+        swal('Error', result.message, 'error');
+      }
+    } catch (error) {
+      swal('Error', 'Failed to create event', 'error');
+    }
+  };
 
   return (
     <Container>

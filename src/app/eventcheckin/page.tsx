@@ -1,52 +1,45 @@
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, Table } from 'react-bootstrap';
-import { prisma } from '@/lib/prisma';
-import StuffItem from '@/components/StuffItem';
-import { loggedInProtectedPage } from '@/lib/page-protection';
+import { PrismaClient } from '@prisma/client';
 import authOptions from '@/lib/authOptions';
+import { adminProtectedPage } from '@/lib/page-protection';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+import Barcode from '@/components/Barcode';
 
-const EventCheckInPage = async () => {
-  // Protect the page, only logged in users can access it.
+const prisma = new PrismaClient();
+
+const EventCheckIn = async () => {
+  // Protect the page so only admins can access it
   const session = await getServerSession(authOptions);
-  loggedInProtectedPage(
+  adminProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-      // eslint-disable-next-line @typescript-eslint/comma-dangle
     } | null,
   );
-  const owner = (session && session.user && session.user.email) || '';
-  const stuff = await prisma.stuff.findMany({
-    where: {
-      owner,
-    },
-  });
-  // console.log(stuff);
+  // Fetch the events from the database
+  const events = await prisma.event.findMany();
+
   return (
-    <main>
-      <Container id="list" fluid className="py-3">
-        <Row>
-          <Col>
-            <h1>Stuff</h1>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Quantity</th>
-                  <th>Condition</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stuff.map((item) => (
-                  <StuffItem key={item.id} {...item} />
-                ))}
-              </tbody>
-            </Table>
+    <Container>
+      <h1 className="fw-bolder pt-3">Event Check-in</h1>
+      <hr />
+      <Row>
+        {events.map((event) => (
+          <Col key={event.id} md={4} className="mb-4">
+            <Card>
+              <Card.Body>
+                <Card.Title>{event.title}</Card.Title>
+                <Card.Subtitle className="mb-2 text-muted">{event.date}</Card.Subtitle>
+                <Card.Text>{event.description}</Card.Text>
+                <div>
+                  <Barcode />
+                </div>
+              </Card.Body>
+            </Card>
           </Col>
-        </Row>
-      </Container>
-    </main>
+        ))}
+      </Row>
+    </Container>
   );
 };
 
-export default EventCheckInPage;
+export default EventCheckIn;

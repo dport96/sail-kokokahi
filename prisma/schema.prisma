@@ -40,6 +40,7 @@ model Event {
   hours       Int
   time        String
   status      String @default("pending")
+  barcode     String //field to store barcode data
   users       UserEvent[]  // Connects events to the users signed up for them
 }
 
@@ -79,6 +80,12 @@ model HoursLog {
   performedBy String
   createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
+}
+
+model Barcode {
+  id          Int      @id @default(autoincrement())
+  data        String
+  createdAt   DateTime @default(now())
 }
 
 enum Role {
