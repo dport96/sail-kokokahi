@@ -3,9 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // for local development
+  // url      = env("DATABASE_URL")
+  // for Vercel
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
+
 
 model User {
   id                   Int         @id @default(autoincrement())
@@ -37,7 +42,7 @@ model Event {
   description String
   date        String
   location    String
-  hours       Int
+  hours       Float
   time        String
   status      String @default("pending")
   users       UserEvent[]  // Connects events to the users signed up for them
