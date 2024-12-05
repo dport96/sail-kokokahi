@@ -88,7 +88,7 @@ const AddEventForm: React.FC = () => {
                 <Row>
                   <Col>
                     <Form.Group>
-                      <Form.Label>Time (Enter in HH:MM format)</Form.Label>
+                      <Form.Label>Time (Enter in HH:MM[AM/PM] format)</Form.Label>
                       <input
                         type="text"
                         {...register('time')}
