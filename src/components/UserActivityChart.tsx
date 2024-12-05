@@ -11,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
+  TooltipProps } from 'recharts';
 
 interface UserData {
   name: string;
@@ -23,17 +23,7 @@ interface UserActivityChartProps {
   data: UserData[];
 }
 
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-}
-
-const CustomTooltip: React.FC<CustomTooltipProps> = ({
-  active,
-  payload = [],
-  label = '',
-}) => {
+const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
   if (!active || !payload?.length) {
     return null;
   }
@@ -64,16 +54,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   );
 };
 
-CustomTooltip.defaultProps = {
-  active: false,
-  payload: [],
-  label: '',
-};
-
 const UserActivityChart: React.FC<UserActivityChartProps> = ({ data }) => (
   <Card>
     <Card.Header>
-      <Card.Title>User Registration & Hours Overview</Card.Title>
+      <Card.Title>New User Registration (First Year)</Card.Title>
+      <small className="text-muted">Shows volunteer activity for users registered within the past year</small>
     </Card.Header>
     <Card.Body>
       <div style={{ width: '100%', height: 400 }}>
@@ -116,9 +101,5 @@ const UserActivityChart: React.FC<UserActivityChartProps> = ({ data }) => (
     </Card.Body>
   </Card>
 );
-
-CustomTooltip.defaultProps = {
-  active: false,
-};
 
 export default UserActivityChart;
