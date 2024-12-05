@@ -31,7 +31,7 @@ export const AddEventSchema = Yup.object({
     .string()
     .required('Time is required')
     .matches(
-      /^(0[0-9]|1[0-2]):[0-5][0-9]$/,
-      'Please enter a valid time in HH:MM format (e.g., 01:00 or 12:59).',
+      /^(0[1-9]|1[0-2]):[0-5][0-9](AM|PM)$/,
+      'Please enter a valid time in HH:MM[AM/PM] format (e.g., 01:00AM or 12:59PM).',
     ),
 });
