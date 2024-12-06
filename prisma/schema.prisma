@@ -45,6 +45,7 @@ model Event {
   hours       Float
   time        String
   status      String @default("pending")
+  qr          String //field to store qr data
   users       UserEvent[]  // Connects events to the users signed up for them
 }
 
@@ -84,6 +85,12 @@ model HoursLog {
   performedBy String
   createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
+}
+
+model Qr {
+  id          Int      @id @default(autoincrement())
+  data        String
+  createdAt   DateTime @default(now())
 }
 
 enum Role {
