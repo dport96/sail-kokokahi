@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import QRCode from 'qrcode';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { title, description, date, location, hours, time } = req.body;
 
       // Generate a unique barcode
-      const barcodeData = `EVENT-${date.replace(/\//g, '')}-${title.replace(/\s+/g, '-')}`;
+      const qrData = `EVENT-${date.replace(/\//g, '')}-${title.replace(/\s+/g, '-')}`;
+      const qrCodeUrl = await QRCode.toDataURL(qrData);
 
       // Save the event to the database
       const event = await prisma.event.create({
@@ -20,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location,
           hours,
           time,
-          barcode: barcodeData,
+          qr: qrCodeUrl,
         },
       });
 

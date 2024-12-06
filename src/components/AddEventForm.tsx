@@ -34,7 +34,7 @@ const AddEventForm: React.FC = () => {
       const result = await response.json();
 
       if (result.success) {
-        swal('Success', `Event created with barcode: ${result.event.barcode}`, 'success', {
+        swal('Success', `Event created with QR code: ${result.event.qr}`, 'success', {
           timer: 2000,
         });
         reset(); // Clear the form

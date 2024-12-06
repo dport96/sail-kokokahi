@@ -1,53 +1,28 @@
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, DropdownButton } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-
+import SignUp from '@/components/SignUp';
 
 /** Render a list of stuff for the logged in user. */
-const EventSignUpPage = async () => {
-  // Protect the page, only logged in users can access it.
+const EventsSignUp = async () => {
+  // Protect the page, only logged-in users can access it
   const session = await getServerSession(authOptions);
   loggedInProtectedPage(
-    session as {
-      user: { email: string; id: string; randomKey: string };
-      // eslint-disable-next-line @typescript-eslint/comma-dangle
-    } | null,
+    session as { user: { email: string; id: string; randomKey: string } } | null,
   );
-  const events = await prisma.event.findMany({});
 
-  // console.log(stuff);
+  // Fetch events from the database
+  const events = await prisma.event.findMany();
+
+  // Pass the events data as props to the EventsSignUp component
   return (
     <main>
       <Container>
         <Row>
           <Col>
-            <div className="mb-3">
-              <h2>Event Sign-up</h2>
-              {events.map((event) => (
-                <Row key={event.id} className="border p-3">
-                  <h4>{event.date}</h4>
-                  <h5>{event.title}</h5>
-                  <Col>
-                    <DropdownButton title="Information" variant="light">
-                      Time:
-                      {' '}
-                      {event.time}
-                      <br />
-                      Potential Hours:
-                      {' '}
-                      {event.hours}
-                      <br />
-                      Description:
-                      {' '}
-                      {event.description}
-                      <br />
-                    </DropdownButton>
-                  </Col>
-                </Row>
-              ))}
-            </div>
+            <SignUp events={events} />
           </Col>
         </Row>
       </Container>
@@ -55,4 +30,4 @@ const EventSignUpPage = async () => {
   );
 };
 
-export default EventSignUpPage;
+export default EventsSignUp;

@@ -1,14 +1,14 @@
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, DropdownButton } from 'react-bootstrap';
-import { adminProtectedPage } from '@/lib/page-protection';
+import { Col, Container, Row, DropdownButton, Image } from 'react-bootstrap';
+import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 
 /** Render a list of stuff for the logged in user. */
-const EventCheckIn = async () => {
+const EventsPage = async () => {
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);
-  adminProtectedPage(
+  loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
       // eslint-disable-next-line @typescript-eslint/comma-dangle
@@ -23,7 +23,7 @@ const EventCheckIn = async () => {
         <Row>
           <Col>
             <div className="mb-3">
-              <h2>Event List</h2>
+              <h2>Event Sign-up</h2>
               {events.map((event) => (
                 <Row key={event.id} className="border p-3">
                   <h4>{event.date}</h4>
@@ -43,6 +43,7 @@ const EventCheckIn = async () => {
                       {event.description}
                       <br />
                     </DropdownButton>
+                    <Image src={event.qr} alt="Event QR Code" fluid />
                   </Col>
                 </Row>
               ))}
@@ -54,4 +55,4 @@ const EventCheckIn = async () => {
   );
 };
 
-export default EventCheckIn;
+export default EventsPage;
