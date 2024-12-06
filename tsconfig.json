@@ -1,33 +1,32 @@
 {
   "compilerOptions": {
-    "target": "esnext", // Specify target for the latest ECMAScript version
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
-    ], // Include necessary libraries
-    "allowJs": true, // Allow JavaScript files
-    "skipLibCheck": true, // Skip type checking for libraries
-    "strict": true, // Enable all strict type-checking options
-    "noEmit": true, // Do not emit output
-    "esModuleInterop": true, // Enable interoperability between CommonJS and ESModules
-    "module": "esnext", // Specify the module code generation
-    "moduleResolution": "node", // Use Node.js module resolution
-    "resolveJsonModule": true, // Allow importing JSON modules
-    "isolatedModules": true, // Ensure each file is treated as a separate module
-    "jsx": "preserve", // Preserve JSX syntax
-    "incremental": true, // Enable incremental compilation for faster builds
-    "baseUrl": ".", // Set base directory for paths
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "src/*"
-      ] // Alias for the src directory
+      ]
     },
     "types": [
       "node",
-      "jest"
-    ] // Include type declarations for Node.js and Jest
-    ,
+      "jest",
+      "@playwright/test"  // Add this
+    ],
     "plugins": [
       {
         "name": "next"
@@ -35,14 +34,14 @@
     ]
   },
   "include": [
-    "next-env.d.ts", // Include Next.js environment declarations
-    "**/*.ts", // Include all TypeScript files
-    "**/*.tsx", // Include all TypeScript JSX files
-    ".next/types/**/*.ts" // Include Next.js generated types
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "tests/**/*.ts",    // Changed from "tests" to be more specific
+    "tests/**/*.tsx"    // Add this for any TSX test files
   ],
   "exclude": [
-    "node_modules",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ] // Exclude node_modules and test files
+    "node_modules"      // Remove the test file exclusions
+  ]
 }
