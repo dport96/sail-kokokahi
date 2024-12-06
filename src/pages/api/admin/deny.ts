@@ -18,7 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     await prisma.event.updateMany({
-      where: { id: userId },
+      where: {
+        users: {
+          some: { userId }, // Use 'some' because 'users' is a one-to-many relation
+        },
+      },
       data: { status: 'denied' },
     });
 
