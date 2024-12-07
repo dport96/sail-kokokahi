@@ -40,6 +40,21 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     toast.success('Exported as Excel successfully!');
   };
 
+  const updateApprovedHours = async (userId: number, newHours: number) => {
+    const response = await fetch('/api/admin/update-hours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, approvedHours: newHours }),
+    });
+    if (response.ok) {
+      setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
+        ? { ...user, approvedHours: newHours }
+        : user)));
+    } else {
+      console.error('Failed to update approved hours');
+    }
+  };
+
   const handleApprove = async (userId: number) => {
     try {
       const response = await fetch('/api/admin/approve', {
@@ -98,9 +113,6 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   return (
     <>
       <Container>
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <Button onClick={exportToExcel}>Export as Excel</Button>
-        </div>
         <Table striped bordered hover responsive>
           <thead>
             <tr>
@@ -118,7 +130,31 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               <tr key={user.id}>
                 <td>{user.firstName}</td>
                 <td>{user.lastName}</td>
-                <td>{user.approvedHours}</td>
+                <td>
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    style={{ float: 'left' }}
+                    onClick={async () => {
+                      const newHours = user.approvedHours - 0.5;
+                      await updateApprovedHours(user.id, newHours);
+                    }}
+                  >
+                    -
+                  </Button>
+                  {user.approvedHours}
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    style={{ float: 'right' }}
+                    onClick={async () => {
+                      const newHours = user.approvedHours + 0.5;
+                      await updateApprovedHours(user.id, newHours);
+                    }}
+                  >
+                    +
+                  </Button>
+                </td>
                 <td>{user.pendingHours}</td>
                 <td>
                   $
@@ -126,19 +162,10 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                 </td>
                 <td>{getStatusBadge(user)}</td>
                 <td>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleApprove(user.id)}
-                  >
+                  <Button variant="success" size="sm" className="me-2" onClick={() => handleApprove(user.id)}>
                     Approve
                   </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeny(user.id)}
-                  >
+                  <Button variant="danger" size="sm" onClick={() => handleDeny(user.id)}>
                     Deny
                   </Button>
                 </td>
@@ -146,6 +173,9 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
             ))}
           </tbody>
         </Table>
+        <div className="d-flex justify-content-between align-items-center mt-2">
+          <Button onClick={exportToExcel}>Export as Excel</Button>
+        </div>
       </Container>
       <ToastContainer />
     </>
