@@ -17,6 +17,7 @@ export async function addEvent(event: {
   location: string;
   hours: number;
   time: string;
+  qr: string;
 }) {
   await prisma.event.create({
     data: {
@@ -26,6 +27,7 @@ export async function addEvent(event: {
       location: event.location,
       hours: event.hours,
       time: event.time,
+      qr: event.qr,
     },
   });
   // After adding, redirect to the event page
