@@ -40,6 +40,22 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     toast.success('Exported as Excel successfully!');
   };
 
+  const databaseReset = async (userId: number) => {
+    const hoursReset = 0;
+    const response = await fetch('/api/admin/update-hours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, approvedHours: hoursReset, pendingHours: hoursReset }),
+    });
+    if (response.ok) {
+      setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
+        ? { ...user, approvedHours: hoursReset, pendingHours: hoursReset }
+        : user)));
+    } else {
+      console.error('Failed to update approved hours');
+    }
+  };
+
   const updateApprovedHours = async (userId: number, newHours: number) => {
     const response = await fetch('/api/admin/update-hours', {
       method: 'POST',
@@ -173,8 +189,20 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
             ))}
           </tbody>
         </Table>
-        <div className="d-flex justify-content-between align-items-center mt-2">
+        <div style={{ float: 'left' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
           <Button onClick={exportToExcel}>Export as Excel</Button>
+        </div>
+        <div style={{ float: 'right' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
+          {updatedUsers.map((user) => (
+            <Button
+              variant="danger"
+              onClick={async () => {
+                await databaseReset(user.id);
+              }}
+            >
+              Database Reset
+            </Button>
+          ))}
         </div>
       </Container>
       <ToastContainer />
