@@ -10,7 +10,7 @@ import { BoxArrowRight, Lock, PersonFill, PersonPlusFill, GearFill } from 'react
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
   const currentUser = session?.user?.email;
-  const userWithRole = session?.user as { email: string; randomKey: string };
+  const userWithRole = session?.user as { email: string; randomKey?: string };
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
 
