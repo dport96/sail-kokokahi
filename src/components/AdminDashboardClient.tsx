@@ -5,6 +5,8 @@ import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import React from 'react';
+import Modal from '@mui/material/Modal';
 
 interface User {
   id: number;
@@ -22,6 +24,8 @@ interface AdminDashboardClientProps {
 
 const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) => {
   const [updatedUsers, setUpdatedUsers] = useState(users);
+  const [open, setOpen] = React.useState(false);
+  const [confirmationText, setConfirmationText] = useState('');
 
   const exportToExcel = () => {
     const data = updatedUsers.map((user) => ({
@@ -38,6 +42,22 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Admin Dashboard');
     XLSX.writeFile(workbook, 'Admin_Dashboard.xlsx');
     toast.success('Exported as Excel successfully!');
+  };
+
+  const databaseReset = async (userId: number) => {
+    const hoursReset = 0;
+    const response = await fetch('/api/admin/update-hours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, approvedHours: hoursReset, pendingHours: hoursReset }),
+    });
+    if (response.ok) {
+      setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
+        ? { ...user, approvedHours: hoursReset, pendingHours: hoursReset }
+        : user)));
+    } else {
+      console.error('Failed to update approved hours');
+    }
   };
 
   const updateApprovedHours = async (userId: number, newHours: number) => {
@@ -173,8 +193,66 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
             ))}
           </tbody>
         </Table>
-        <div className="d-flex justify-content-between align-items-center mt-2">
+        <div style={{ float: 'left' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
           <Button onClick={exportToExcel}>Export as Excel</Button>
+        </div>
+        <div style={{ float: 'right' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
+          <Button
+            variant="danger"
+            onClick={() => setOpen(true)}
+          >
+            Database Reset
+          </Button>
+          <Modal open={open} onClose={() => setOpen(false)}>
+            <div style={{
+              borderRadius: '15px',
+              textAlign: 'justify',
+              background: 'white',
+              padding: '20px',
+              margin: '10% auto',
+              width: '50%',
+              height: 'auto',
+            }}
+            >
+              <h1 className="fw-bold">Database Reset</h1>
+              <hr />
+              <p className="">
+                Are you sure you want to reset the database? This button is expected to only be used on November 31st at
+                to reset all hours back to zero. Please type
+                <i className="fw-bold">&quot;Reset Database&quot; </i>
+                and click the button to confirm your reset, then refresh to see changes.
+              </p>
+              <div className="d-flex flex-column align-items-center mt-4">
+                <input
+                  type="text"
+                  placeholder="Type 'Reset Database' here"
+                  value={confirmationText}
+                  onChange={(e) => setConfirmationText(e.target.value)}
+                  style={{
+                    width: '80%',
+                    padding: '10px',
+                    marginBottom: '20px',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc',
+                  }}
+                />
+                {updatedUsers.map((user) => (
+                  <Button
+                    key={`modal-reset-${user.id}`}
+                    variant="danger"
+                    disabled={confirmationText !== 'Reset Database'}
+                    onClick={async () => {
+                      await databaseReset(user.id);
+                      setOpen(false);
+                      setConfirmationText('');
+                    }}
+                  >
+                    Reset Database
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </Modal>
         </div>
       </Container>
       <ToastContainer />
