@@ -9,7 +9,7 @@ test('Admin Pages', async ({ page }) => {
     'http://localhost:3000/add-event',
     'http://localhost:3000/admin-dashboard',
     'http://localhost:3000/admin-landingpage',
-    'http://localhost:3000/settings'
+    'http://localhost:3000/settings',
   ];
 
   for (const pageUrl of adminPages) {
