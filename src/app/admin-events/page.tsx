@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { Col, Container, Row, DropdownButton, Image } from 'react-bootstrap';
-import { loggedInProtectedPage } from '@/lib/page-protection';
+import { adminProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 
@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 const EventsPage = async () => {
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);
-  loggedInProtectedPage(
+  adminProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
       // eslint-disable-next-line @typescript-eslint/comma-dangle
@@ -23,7 +23,7 @@ const EventsPage = async () => {
         <Row>
           <Col>
             <div className="mb-3">
-              <h2>Event Sign-up</h2>
+              <h2>Events List</h2>
               {events.map((event) => (
                 <Row key={event.id} className="border p-3">
                   <h4>{event.date}</h4>
