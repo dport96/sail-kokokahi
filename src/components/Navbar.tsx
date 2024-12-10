@@ -82,6 +82,15 @@ const NavBar: React.FC = () => {
                 >
                   Add Event
                 </Nav.Link>
+                <Nav.Link
+                  className="text-white"
+                  id="events-nav"
+                  href="/events"
+                  key="events"
+                  active={pathName === '/events'}
+                >
+                  Events
+                </Nav.Link>
               </>
             )}
           </Nav>
