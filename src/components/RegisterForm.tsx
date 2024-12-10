@@ -1,12 +1,22 @@
+// components/RegisterForm.tsx
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 
-const Register: React.FC = () => {
-  const [formData, setFormData] = useState({
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+const RegisterForm: React.FC = () => {
+  const [formData, setFormData] = useState<RegisterFormData>({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
+    phone: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +40,6 @@ const Register: React.FC = () => {
       });
 
       if (response.ok) {
-        // Redirect to the main page after successful registration
         router.push('/');
       } else {
         const data = await response.json();
@@ -44,72 +53,116 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="firstName" className="form-label">
-            First Name
-          </label>
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            className="form-control"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="lastName" className="form-label">
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            className="form-control"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            className="form-control"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            className="form-control"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <div className="text-danger mb-3">{error}</div>}
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
+    <div className="card border-0 shadow-lg">
+      <div className="card-body p-4 p-md-5">
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="row g-4">
+            <div className="col-md-6">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="firstName"
+                  name="firstName"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                />
+                <label htmlFor="firstName">First Name</label>
+              </div>
+            </div>
+
+            <div className="col-md-6">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="lastName"
+                  name="lastName"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                />
+                <label htmlFor="lastName">Last Name</label>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-floating">
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                <label htmlFor="email">Email Address</label>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-floating">
+                <input
+                  type="tel"
+                  className="form-control"
+                  id="phone"
+                  name="phone"
+                  placeholder="Phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+                <label htmlFor="phone">Phone Number (Optional)</label>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-floating">
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <label htmlFor="password">Password</label>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <button
+                type="submit"
+                className="btn btn-primary w-100 btn-lg py-3"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default Register;
+export default RegisterForm;
