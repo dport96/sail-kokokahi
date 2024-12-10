@@ -1,7 +1,8 @@
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { adminProtectedPage } from '@/lib/page-protection';
+import Link from 'next/link';
 
 const AdminLandingPage = async () => {
   const session = await getServerSession(authOptions);
@@ -19,14 +20,19 @@ const AdminLandingPage = async () => {
         </Row>
         <Row>
           <Col>
-            <button type="button" className="m-3">
-              <a href="/admin-dashboard">Admin Dashboard</a>
-            </button>
+            <Link href="/admin-dashboard">
+              <Button className="m-3 same-size-btn">Admin Dashboard</Button>
+            </Link>
           </Col>
           <Col>
-            <button type="button" className="m-3">
-              <a href="/add-event">Add Event</a>
-            </button>
+            <Link href="/add-event">
+              <Button className="m-3 same-size-btn">Add Event</Button>
+            </Link>
+          </Col>
+          <Col>
+            <Link href="/events">
+              <Button className="m-3 same-size-btn">Events</Button>
+            </Link>
           </Col>
           {/* <Col>
             <button type="button" className="m-3">
