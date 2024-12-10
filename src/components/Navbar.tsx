@@ -53,10 +53,10 @@ const NavBar: React.FC = () => {
                 </Nav.Link>
                 <Nav.Link
                   className="text-white"
-                  id="event-signup-nav"
-                  href="/eventsignup"
-                  key="event-signup"
-                  active={pathName === '/eventsignup'}
+                  id="member-event-sign-up-nav"
+                  href="/member-event-sign-up"
+                  key="member-event-sign-up"
+                  active={pathName === '/member-event-sign-up'}
                 >
                   Event Sign-Up
                 </Nav.Link>
@@ -84,12 +84,12 @@ const NavBar: React.FC = () => {
                 </Nav.Link>
                 <Nav.Link
                   className="text-white"
-                  id="events-nav"
-                  href="/events"
-                  key="events"
-                  active={pathName === '/events'}
+                  id="admin-events-nav"
+                  href="/admin-events"
+                  key="admin-events"
+                  active={pathName === '/admin-events'}
                 >
-                  Events
+                  Events List
                 </Nav.Link>
               </>
             )}
