@@ -1,7 +1,8 @@
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { memberProtectedPage } from '@/lib/page-protection';
+import Link from 'next/link';
 
 /** The Home page. */
 const MemberLandingPage = async () => {
@@ -20,18 +21,14 @@ const MemberLandingPage = async () => {
         </Row>
         <Row>
           <Col>
-            <button type="button" className="m-3">
-              <a href="/member-dashboard">Member Dashboard</a>
-            </button>
+            <Link href="/member-dashboard">
+              <Button className="m-3 same-size-btn">Member Dashboard</Button>
+            </Link>
           </Col>
           <Col>
-            <button type="button" className="m-3">
-              <a href="/eventsignup">
-                Event
-                <br />
-                Sign-up
-              </a>
-            </button>
+            <Link href="/eventsignup">
+              <Button className="m-3 same-size-btn">Event Sign Up</Button>
+            </Link>
           </Col>
         </Row>
       </Container>
