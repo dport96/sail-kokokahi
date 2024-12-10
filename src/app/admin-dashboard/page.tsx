@@ -1,6 +1,5 @@
 import { getServerSession } from 'next-auth';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Role } from '@prisma/client';
 import authOptions from '@/lib/authOptions';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
@@ -15,20 +14,7 @@ const AdminDashboard = async () => {
     } | null,
   );
 
-  // Calculate date one year ago
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
   const users = await prisma.user.findMany({
-    where: {
-      role: Role.USER,
-      createdAt: {
-        gte: oneYearAgo, // Only get users created after this date
-      },
-    },
-    orderBy: {
-      createdAt: 'asc', // Sort by creation date
-    },
     select: {
       id: true,
       firstName: true,
@@ -41,6 +27,9 @@ const AdminDashboard = async () => {
     },
   });
 
+  // Debug log raw user data
+  console.log('Raw users from database:', users);
+
   const amount = 120;
 
   const usersWithAmountDue = users.map((user) => ({
@@ -51,13 +40,19 @@ const AdminDashboard = async () => {
     pendingHours: user.pendingHours,
     amountDue: user.approvedHours > 6 ? 0 : amount - 20 * user.approvedHours,
     status: user.status,
+    role: user.role,
   }));
 
-  const chartData = users.map((user) => ({
-    name: `${user.firstName} ${user.lastName}`,
-    registrationDate: user.createdAt.toLocaleDateString(),
-    hours: Number(user.approvedHours) + Number(user.pendingHours),
-  }));
+  const chartData = users.map((user) => {
+    const data = {
+      name: `${user.firstName} ${user.lastName}`,
+      registrationDate: user.createdAt.toLocaleDateString(),
+      hours: Number(user.approvedHours) + Number(user.pendingHours),
+      role: user.role,
+    };
+    console.log('Processing user for chart:', data);
+    return data;
+  });
 
   return (
     <main>
