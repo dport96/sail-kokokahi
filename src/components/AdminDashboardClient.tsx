@@ -16,6 +16,8 @@ interface User {
   pendingHours: number;
   amountDue: number;
   status: string;
+  role: string;
+
 }
 
 interface AdminDashboardClientProps {
