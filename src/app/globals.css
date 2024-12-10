@@ -77,3 +77,14 @@ th {
   align-items: center;
   text-align: center;
 }
+
+.same-size-btn {
+  width: 120px;
+  height: 60px;
+  background-color: #343a40 !important;
+  border-color: #343a40 !important;
+}
+
+.same-size-btn:hover {
+  background-color: #414951 !important;
+}
