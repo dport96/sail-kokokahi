@@ -25,23 +25,24 @@
     "types": [
       "node",
       "jest",
-      "@playwright/test"  // Add this
+      "@playwright/test" // Add this
     ],
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "tests/**/*.ts",    // Changed from "tests" to be more specific
-    "tests/**/*.tsx"    // Add this for any TSX test files
+    "tests/**/*.ts", // Changed from "tests" to be more specific
+    "tests/**/*.tsx" // Add this for any TSX test files
   ],
   "exclude": [
-    "node_modules"      // Remove the test file exclusions
+    "node_modules" // Remove the test file exclusions
   ]
 }
