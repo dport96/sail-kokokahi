@@ -10,7 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { title, description, date, location, hours, time } = req.body;
 
       // Generate a unique barcode
-      const qrData = `EVENT-${date.replace(/\//g, '')}-${title.replace(/\s+/g, '-')}`;
+      const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
+      const qrData = `http://localhost:3000/event-check-in/${eventIdentifier}`;
       const qrCodeUrl = await QRCode.toDataURL(qrData);
 
       // Save the event to the database
@@ -25,8 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           qr: qrCodeUrl,
         },
       });
-
-      return res.status(200).json({ success: true, event });
+      return res.status(200).json({ success: true, event, qrCodeLink: qrData });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ success: false, message: 'Failed to create event.' });
