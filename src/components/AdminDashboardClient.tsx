@@ -1,7 +1,7 @@
 'use client';
 
 import { Table, Button, Badge, Container } from 'react-bootstrap';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,7 +17,6 @@ interface User {
   amountDue: number;
   status: string;
   role: string;
-
 }
 
 interface AdminDashboardClientProps {
@@ -28,6 +27,10 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   const [updatedUsers, setUpdatedUsers] = useState(users);
   const [open, setOpen] = React.useState(false);
   const [confirmationText, setConfirmationText] = useState('');
+
+  useEffect(() => {
+    setUpdatedUsers(users);
+  }, [users]);
 
   const exportToExcel = () => {
     const data = updatedUsers.map((user) => ({
