@@ -34,6 +34,18 @@ export async function addEvent(event: {
 }
 
 /**
+ * Deletes an existing event from the database.
+ * @param id, the id of the event to delete.
+ */
+export const deleteEvent = async (id: number) => {
+  await prisma.event.delete({
+    where: { id },
+  });
+  // After deleting, redirect to the event page
+  redirect('/events');
+};
+
+/**
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
