@@ -1,10 +1,9 @@
 import { getServerSession } from 'next-auth';
-import { Container, Row, Col } from 'react-bootstrap';
 import authOptions from '@/lib/authOptions';
+import { Role } from '@prisma/client';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
-import AdminDashboardClient from '@/components/AdminDashboardClient';
-import UserActivityChart from '@/components/UserActivityChart';
+import AdminDashboardContent from '@/components/AdminDashboardContent';
 
 const AdminDashboard = async () => {
   const session = await getServerSession(authOptions);
@@ -14,7 +13,20 @@ const AdminDashboard = async () => {
     } | null,
   );
 
+  // Calculate date one year ago
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
   const users = await prisma.user.findMany({
+    where: {
+      role: Role.USER,
+      createdAt: {
+        gte: oneYearAgo, // Only get users created after this date
+      },
+    },
+    orderBy: {
+      createdAt: 'asc', // Sort by creation date
+    },
     select: {
       id: true,
       firstName: true,
@@ -27,9 +39,6 @@ const AdminDashboard = async () => {
     },
   });
 
-  // Debug log raw user data
-  console.log('Raw users from database:', users);
-
   const amount = 120;
 
   const usersWithAmountDue = users.map((user) => ({
@@ -39,33 +48,24 @@ const AdminDashboard = async () => {
     approvedHours: user.approvedHours,
     pendingHours: user.pendingHours,
     amountDue: user.approvedHours > 6 ? 0 : amount - 20 * user.approvedHours,
+    createdAt: user.createdAt,
     status: user.status,
     role: user.role,
   }));
 
-  const chartData = users.map((user) => {
-    const data = {
-      name: `${user.firstName} ${user.lastName}`,
-      registrationDate: user.createdAt.toLocaleDateString(),
-      hours: Number(user.approvedHours) + Number(user.pendingHours),
-      role: user.role,
-    };
-    console.log('Processing user for chart:', data);
-    return data;
-  });
+  if (!users || users.length === 0) {
+    return (
+      <main>
+        <div>No users found</div>
+      </main>
+    );
+  }
 
   return (
     <main>
-      <Container>
-        <h1 className="fw-bolder pt-3">Admin Dashboard</h1>
-        <hr />
-        <Row className="mb-4">
-          <Col>
-            <UserActivityChart data={chartData} />
-          </Col>
-        </Row>
-        <AdminDashboardClient users={usersWithAmountDue} />
-      </Container>
+      <AdminDashboardContent
+        usersWithAmountDue={usersWithAmountDue}
+      />
     </main>
   );
 };
