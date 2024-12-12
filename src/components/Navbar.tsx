@@ -1,11 +1,9 @@
-/* eslint-disable react/jsx-indent, @typescript-eslint/indent */
-
 'use client';
 
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { BoxArrowRight, Lock, PersonFill, PersonPlusFill, GearFill } from 'react-bootstrap-icons';
+import { Container, Nav, Navbar } from 'react-bootstrap';
+import Link from 'next/link';
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
@@ -14,113 +12,84 @@ const NavBar: React.FC = () => {
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
 
+  // Determine if we're on the landing page
+  const isLandingPage = pathName === '/';
+
+  // Style based on page
+  const navStyle = {
+    backgroundColor: isLandingPage ? 'transparent' : 'rgba(0, 0, 0, 0.35)',
+    position: 'absolute',
+    width: '100%',
+    zIndex: 1000,
+    paddingTop: '1rem',
+    paddingBottom: '1rem',
+    transition: 'background-color 0.3s ease',
+  } as const;
+
   return (
-    <Navbar bg="dark" expand="lg" className="py-4">
+    <Navbar
+      expand="lg"
+      variant="dark"
+      style={navStyle}
+    >
       <Container>
-        {currentUser && role === 'USER'
-          ? [
-              <Navbar.Brand className="text-white" href="/member-landingpage">
-                Sail Kokokahi Volunteer Portal
-              </Navbar.Brand>,
-            ]
-          : ''}
-        {currentUser && role === 'ADMIN'
-          ? [
-              <Navbar.Brand className="text-white" href="/admin-landingpage">
-                Sail Kokokahi Volunteer Portal
-              </Navbar.Brand>,
-            ]
-          : ''}
-        <Navbar.Toggle
-          aria-controls="basic-navbar-nav"
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '5px',
-          }}
-        />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto justify-content-start">
-            {currentUser && role === 'USER' && (
+        <Link href="/" className="navbar-brand text-white">
+          SAIL KOKOKAHI
+        </Link>
+        <Navbar.Toggle aria-controls="navbar-nav" />
+        <Navbar.Collapse id="navbar-nav">
+          <Nav className="ms-auto align-items-center">
+            {role === 'ADMIN' && (
               <>
-                <Nav.Link
-                  className="text-white"
-                  id="member-dashboard-nav"
-                  href="/member-dashboard"
-                  key="member-dashboard"
-                  active={pathName === '/member-dashboard'}
-                >
-                  Member Dashboard
-                </Nav.Link>
-                <Nav.Link
-                  className="text-white"
-                  id="member-event-sign-up-nav"
-                  href="/member-event-sign-up"
-                  key="member-event-sign-up"
-                  active={pathName === '/member-event-sign-up'}
-                >
-                  Event Sign-Up
-                </Nav.Link>
-              </>
-            )}
-            {currentUser && role === 'ADMIN' && (
-              <>
-                <Nav.Link
-                  className="text-white"
-                  id="admin-dashboard-nav"
+                <Link
                   href="/admin-dashboard"
-                  key="admin-dashboard"
-                  active={pathName === '/admin-dashboard'}
+                  className={`nav-link text-white ${pathName === '/admin-dashboard' ? 'active' : ''}`}
                 >
-                  Admin Dashboard
-                </Nav.Link>
-                <Nav.Link
-                  className="text-white"
-                  id="add-event-nav"
+                  DASHBOARD
+                </Link>
+                <Link
                   href="/add-event"
-                  key="add-event"
-                  active={pathName === '/add-event'}
+                  className={`nav-link text-white ${pathName === '/add-event' ? 'active' : ''}`}
                 >
-                  Add Event
-                </Nav.Link>
-                <Nav.Link
-                  className="text-white"
-                  id="admin-events-nav"
-                  href="/admin-events"
-                  key="admin-events"
-                  active={pathName === '/admin-events'}
+                  ADD EVENT
+                </Link>
+                <Link
+                  href="/events"
+                  className={`nav-link text-white ${pathName === '/events' ? 'active' : ''}`}
                 >
-                  Events List
-                </Nav.Link>
+                  EVENTS
+                </Link>
               </>
             )}
-          </Nav>
-          <Nav>
-            {session ? (
-              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>{currentUser}</span>}>
-                <NavDropdown.Item id="login-dropdown-sign-out" href="/api/auth/signout">
-                  <BoxArrowRight />
-                  Sign Out
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-change-password" href="/auth/change-password">
-                  <Lock />
-                  Change Password
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-settings" href="/settings">
-                  <GearFill />
-                  Settings
-                </NavDropdown.Item>
-              </NavDropdown>
+            {role === 'USER' && (
+              <>
+                <Link
+                  href="/member-dashboard"
+                  className={`nav-link text-white ${pathName === '/member-dashboard' ? 'active' : ''}`}
+                >
+                  HOME
+                </Link>
+                <Link
+                  href="/member-event-sign-up"
+                  className={`nav-link text-white ${pathName === '/member-event-sign-up' ? 'active' : ''}`}
+                >
+                  EVENTS
+                </Link>
+              </>
+            )}
+            {currentUser ? (
+              <>
+                <Link href="/settings" className="nav-link text-white">
+                  SETTINGS
+                </Link>
+                <Link href="/api/auth/signout" className="nav-link text-white">
+                  SIGN OUT
+                </Link>
+              </>
             ) : (
-              <NavDropdown id="login-dropdown" title={<span style={{ color: 'white' }}>Login</span>}>
-                <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
-                  <PersonFill />
-                  Sign in
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-sign-up" href="/register">
-                  <PersonPlusFill />
-                  Sign up
-                </NavDropdown.Item>
-              </NavDropdown>
+              <Link href="/auth/signin" className="nav-link text-white">
+                SIGN IN
+              </Link>
             )}
           </Nav>
         </Navbar.Collapse>

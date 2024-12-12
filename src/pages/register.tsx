@@ -1,6 +1,6 @@
 // pages/register.tsx
 import React from 'react';
-import RegisterForm from '@/components/RegisterForm';
+import RegisterForm from '@/app/(protected)/RegisterForm';
 
 const RegisterPage: React.FC = () => (
   <div className="min-vh-100 d-flex align-items-center bg-light py-5">

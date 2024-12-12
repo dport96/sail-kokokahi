@@ -3,7 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-import SignUp from '@/components/SignUp';
+import SignUp from '@/app/(protected)/SignUp';
 
 /** Render a list of stuff for the logged in user. */
 const EventsSignUp = async () => {

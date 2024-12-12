@@ -15,9 +15,7 @@ const AdminLandingPage = async () => {
   return (
     <main>
       <Container className="background centered" id="landing-page" fluid>
-        <Row>
-          <h1 className="text-white">Welcome! please select an action below</h1>
-        </Row>
+        <Row />
         <Row>
           <Col>
             <Link href="/admin-dashboard">
