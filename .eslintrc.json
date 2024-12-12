@@ -6,6 +6,7 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "new-cap": "off",
     "arrow-parens": "off",
     "func-names": "off",
     "linebreak-style": "off",

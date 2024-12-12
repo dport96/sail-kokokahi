@@ -15,6 +15,10 @@ export const EditStuffSchema = Yup.object({
   owner: Yup.string().required(),
 });
 
+export const DeleteEventSchema = Yup.object({
+  id: Yup.number().required(),
+});
+
 export const AddEventSchema = Yup.object({
   title: Yup.string().required('Title is required'),
   description: Yup.string().required('Description is required'),
