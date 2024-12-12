@@ -71,7 +71,7 @@ const AddEventForm: React.FC = () => {
                   </Col>
                   <Col>
                     <Form.Group>
-                      <Form.Label>Date (Enter in MM/DD format)</Form.Label>
+                      <Form.Label>Date (MM/DD/YYYY format)</Form.Label>
                       <input
                         type="text"
                         {...register('date')}
@@ -102,7 +102,7 @@ const AddEventForm: React.FC = () => {
                 <Row>
                   <Col>
                     <Form.Group>
-                      <Form.Label>Time (Enter in HH:MM[AM/PM] format)</Form.Label>
+                      <Form.Label>Time (HH:MM|AM/PM format)</Form.Label>
                       <input
                         type="text"
                         {...register('time')}

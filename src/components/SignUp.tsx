@@ -39,10 +39,16 @@ const SignUp = ({ events }: EventsSignUpProps) => {
     }
   };
 
+  const sortedEvents = events.sort((a, b) => {
+    const dateA = new Date(a.date).getTime(); // Convert MM/DD/YYYY string to Date object
+    const dateB = new Date(b.date).getTime(); // Convert MM/DD/YYYY string to Date object
+    return dateB - dateA; // Sort by date descending
+  });
+
   return (
     <div className="mb-3">
       <h2>Event Sign-up</h2>
-      {events.map((event) => (
+      {sortedEvents.map((event) => (
         <Row key={event.id} className="border p-3">
           <h4>{event.date}</h4>
           <h5>{event.title}</h5>

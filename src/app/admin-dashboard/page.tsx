@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { Container, Row, Col } from 'react-bootstrap';
 import authOptions from '@/lib/authOptions';
+import { Role } from '@prisma/client';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
 import AdminDashboardClient from '@/components/AdminDashboardClient';
@@ -14,7 +15,20 @@ const AdminDashboard = async () => {
     } | null,
   );
 
+  // Calculate date one year ago
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
   const users = await prisma.user.findMany({
+    where: {
+      role: Role.USER,
+      createdAt: {
+        gte: oneYearAgo, // Only get users created after this date
+      },
+    },
+    orderBy: {
+      createdAt: 'asc', // Sort by creation date
+    },
     select: {
       id: true,
       firstName: true,

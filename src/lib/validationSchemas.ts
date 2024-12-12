@@ -22,8 +22,8 @@ export const AddEventSchema = Yup.object({
     .string()
     .required('Date is required')
     .matches(
-      /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])$/,
-      'Please enter a valid date in MM/DD format (e.g., 01/01 or 12/31).',
+      /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/,
+      'Please enter a valid date in MM/DD/YYYY format. (ex. 01/01/2022)',
     ),
   location: Yup.string().required('Location is required'),
   hours: Yup.number().positive().required('Hours is required'),
@@ -32,6 +32,6 @@ export const AddEventSchema = Yup.object({
     .required('Time is required')
     .matches(
       /^(0[1-9]|1[0-2]):[0-5][0-9](AM|PM)$/,
-      'Please enter a valid time in HH:MM[AM/PM] format (e.g., 01:00AM or 12:59PM).',
+      'Please enter a valid time in HH:MM|AM/PM format. (ex. 01:00PM)',
     ),
 });
