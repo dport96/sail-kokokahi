@@ -74,7 +74,7 @@ export const EventList = ({ events }: { events: any[] }) => {
   const sortedEvents = eventList.sort((a, b) => {
     const dateA = new Date(a.date).getTime(); // Convert MM/DD/YYYY string to Date object
     const dateB = new Date(b.date).getTime(); // Convert MM/DD/YYYY string to Date object
-    return dateB - dateA; // Sort by date descending
+    return dateA - dateB; // Sort by date descending
   });
 
   return (

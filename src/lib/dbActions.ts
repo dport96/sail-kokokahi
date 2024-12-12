@@ -42,7 +42,7 @@ export const deleteEvent = async (id: number) => {
     where: { id },
   });
   // After deleting, redirect to the event page
-  redirect('/events');
+  redirect('/admin-events');
 };
 
 /**
