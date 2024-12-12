@@ -71,9 +71,15 @@ export const EventList = ({ events }: { events: any[] }) => {
     }
   };
 
+  const sortedEvents = eventList.sort((a, b) => {
+    const dateA = new Date(a.date).getTime(); // Convert MM/DD/YYYY string to Date object
+    const dateB = new Date(b.date).getTime(); // Convert MM/DD/YYYY string to Date object
+    return dateA - dateB; // Sort by date descending
+  });
+
   return (
     <>
-      {eventList.map((event) => (
+      {sortedEvents.map((event) => (
         <Row key={event.id} className="border p-3">
           <div className="mb-1">
             <h4 style={{ float: 'left' }}>{event.date}</h4>
