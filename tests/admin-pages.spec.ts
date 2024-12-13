@@ -5,11 +5,13 @@ test.use({
 });
 
 test('Admin Pages', async ({ page }) => {
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
   const adminPages = [
-    'http://localhost:3000/add-event',
-    'http://localhost:3000/admin-dashboard',
-    'http://localhost:3000/admin-landingpage',
-    'http://localhost:3000/settings',
+    `${baseUrl}/`,
+    `${baseUrl}/add-event`,
+    `${baseUrl}/admin-dashboard`,
+    `${baseUrl}/admin-events`,
+    `${baseUrl}/settings`,
   ];
 
   for (const pageUrl of adminPages) {

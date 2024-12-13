@@ -1,12 +1,14 @@
 'use client';
 
 import { Table, Button, Badge, Container } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React from 'react';
 import Modal from '@mui/material/Modal';
+import { deleteUser } from '@/lib/dbActions';
+import swal from 'sweetalert';
 
 interface User {
   id: number;
@@ -16,7 +18,6 @@ interface User {
   pendingHours: number;
   amountDue: number;
   status: string;
-  role: string;
 }
 
 interface AdminDashboardClientProps {
@@ -28,9 +29,26 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   const [open, setOpen] = React.useState(false);
   const [confirmationText, setConfirmationText] = useState('');
 
-  useEffect(() => {
-    setUpdatedUsers(users);
-  }, [users]);
+  const handleDelete = async (id: number) => {
+    swal({
+      title: 'Are you sure?',
+      text: 'Once deleted, you will not be able to recover this users data!',
+      icon: 'warning',
+      buttons: ['Cancel', 'Delete'],
+      dangerMode: true,
+    }).then(async (willDelete) => {
+      if (willDelete) {
+        try {
+          await deleteUser(id);
+          setUpdatedUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+          swal('Deleted!', 'The user has been deleted successfully.', 'success');
+        } catch (error) {
+          console.error('Delete user error:', error);
+          swal('Error', 'Failed to delete the user. Please try again.', 'error');
+        }
+      }
+    });
+  };
 
   const exportToExcel = () => {
     const data = updatedUsers.map((user) => ({
@@ -62,6 +80,20 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
         : user)));
     } else {
       console.error('Failed to update approved hours');
+    }
+  };
+
+  const handleResetAll = async () => {
+    try {
+      // Create an array of promises for each user's databaseReset call
+      const resetPromises = updatedUsers.map((user) => databaseReset(user.id));
+
+      // Execute all promises concurrently
+      await Promise.all(resetPromises);
+
+      console.log('All users reset successfully!');
+    } catch (error) {
+      console.error('Error resetting the database:', error);
     }
   };
 
@@ -148,6 +180,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               <th>Amount Due</th>
               <th>Status</th>
               <th>Actions</th>
+              <th>Delete User</th>
             </tr>
           </thead>
           <tbody>
@@ -194,6 +227,15 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     Deny
                   </Button>
                 </td>
+                <td>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    X
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -206,7 +248,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
             variant="danger"
             onClick={() => setOpen(true)}
           >
-            Database Reset
+            Reset Database
           </Button>
           <Modal open={open} onClose={() => setOpen(false)}>
             <div style={{
@@ -219,10 +261,10 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               height: 'auto',
             }}
             >
-              <h1 className="fw-bold">Database Reset</h1>
+              <h1 className="fw-bold">Reset Database</h1>
               <hr />
               <p className="">
-                Are you sure you want to reset the database? This button is expected to only be used on November 31st at
+                Are you sure you want to reset the database? This button is expected to only be used on November 31st
                 to reset all hours back to zero. Please type
                 <i className="fw-bold">&quot;Reset Database&quot; </i>
                 and click the button to confirm your reset, then refresh to see changes.
@@ -241,20 +283,17 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     border: '1px solid #ccc',
                   }}
                 />
-                {updatedUsers.map((user) => (
-                  <Button
-                    key={`modal-reset-${user.id}`}
-                    variant="danger"
-                    disabled={confirmationText !== 'Reset Database'}
-                    onClick={async () => {
-                      await databaseReset(user.id);
-                      setOpen(false);
-                      setConfirmationText('');
-                    }}
-                  >
-                    Reset Database
-                  </Button>
-                ))}
+                <Button
+                  variant="danger"
+                  disabled={confirmationText !== 'Reset Database'}
+                  onClick={async () => {
+                    await handleResetAll();
+                    setOpen(false);
+                    setConfirmationText('');
+                  }}
+                >
+                  Reset Database
+                </Button>
               </div>
             </div>
           </Modal>
