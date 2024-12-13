@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button, Col, DropdownButton, Row, Container } from 'react-bootstrap';
+import swal from 'sweetalert';
 
 interface Event {
   id: number;
@@ -13,9 +14,10 @@ interface Event {
 }
 
 export default function CheckInComponent({ event }: { event: Event }) {
-  const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCheckIn = async (eventId: number) => {
+    setIsLoading(true);
     try {
       const response = await fetch('/api/user/checkin', {
         method: 'POST',
@@ -24,16 +26,17 @@ export default function CheckInComponent({ event }: { event: Event }) {
       });
 
       const result = await response.json();
-      console.log('Response:', result); // Log server response for debugging
 
       if (response.ok) {
-        setMessage('Successfully checked in!');
+        swal('Success', 'Successfully checked in!', 'success');
       } else {
-        setMessage(result.message || 'Check-in failed.');
+        throw new Error(result.message || 'Check-in failed');
       }
     } catch (error) {
       console.error(error);
-      setMessage('An error occurred during check-in.');
+      swal('Error', error instanceof Error ? error.message : 'An error occurred during check-in', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,25 +50,31 @@ export default function CheckInComponent({ event }: { event: Event }) {
               <h4>{event.date}</h4>
               <h5>{event.title}</h5>
               <Col>
-                <DropdownButton title="Information" variant="light">
-                  Time:
-                  {' '}
-                  {event.time}
-                  <br />
-                  Potential Hours:
-                  {' '}
-                  {event.hours}
-                  <br />
-                  Description:
-                  {' '}
-                  {event.description}
-                  <br />
+                <DropdownButton title="Information" variant="light" className="mb-2">
+                  <div className="p-3">
+                    <p>
+                      Time:
+                      {event.time}
+                    </p>
+                    <p>
+                      Potential Hours:
+                      {event.hours}
+                    </p>
+                    <p>
+                      Description:
+                      {event.description}
+                    </p>
+                  </div>
                 </DropdownButton>
-                <Button onClick={() => handleCheckIn(event.id)}>Check In</Button>
+                <Button
+                  onClick={() => handleCheckIn(event.id)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Checking in...' : 'Check In'}
+                </Button>
               </Col>
             </Row>
           </div>
-          {message && <p>{message}</p>}
         </Col>
       </Row>
     </Container>

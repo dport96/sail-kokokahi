@@ -20,7 +20,7 @@ export default async function EventPage({ params }: { params: { eventId: string 
   const [date, ...titleParts] = eventId.replace(/^EVENT-/, '').split('-');
   const title = titleParts.join(' ');
 
-  const formattedDate = `${date.slice(0, 2)}/${date.slice(2)}`;
+  const formattedDate = `${date.slice(0, 2)}/${date.slice(2, 4)}/${date.slice(4)}`;
 
   const normalizedTitle = title.replace(/-/g, ' ');
   const event = await prisma.event.findFirst({
