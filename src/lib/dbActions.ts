@@ -46,6 +46,18 @@ export const deleteEvent = async (id: number) => {
 };
 
 /**
+ * Deletes an existing user from the database.
+ * @param id, the id of the user to delete.
+ */
+export const deleteUser = async (id: number) => {
+  await prisma.user.delete({
+    where: { id },
+  });
+  // After deleting, redirect to the admin dashboard page
+  redirect('/admin-dashboard');
+};
+
+/**
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
