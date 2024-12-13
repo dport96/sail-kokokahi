@@ -1,21 +1,25 @@
 import { test, expect } from '@playwright/test';
 
 test.use({
-  storageState: 'admin-auth.json',
+  storageState: 'admin-auth.json', // Ensure this file is valid and correctly generated
 });
 
-test('Admin Pages', async ({ page }) => {
-  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+test.describe('Admin Pages', () => {
   const adminPages = [
-    `${baseUrl}/`,
-    `${baseUrl}/add-event`,
-    `${baseUrl}/admin-dashboard`,
-    `${baseUrl}/admin-events`,
-    `${baseUrl}/settings`,
+    '/',
+    '/add-event',
+    '/admin-dashboard',
+    '/admin-events',
+    '/settings',
   ];
 
-  for (const pageUrl of adminPages) {
-    await page.goto(pageUrl);
-    await expect(page).toHaveURL(pageUrl);
-  }
+  adminPages.forEach((path) => {
+    test(`should navigate to ${path}`, async ({ page }) => {
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Use environment variable for flexibility
+      const pageUrl = `${baseUrl}${path}`;
+
+      await page.goto(pageUrl); // Navigate to the URL
+      await expect(page).toHaveURL(pageUrl); // Validate the URL
+    });
+  });
 });
