@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.use({
   storageState: 'admin-auth.json', // Ensure this file is valid and correctly generated
@@ -20,8 +20,6 @@ test.describe('Admin Pages', () => {
       const pageUrl = `${baseUrl}${path}`;
 
       await page.goto(pageUrl); // Navigate to the URL
-
-      await expect(page); // Validate the URL
     });
   });
 });

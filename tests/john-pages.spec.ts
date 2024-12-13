@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.use({
   storageState: 'john-auth.json', // Ensure this file is valid and correctly generated
@@ -19,8 +19,6 @@ test.describe('User Pages', () => {
       const pageUrl = `${baseUrl}${path}`;
 
       await page.goto(pageUrl); // Navigate to the URL
-
-      await expect(page); // Validate the URL
     });
   });
 });
