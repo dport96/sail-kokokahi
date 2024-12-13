@@ -19,6 +19,11 @@ test.describe('Admin Pages', () => {
       const pageUrl = `${baseUrl}${path}`;
 
       await page.goto(pageUrl); // Navigate to the URL
+
+      if (page.url().includes('/auth/signin')) {
+        throw new Error(`Test failed: Redirected to signin for ${path}`);
+      }
+
       await expect(page).toHaveURL(pageUrl); // Validate the URL
     });
   });
