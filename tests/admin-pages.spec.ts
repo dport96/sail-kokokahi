@@ -11,7 +11,7 @@ test.describe('Admin Pages', () => {
     '/admin-dashboard',
     '/admin-events',
     '/settings',
-    'auth/signin',
+    '/auth/signin',
   ];
 
   adminPages.forEach((path) => {
