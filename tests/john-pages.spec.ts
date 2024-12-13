@@ -10,6 +10,7 @@ test.describe('User Pages', () => {
     '/member-dashboard',
     '/eventsignup',
     '/settings',
+    '/auth/signin',
   ];
 
   userPages.forEach((path) => {
