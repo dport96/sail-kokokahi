@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import { signIn } from 'next-auth/react';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
-import Link from 'next/link';
 
 /** The sign in page. */
 const SignIn = () => {
@@ -21,7 +20,7 @@ const SignIn = () => {
     const email = target.email.value;
     const password = target.password.value;
     const result = await signIn('credentials', {
-      callbackUrl: '/',
+      callbackUrl: '/post-logindirectory',
       email,
       password,
     });
@@ -46,7 +45,7 @@ const SignIn = () => {
           : [
             <Row className="justify-content-center">
               <Col xs={5}>
-                <h1 className="pt-1 fw-bold text-center">Sign In</h1>
+                <h1 className="text-center">Sign In</h1>
                 <Card>
                   <Card.Body>
                     <Form method="post" onSubmit={handleSubmit}>
@@ -65,7 +64,7 @@ const SignIn = () => {
                   </Card.Body>
                   <Card.Footer>
                     Don&apos;t have an account?
-                    <Link href="/register">Sign up</Link>
+                    <a href="/auth/signup">Sign up</a>
                   </Card.Footer>
                 </Card>
               </Col>
