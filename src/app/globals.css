@@ -6,18 +6,21 @@ body {
   padding: 0;
   margin: 0;
 }
+
 .wrapper {
   box-sizing: border-box;
   min-height: 100%;
   display: flex;
   flex-direction: column;
 }
+
 .background {
-  background-image: url(https://images.squarespace-cdn.com/content/v1/585d8ae8d2b857ddbd61ebf4/1637733891426-7PQCRKW4SP6FXSTBSWYZ/IMG_6638.jpeg?format=750w);
+  background-image: url(https://getwallpapers.com/wallpaper/full/a/3/5/1204058-hd-sailing-wallpaper-2400x1600-samsung.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   height: 100vh;
+  filter: brightness(90%);
 }
 
 .center {
@@ -39,7 +42,7 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  border: 2px solid black; /* Adds a thicker border around the entire table */
+  border: 2px solid black;
 }
 
 th, td {
@@ -61,15 +64,6 @@ th {
   font-size: 1.5rem;
 }
 
-.background {
-  background-image: url(https://getwallpapers.com/wallpaper/full/a/3/5/1204058-hd-sailing-wallpaper-2400x1600-samsung.jpg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100vh;
-  filter: brightness(90%);
-}
-
 .centered {
   display: flex;
   flex-direction: column;
@@ -87,4 +81,10 @@ th {
 
 .same-size-btn:hover {
   background-color: #414951 !important;
+}
+
+@layer utilities {
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
 }
