@@ -11,6 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Generate a unique barcode
       const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
+      // vercel
       const qrData = `http://sail-kokokahi-nine.vercel.app/event-check-in/${eventIdentifier}`;
       const qrCodeUrl = await QRCode.toDataURL(qrData);
 
