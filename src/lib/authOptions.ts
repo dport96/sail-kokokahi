@@ -54,7 +54,6 @@ const authOptions: NextAuthOptions = {
   },
   callbacks: {
     session: ({ session, token }) => {
-      // console.log('Session Callback', { session, token })
       return {
         ...session,
         user: {
@@ -65,7 +64,6 @@ const authOptions: NextAuthOptions = {
       };
     },
     jwt: ({ token, user }) => {
-      // console.log('JWT Callback', { token, user })
       if (user) {
         const u = user as unknown as any;
         return {
@@ -75,6 +73,9 @@ const authOptions: NextAuthOptions = {
         };
       }
       return token;
+    },
+    redirect: () => {
+      return '/'; // Redirect to landing page
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
