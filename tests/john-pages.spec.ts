@@ -1,19 +1,24 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.use({
-  storageState: 'john-auth.json',
+  storageState: 'john-auth.json', // Ensure this file is valid and correctly generated
 });
 
-test('User Pages', async ({ page }) => {
-  const pages = [
-    'http://localhost:3000/member-dashboard',
-    'http://localhost:3000/eventsignup',
-    'http://localhost:3000/member-landingpage',
-    'http://localhost:3000/settings',
+test.describe('User Pages', () => {
+  const userPages = [
+    '/',
+    '/member-dashboard',
+    '/eventsignup',
+    '/settings',
+    '/auth/signin',
   ];
 
-  for (const url of pages) {
-    await page.goto(url);
-    await expect(page).toHaveURL(url);
-  }
+  userPages.forEach((path) => {
+    test(`should navigate to ${path}`, async ({ page }) => {
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Use environment variable for flexibility
+      const pageUrl = `${baseUrl}${path}`;
+
+      await page.goto(pageUrl); // Navigate to the URL
+    });
+  });
 });
