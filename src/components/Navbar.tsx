@@ -109,9 +109,14 @@ const NavBar: React.FC = () => {
                 </Link>
               </>
             ) : (
-              <Link href="/auth/signin" className="nav-link text-white">
-                SIGN IN
-              </Link>
+              <>
+                <Link href="/auth/signin" className="nav-link text-white">
+                  SIGN IN
+                </Link>
+                <Link href="/register" className="nav-link text-white">
+                  SIGN UP
+                </Link>
+              </>
             )}
           </Nav>
         </Navbar.Collapse>
