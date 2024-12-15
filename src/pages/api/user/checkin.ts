@@ -55,15 +55,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Check if the event date is today
-    /* const eventDate = new Date(event.date);
-    const today = new Date();
-    if (eventDate.toDateString() !== today.toDateString()) {
-      return res.status(400).json({
-        success: false,
-        message: 'You can only check in on the day of the event',
+    // Check if the user is already signed up for the event
+    let userEvent = await prisma.userEvent.findUnique({
+      where: {
+        userId_eventId: { userId: user.id, eventId: Number(eventId) },
+      },
+    });
+
+    if (!userEvent) {
+      // If not signed up, create the sign-up and set 'attended' to false initially
+      userEvent = await prisma.userEvent.create({
+        data: {
+          userId: user.id,
+          eventId: Number(eventId),
+        },
       });
-    } */
+    }
+
+    // Set the 'attended' field to true for the check-in
+    await prisma.userEvent.update({
+      where: { id: userEvent.id },
+      data: { attended: true },
+    });
 
     // Increment the user's pending hours by the event's hours
     await prisma.user.update({

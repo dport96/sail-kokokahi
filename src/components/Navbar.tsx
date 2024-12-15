@@ -10,20 +10,27 @@ const NavBar: React.FC = () => {
   const currentUser = session?.user?.email;
   const userWithRole = session?.user as { email: string; randomKey?: string };
   const role = userWithRole?.randomKey;
-  const pathName = usePathname();
+  const pathName = usePathname() || ''; // Provide empty string as fallback
 
   // Determine if we're on the landing page
   const isLandingPage = pathName === '/';
 
+  // Check if we're on the event-check-in page
+  const isEventCheckIn = pathName?.startsWith('/event-check-in') || false;
+
   // Style based on page
   const navStyle = {
     backgroundColor: isLandingPage ? 'transparent' : 'rgba(0, 0, 0, 0.35)',
-    position: 'absolute',
+    position: isEventCheckIn ? 'relative' : 'absolute',
     width: '100%',
     zIndex: 1000,
     paddingTop: '1rem',
     paddingBottom: '1rem',
     transition: 'background-color 0.3s ease',
+    ...(isEventCheckIn && {
+      marginBottom: '2rem',
+      backgroundColor: 'rgb(154, 152, 152)',
+    }),
   } as const;
 
   return (
