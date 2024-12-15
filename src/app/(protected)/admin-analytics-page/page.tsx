@@ -1,6 +1,9 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import EventsAnalytics from '@/components/EventsAnalytics';
+import authOptions from '@/lib/authOptions';
+import { adminProtectedPage } from '@/lib/page-protection';
+import { getServerSession } from 'next-auth';
 
 // Define the type for our analytics data
 type EventAnalytics = {
@@ -11,6 +14,13 @@ type EventAnalytics = {
   totalUsers: number;
   hours: number; // Add hours field
 };
+
+const session = await getServerSession(authOptions);
+adminProtectedPage(
+  session as {
+    user: { email: string; id: string; randomKey: string };
+  } | null,
+);
 
 // This function fetches and transforms the data
 async function getEventsAnalytics(): Promise<EventAnalytics[]> {
