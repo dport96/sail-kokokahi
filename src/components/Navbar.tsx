@@ -70,7 +70,7 @@ const NavBar: React.FC = () => {
                   href="/admin-analytics-page"
                   className={`nav-link text-white ${pathName === '/admin-analytics-page' ? 'active' : ''}`}
                 >
-                  Analytics
+                  ANALYTICS
                 </Link>
               </>
             )}
