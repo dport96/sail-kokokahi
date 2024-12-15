@@ -37,10 +37,25 @@ export async function addEvent(event: {
  * Deletes an existing event from the database.
  * @param id, the id of the event to delete.
  */
-export const deleteEvent = async (id: number) => {
-  await prisma.event.delete({
-    where: { id },
-  });
+export const deleteEvent = async (eventId: number) => {
+  try {
+    // Delete related records first
+    await prisma.userEvent.deleteMany({
+      where: { eventId }, // Replace `eventId` with the correct field name if different
+    });
+
+    // Delete the event after deleting related records
+    const deletedEvent = await prisma.event.delete({
+      where: { id: eventId },
+    });
+
+    return deletedEvent;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error; // Ensure errors are propagated
+  } finally {
+    await prisma.$disconnect();
+  }
   // After deleting, redirect to the event page
   redirect('/admin-events');
 };
