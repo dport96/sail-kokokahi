@@ -98,14 +98,14 @@ const NavBar: React.FC = () => {
             )}
             {currentUser ? (
               <>
-                <Link href="/api/auth/signout" className="nav-link text-white">
-                  SIGN OUT
-                </Link>
                 <Link
                   href="/auth/change-password"
                   className={`nav-link text-white ${pathName === '/auth/change-password' ? 'active' : ''}`}
                 >
                   CHANGE PASSWORD
+                </Link>
+                <Link href="/api/auth/signout" className="nav-link text-white">
+                  SIGN OUT
                 </Link>
               </>
             ) : (

@@ -46,14 +46,36 @@ export const EventList = ({ events }: { events: any[] }) => {
                 const printWindow = window.open('', '', 'height=600,width=800');
                 if (printWindow) {
                   const qrImageUrl = event.qr;
-                  printWindow.document.write('<html><head><title>Print QR Code</title></head><body>');
                   printWindow.document.write(`
-                    <div>
-                      <h3>QR Code for Event: ${event.title}</h3>
-                      <img src="${qrImageUrl}" alt="QR Code" style="width:400px;height:400px;"/>
-                    </div>
+                    <html>
+                      <head>
+                        <title>Print QR Code</title>
+                        <style>
+                          body {
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100%;
+                            margin: 0;
+                          }
+                          h3 {
+                            text-align: center;
+                          }
+                          img {
+                            display: block;
+                            margin: 20px auto;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div>
+                          <h3>QR Code for Event: ${event.title}</h3>
+                          <img src="${qrImageUrl}" alt="QR Code" style="width:400px;height:400px;" />
+                        </div>
+                      </body>
+                    </html>
                   `);
-                  printWindow.document.write('</body></html>');
                   printWindow.document.close();
                   printWindow.onload = () => printWindow.print();
                 }
