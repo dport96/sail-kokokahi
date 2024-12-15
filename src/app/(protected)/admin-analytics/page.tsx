@@ -15,13 +15,6 @@ type EventAnalytics = {
   hours: number; // Add hours field
 };
 
-const session = await getServerSession(authOptions);
-adminProtectedPage(
-  session as {
-    user: { email: string; id: string; randomKey: string };
-  } | null,
-);
-
 // This function fetches and transforms the data
 async function getEventsAnalytics(): Promise<EventAnalytics[]> {
   // Get total number of users with USER role
@@ -74,12 +67,21 @@ async function getEventsAnalytics(): Promise<EventAnalytics[]> {
 
 // Convert to Server Component
 const Page = async () => {
+  const session = await getServerSession(authOptions);
+  adminProtectedPage(
+    session as {
+      user: { email: string; id: string; randomKey: string };
+    } | null,
+  );
+
   const eventsData = await getEventsAnalytics();
 
   return (
-    <div className="admin-analytics">
-      <EventsAnalytics events={eventsData} />
-    </div>
+    <main>
+      <div className="admin-analytics">
+        <EventsAnalytics events={eventsData} />
+      </div>
+    </main>
   );
 };
 

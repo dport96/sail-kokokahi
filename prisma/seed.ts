@@ -18,9 +18,6 @@ async function main() {
       email: 'admin@foo.com',
       password,
       role: Role.ADMIN,
-      cardNumber: '4111111111111111',
-      cardExpiry: '12/24',
-      cardCVV: '123',
     },
   });
 
@@ -33,9 +30,6 @@ async function main() {
       email: 'john@foo.com',
       password,
       role: Role.USER,
-      cardNumber: '4111111111112222',
-      cardExpiry: '01/25',
-      cardCVV: '456',
     },
   });
 

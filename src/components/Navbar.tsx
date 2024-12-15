@@ -80,7 +80,7 @@ const NavBar: React.FC = () => {
                   href="/member-dashboard"
                   className={`nav-link text-white ${pathName === '/member-dashboard' ? 'active' : ''}`}
                 >
-                  HOME
+                  DASHBOARD
                 </Link>
                 <Link
                   href="/member-event-sign-up"
@@ -88,12 +88,21 @@ const NavBar: React.FC = () => {
                 >
                   EVENTS
                 </Link>
+                <Link
+                  href="/settings"
+                  className={`nav-link text-white ${pathName === '/settings' ? 'active' : ''}`}
+                >
+                  SETTINGS
+                </Link>
               </>
             )}
             {currentUser ? (
               <>
-                <Link href="/settings" className="nav-link text-white">
-                  SETTINGS
+                <Link
+                  href="/auth/change-password"
+                  className={`nav-link text-white ${pathName === '/auth/change-password' ? 'active' : ''}`}
+                >
+                  CHANGE PASSWORD
                 </Link>
                 <Link href="/api/auth/signout" className="nav-link text-white">
                   SIGN OUT
