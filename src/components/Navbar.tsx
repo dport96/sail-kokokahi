@@ -59,6 +59,12 @@ const NavBar: React.FC = () => {
                 >
                   EVENTS
                 </Link>
+                <Link
+                  href="/admin-analytics-page"
+                  className={`nav-link text-white ${pathName === '/admin-analytics-page' ? 'active' : ''}`}
+                >
+                  Analytics
+                </Link>
               </>
             )}
             {role === 'USER' && (
