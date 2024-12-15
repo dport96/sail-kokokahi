@@ -54,6 +54,7 @@ model UserEvent {
   id        Int     @id @default(autoincrement())
   userId    Int
   eventId   Int
+  attended  Boolean @default(false) // Tracks if the user attended the event
   User      User    @relation(fields: [userId], references: [id])
   Event     Event   @relation(fields: [eventId], references: [id])
 
