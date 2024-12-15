@@ -21,7 +21,8 @@ const EventsAnalytics = ({ events }: { events: any[] }) => {
 
   return (
     <Container>
-      <h1 className="mb-4">Events Analytics</h1>
+      <h1 className="fw-bolder pt-3">Event Analytics</h1>
+      <hr />
       <SortableTable
         data={sortedEvents}
         columns={[

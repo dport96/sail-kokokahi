@@ -34,11 +34,10 @@ const SignUp = ({ events }: EventsSignUpProps) => {
         throw new Error('Failed to sign up for the event');
       }
 
-      const data = await response.json();
-      swal(`Successfully signed up for event: ${data.eventId}`);
+      swal('Successfully signed up for the event');
     } catch (error) {
       console.error(error);
-      swal('Error signing up for the event');
+      swal('You are already signed up for the event');
     }
   };
 
@@ -59,7 +58,8 @@ const SignUp = ({ events }: EventsSignUpProps) => {
 
   return (
     <div className="mb-3">
-      <h2>Event Sign-up</h2>
+      <h1 className="fw-bolder pt-3">Event Sign-up</h1>
+      <hr />
       {sortedEvents.map((event) => (
         <Row key={event.id} className="border p-3">
           <h4>{event.date}</h4>

@@ -45,7 +45,7 @@ export default function CheckInComponent({ event }: { event: Event }) {
       <Row>
         <Col>
           <div className="mb-3">
-            <h1 className="fw-bold pt-3">Event Check In</h1>
+            <h1 className="fw-bolder pt-3">Event Check In</h1>
             <Row className="border p-3">
               <h4>{event.date}</h4>
               <h5>{event.title}</h5>
