@@ -64,10 +64,22 @@ export const deleteEvent = async (eventId: number) => {
  * Deletes an existing user from the database.
  * @param id, the id of the user to delete.
  */
-export const deleteUser = async (id: number) => {
-  await prisma.user.delete({
-    where: { id },
-  });
+export const deleteUser = async (userId: number) => {
+  try {
+    // Delete related records in HoursLog and UserEvent
+    await prisma.hoursLog.deleteMany({ where: { userId } });
+    await prisma.userEvent.deleteMany({ where: { userId } });
+
+    // Delete the user
+    const deletedUser = await prisma.user.delete({ where: { id: userId } });
+
+    return deletedUser;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
   // After deleting, redirect to the admin dashboard page
   redirect('/admin-dashboard');
 };
