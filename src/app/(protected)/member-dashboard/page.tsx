@@ -19,7 +19,25 @@ const MemberDashboard = async () => {
       email: currentUser,
     },
   });
-  const events = await prisma.event.findMany({});
+  console.log("users:", users.events);
+  const formatDate = (date: Date) => {
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+  };
+
+  const events = await prisma.event.findMany({
+    where: {
+      date: {
+        gte: formatDate(new Date()) // Get events that are today or later
+      },
+    },
+    orderBy: {
+      date: 'asc',
+    },
+  });
+
   return (
     <main>
       <Container>

@@ -7,7 +7,7 @@ import { prisma } from './prisma';
 /**
  * Adds a new Event to the database.
  * @param event, an object with the following properties:
- * eventId, title, description, date, location, owner, hours, time.
+ * eventId, title, description, date, location, owner, hours, time, signupReq.
  */
 export async function addEvent(event: {
   title: string;
@@ -16,6 +16,7 @@ export async function addEvent(event: {
   location: string;
   hours: number;
   time: string;
+  signupReq: boolean;
   qr: string;
 }) {
   await prisma.event.create({
@@ -26,6 +27,7 @@ export async function addEvent(event: {
       location: event.location,
       hours: event.hours,
       time: event.time,
+      signupReq: event.signupReq,
       qr: event.qr,
     },
   });

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { title, description, date, location, hours, time } = req.body;
+      const { title, description, date, location, hours, time, signupReq } = req.body;
 
       // Generate a unique barcode
       const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location,
           hours,
           time,
+          signupReq,
           qr: qrCodeUrl,
         },
       });

@@ -194,7 +194,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     size="sm"
                     style={{ float: 'left' }}
                     onClick={async () => {
-                      const newHours = user.approvedHours - 0.5;
+                      const newHours = (user.approvedHours > 0.5) ? (user.approvedHours - 0.5) : 0;
                       await updateApprovedHours(user.id, newHours);
                     }}
                   >

@@ -34,43 +34,41 @@ const SignIn = () => {
   return (
     <main>
       <Container>
-        {currentUser && (role === 'USER' || role === 'ADMIN')
-          ? [
-            <h2 className="text-center mt-5">
-              You are already signed in!
-              <br />
-              <br />
-              Please use the navigation bar to go to another page.
-            </h2>,
-          ]
-          : [
-            <Row className="justify-content-center">
-              <Col xs={5}>
-                <h1 className="text-center fw-bold">Sign In</h1>
-                <Card>
-                  <Card.Body>
-                    <Form method="post" onSubmit={handleSubmit}>
-                      <Form.Group controlId="formBasicEmail">
-                        <Form.Label>Email</Form.Label>
-                        <input name="email" type="text" className="form-control" />
-                      </Form.Group>
-                      <Form.Group>
-                        <Form.Label>Password</Form.Label>
-                        <input name="password" type="password" className="form-control" />
-                      </Form.Group>
-                      <Button type="submit" className="mt-3">
-                        Signin
-                      </Button>
-                    </Form>
-                  </Card.Body>
-                  <Card.Footer>
-                    Don&apos;t have an account?
-                    <Link href="/register">Sign up</Link>
-                  </Card.Footer>
-                </Card>
-              </Col>
-            </Row>,
-          ]}
+        {currentUser && (role === 'USER' || role === 'ADMIN') ? (
+          <h2 key="signed-in" className="text-center mt-5">
+            You are already signed in!
+            <br />
+            <br />
+            Please use the navigation bar to go to another page.
+          </h2>
+        ) : (
+          <Row key="signin-form" className="justify-content-center">
+            <Col xs={5}>
+              <h1 className="text-center fw-bold">Sign In</h1>
+              <Card>
+                <Card.Body>
+                  <Form method="post" onSubmit={handleSubmit}>
+                    <Form.Group controlId="formBasicEmail">
+                      <Form.Label>Email</Form.Label>
+                      <input name="email" type="text" className="form-control" />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Password</Form.Label>
+                      <input name="password" type="password" className="form-control" />
+                    </Form.Group>
+                    <Button type="submit" className="mt-3">
+                      Signin
+                    </Button>
+                  </Form>
+                </Card.Body>
+                <Card.Footer>
+                  Don&apos;t have an account?{' '}
+                  <Link href="/register">Sign up</Link>
+                </Card.Footer>
+              </Card>
+            </Col>
+          </Row>
+        )}
       </Container>
     </main>
   );

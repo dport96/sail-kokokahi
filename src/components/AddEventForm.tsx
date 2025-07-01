@@ -23,6 +23,7 @@ const AddEventForm: React.FC = () => {
     location: string;
     hours: number;
     time: string;
+    signupReq: boolean;
   }) => {
     try {
       const response = await fetch('/api/events', {
@@ -116,10 +117,30 @@ const AddEventForm: React.FC = () => {
                       <Form.Label>Hours</Form.Label>
                       <input
                         type="number"
+                        step="0.1"
+                        min="0"
+                        max="6"
                         {...register('hours')}
                         className={`form-control ${errors.hours ? 'is-invalid' : ''}`}
                       />
                       <div className="invalid-feedback">{errors.hours?.message}</div>
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group>
+                      <Form.Label></Form.Label>
+                      <div className="form-check">
+                        <input
+                          type="checkbox"
+                          {...register('signupReq')}
+                          className="form-check-input"
+                          id="signupReq"
+                        />
+                        <label className="form-check-label" htmlFor="signupReq">
+                          Sign up required
+                        </label>
+                      </div>
+                      <div className="invalid-feedback">{errors.signupReq?.message}</div>
                     </Form.Group>
                   </Col>
                 </Row>
