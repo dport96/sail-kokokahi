@@ -11,10 +11,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Generate a unique barcode
       const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
-      // vercel
-      const qrData = `http://sail-kokokahi-nine.vercel.app/event-check-in/${eventIdentifier}`;
-      // localhost
-      // const qrData = `http://localhost:3000/event-check-in/${eventIdentifier}`;
+
+      // Get the current app URL dynamically
+      const { host } = req.headers;
+      const protocol = req.headers['x-forwarded-proto']
+        || (host?.includes('localhost') ? 'http' : 'https');
+      const baseUrl = `${protocol}://${host}`;
+
+      const qrData = `${baseUrl}/event-check-in/${eventIdentifier}`;
       const qrCodeUrl = await QRCode.toDataURL(qrData);
 
       // Save the event to the database

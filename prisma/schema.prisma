@@ -42,7 +42,6 @@ model Event {
   qr          String //field to store qr data
   users       UserEvent[]  // Connects events to the users signed up for them
   signupReq   Boolean @default(false)
-  @@check("hours >= 0")
 }
 
 model UserEvent {
@@ -65,7 +64,6 @@ model HoursLog {
   performedBy String
   createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
-  @@check("hours >= 0")
 }
 
 model Qr {

@@ -1,35 +1,49 @@
 'use client';
 
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import DatePicker from 'react-datepicker';
 import swal from 'sweetalert';
 import { AddEventSchema } from '@/lib/validationSchemas';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const AddEventForm: React.FC = () => {
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(AddEventSchema),
   });
 
-  const onSubmit = async (data: {
-    title: string;
-    description: string;
-    date: string;
-    location: string;
-    hours: number;
-    time: string;
-    signupReq: boolean;
-  }) => {
+  const onSubmit = async (data: any) => {
     try {
+      // Format date and time for API
+      const formattedData = {
+        ...data,
+        date: data.date instanceof Date
+          ? data.date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          })
+          : data.date,
+        time: data.time instanceof Date
+          ? data.time.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })
+          : data.time,
+      };
+
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
       const result = await response.json();
@@ -72,11 +86,21 @@ const AddEventForm: React.FC = () => {
                   </Col>
                   <Col>
                     <Form.Group>
-                      <Form.Label>Date (MM/DD/YYYY format)</Form.Label>
-                      <input
-                        type="text"
-                        {...register('date')}
-                        className={`form-control ${errors.date ? 'is-invalid' : ''}`}
+                      <Form.Label>Date</Form.Label>
+                      <Controller
+                        name="date"
+                        control={control}
+                        render={({ field }) => (
+                          <DatePicker
+                            selected={field.value as Date}
+                            onChange={(date) => field.onChange(date)}
+                            dateFormat="MM/dd/yyyy"
+                            className={`form-control ${errors.date ? 'is-invalid' : ''}`}
+                            placeholderText="Select a date"
+                            minDate={new Date()}
+                            showPopperArrow={false}
+                          />
+                        )}
                       />
                       <div className="invalid-feedback">{errors.date?.message}</div>
                     </Form.Group>
@@ -103,11 +127,24 @@ const AddEventForm: React.FC = () => {
                 <Row>
                   <Col>
                     <Form.Group>
-                      <Form.Label>Time (HH:MM|AM/PM format)</Form.Label>
-                      <input
-                        type="text"
-                        {...register('time')}
-                        className={`form-control ${errors.time ? 'is-invalid' : ''}`}
+                      <Form.Label>Time</Form.Label>
+                      <Controller
+                        name="time"
+                        control={control}
+                        render={({ field }) => (
+                          <DatePicker
+                            selected={field.value as Date}
+                            onChange={(time) => field.onChange(time)}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={15}
+                            timeCaption="Time"
+                            dateFormat="h:mm aa"
+                            className={`form-control ${errors.time ? 'is-invalid' : ''}`}
+                            placeholderText="Select a time"
+                            showPopperArrow={false}
+                          />
+                        )}
                       />
                       <div className="invalid-feedback">{errors.time?.message}</div>
                     </Form.Group>
@@ -128,7 +165,7 @@ const AddEventForm: React.FC = () => {
                   </Col>
                   <Col>
                     <Form.Group>
-                      <Form.Label></Form.Label>
+                      <Form.Label />
                       <div className="form-check">
                         <input
                           type="checkbox"
