@@ -97,16 +97,39 @@ export const EventList = ({ events }: { events: any[] }) => {
           </div>
           <div>
             <h5 style={{ float: 'left' }}>{event.title}</h5>
-            <Button
-              variant="danger"
-              style={{ float: 'right' }}
-              onClick={() => {
-                setSelectedEventId(event.id);
-                setOpen(true);
-              }}
-            >
-              Delete Event
-            </Button>
+            <div style={{ float: 'right' }}>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  // Create URL with event data for duplication
+                  const params = new URLSearchParams({
+                    title: event.title,
+                    description: event.description,
+                    location: event.location,
+                    hours: event.hours.toString(),
+                    time: event.time,
+                    signupReq: event.signupReq.toString(),
+                  });
+                  window.location.href = `/add-event?duplicate=true&${params.toString()}`;
+                }}
+                title="Duplicate this event"
+              >
+                📋 Duplicate
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedEventId(event.id);
+                  setOpen(true);
+                }}
+                title="Delete this event"
+              >
+                🗑️ Delete
+              </Button>
+            </div>
             <Modal open={open} onClose={() => setOpen(false)}>
               <div
                 style={{
