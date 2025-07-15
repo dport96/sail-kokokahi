@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, DropdownButton, Image, Row, Col } from 'react-bootstrap';
 import swal from 'sweetalert';
 import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
@@ -11,6 +11,11 @@ export const EventList = ({ events }: { events: any[] }) => {
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+
+  // Update local state when props change
+  useEffect(() => {
+    setEventList(events);
+  }, [events]);
 
   const handleDelete = async () => {
     if (selectedEventId === null) return;
@@ -28,8 +33,14 @@ export const EventList = ({ events }: { events: any[] }) => {
   };
 
   const sortedEvents = eventList.sort((a, b) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
+    // Parse MM/DD/YYYY format properly
+    const parseEventDate = (dateString: string) => {
+      const [month, day, year] = dateString.split('/').map(Number);
+      return new Date(year, month - 1, day);
+    };
+    
+    const dateA = parseEventDate(a.date).getTime();
+    const dateB = parseEventDate(b.date).getTime();
     return dateA - dateB;
   });
 

@@ -3,7 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap';
 import { adminProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-import { EventList } from '@/components/EventList';
+import AdminEventsClient from '@/components/AdminEventsClient';
 
 const EventsPage = async () => {
   const session = await getServerSession(authOptions);
@@ -13,7 +13,34 @@ const EventsPage = async () => {
     } | null,
   );
 
-  const events = await prisma.event.findMany();
+  // Get all events and sort by date
+  const allEvents = await prisma.event.findMany({
+    orderBy: {
+      date: 'asc',
+    },
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+
+  // Helper function to parse MM/DD/YYYY date format
+  const parseEventDate = (dateString: string) => {
+    const [month, day, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed in JS Date
+  };
+
+  // Separate current/upcoming events from past events
+  const upcomingEvents = allEvents.filter(event => {
+    const eventDate = parseEventDate(event.date);
+    eventDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+    return eventDate >= today;
+  });
+
+  const pastEvents = allEvents.filter(event => {
+    const eventDate = parseEventDate(event.date);
+    eventDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+    return eventDate < today;
+  });
 
   return (
     <main>
@@ -23,7 +50,10 @@ const EventsPage = async () => {
             <div className="mb-3">
               <h1 className="fw-bold pt-3">Events</h1>
               <hr />
-              <EventList events={events} />
+              <AdminEventsClient
+                upcomingEvents={upcomingEvents}
+                pastEvents={pastEvents}
+              />
             </div>
           </Col>
         </Row>
