@@ -7,7 +7,15 @@ import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
 import React from 'react';
 import Modal from '@mui/material/Modal';
 
-export const EventList = ({ events }: { events: any[] }) => {
+export const EventList = ({
+  events,
+  onManageAttendance,
+  showAttendanceButton = false,
+}: {
+  events: any[];
+  onManageAttendance?: (event: any) => void;
+  showAttendanceButton?: boolean;
+}) => {
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
@@ -118,6 +126,17 @@ export const EventList = ({ events }: { events: any[] }) => {
               >
                 📋 Duplicate
               </Button>
+              {showAttendanceButton && onManageAttendance && (
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageAttendance(event)}
+                  title="Manage event attendance"
+                >
+                  👥 Attendance
+                </Button>
+              )}
               <Button
                 variant="outline-danger"
                 size="sm"

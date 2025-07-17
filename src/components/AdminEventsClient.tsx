@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Button, Alert } from 'react-bootstrap';
 import { EventList } from '@/components/EventList';
+import EventAttendanceManager from '@/components/EventAttendanceManager';
 
 interface AdminEventsClientProps {
   upcomingEvents: any[];
@@ -14,9 +15,21 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
   pastEvents,
 }) => {
   const [showPastEvents, setShowPastEvents] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showAttendanceManager, setShowAttendanceManager] = useState(false);
 
   const togglePastEvents = () => {
     setShowPastEvents(!showPastEvents);
+  };
+
+  const handleManageAttendance = (event: any) => {
+    setSelectedEvent(event);
+    setShowAttendanceManager(true);
+  };
+
+  const handleCloseAttendanceManager = () => {
+    setShowAttendanceManager(false);
+    setSelectedEvent(null);
   };
 
   return (
@@ -61,7 +74,11 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
       {showPastEvents ? (
         <div>
           {pastEvents.length > 0 ? (
-            <EventList events={pastEvents} />
+            <EventList
+              events={pastEvents}
+              onManageAttendance={handleManageAttendance}
+              showAttendanceButton
+            />
           ) : (
             <Alert variant="info" className="text-center">
               <h6>📅 No Past Events</h6>
@@ -72,7 +89,11 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
       ) : (
         <div>
           {upcomingEvents.length > 0 ? (
-            <EventList events={upcomingEvents} />
+            <EventList
+              events={upcomingEvents}
+              onManageAttendance={handleManageAttendance}
+              showAttendanceButton={false}
+            />
           ) : (
             <Alert variant="warning" className="text-center">
               <h6>🗓️ No Upcoming Events</h6>
@@ -86,6 +107,15 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
             </Alert>
           )}
         </div>
+      )}
+
+      {/* Attendance Manager Modal */}
+      {selectedEvent && (
+        <EventAttendanceManager
+          event={selectedEvent}
+          isOpen={showAttendanceManager}
+          onClose={handleCloseAttendanceManager}
+        />
       )}
     </div>
   );

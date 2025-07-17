@@ -22,8 +22,8 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
 
   const newUsers = users.filter(user => new Date(user.createdAt) >= oneYearAgo);
 
-  const getProgressBarVariant = (totalHours: number, percentage: number): string => {
-    if (totalHours >= 6) return 'success';
+  const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
+    if (approvedHours >= 6) return 'success';
     if (percentage >= 50) return 'info';
     return 'warning';
   };
@@ -31,8 +31,8 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
   return (
     <>
       {newUsers.map(user => {
-        const totalHours = user.approvedHours + user.pendingHours;
-        const progressPercentage = Math.min((totalHours / 6) * 100, 100);
+        const { approvedHours, pendingHours } = user;
+        const progressPercentage = Math.min((approvedHours / 6) * 100, 100);
         const registrationDate = new Date(user.createdAt).toLocaleDateString();
 
         return (
@@ -52,8 +52,8 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <ProgressBar
                 now={progressPercentage}
-                label={`${totalHours} hours`}
-                variant={getProgressBarVariant(totalHours, progressPercentage)}
+                label={`${approvedHours} hours`}
+                variant={getProgressBarVariant(approvedHours, progressPercentage)}
                 className="w-75"
               />
               <span className="ms-2">
@@ -64,14 +64,14 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
             <small className="text-muted">
               Approved:
               {' '}
-              {user.approvedHours}
+              {approvedHours}
               {' '}
               hrs | Pending:
               {' '}
-              {user.pendingHours}
+              {pendingHours}
               {' '}
               hrs
-              {totalHours >= 6}
+              {approvedHours >= 6 && ' (Complete)'}
             </small>
             <hr />
           </div>
