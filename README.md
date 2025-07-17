@@ -278,7 +278,7 @@ yarn install
    GRANT ALL PRIVILEGES ON DATABASE sail_kokokahi TO sail_user;
    
    # Exit psql
-   \q. 
+   \q
    ```
 
 #### Option B: Using Docker
