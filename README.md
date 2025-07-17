@@ -227,6 +227,177 @@ Immediate improvements that can be implemented:
 - **QR Code**: QR code generation and scanning
 - **Notifications**: SweetAlert for user feedback
 
-## 📚 Getting Started
+## � Installation
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- PostgreSQL (v12 or later)
+- npm or yarn package manager
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/dport96/sail-kokokahi.git
+cd sail-kokokahi
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. PostgreSQL Database Setup
+
+#### Option A: Local PostgreSQL Installation
+
+1. **Install PostgreSQL** (if not already installed):
+   - **macOS**: `brew install postgresql`
+   - **Ubuntu/Debian**: `sudo apt-get install postgresql postgresql-contrib`
+   - **Windows**: Download from [PostgreSQL website](https://www.postgresql.org/download/)
+
+2. **Start PostgreSQL service**:
+   - **macOS**: `brew services start postgresql`
+   - **Ubuntu/Debian**: `sudo systemctl start postgresql`
+   - **Windows**: Start via Services or PostgreSQL installer
+
+3. **Create database and user**:
+
+   ```bash
+   # Connect to PostgreSQL
+   psql -U postgres
+   
+   # Create database
+   CREATE DATABASE sail_kokokahi;
+   
+   # Create user (optional, for better security)
+   CREATE USER sail_user WITH PASSWORD 'your_password';
+   GRANT ALL PRIVILEGES ON DATABASE sail_kokokahi TO sail_user;
+   
+   # Exit psql
+   \q
+   ```
+
+#### Option B: Using Docker
+
+```bash
+# Create and run PostgreSQL container
+docker run --name sail-postgres \
+  -e POSTGRES_DB=sail_kokokahi \
+  -e POSTGRES_USER=sail_user \
+  -e POSTGRES_PASSWORD=your_password \
+  -p 5432:5432 \
+  -d postgres:14
+```
+
+### 4. Environment Configuration
+
+Create a `.env.local` file in the root directory:
+
+```env
+# Database
+DATABASE_URL="postgresql://sail_user:your_password@localhost:5432/sail_kokokahi"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-nextauth-secret-key-here"
+
+# Optional: For production
+NODE_ENV="development"
+```
+
+### 5. Database Migration
+
+Run Prisma migrations to set up the database schema:
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate deploy
+
+# Optional: Seed the database with sample data
+npx prisma db seed
+```
+
+### 6. Start the Development Server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+### 7. Initial Setup
+
+1. **Create Admin User**: Register a new account through the application
+2. **Database Setup**: The admin user will need to be manually set in the database:
+
+   ```sql
+   UPDATE "User" SET role = 'ADMIN' WHERE email = 'your-admin-email@example.com';
+   ```
+
+### 8. Verify Installation
+
+- Navigate to `http://localhost:3000`
+- Register a new account
+- Test QR code functionality
+- Verify database connectivity in admin dashboard
+
+## 🔧 Development Tools
+
+### Database Management
+
+```bash
+# View database in Prisma Studio
+npx prisma studio
+
+# Reset database (WARNING: This will delete all data)
+npx prisma migrate reset
+
+# Create new migration after schema changes
+npx prisma migrate dev --name your_migration_name
+```
+
+### Useful Commands
+
+```bash
+# Run tests
+npm test
+
+# Run linting
+npm run lint
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## 🚀 Deployment
+
+### Environment Variables for Production
+
+```env
+DATABASE_URL="your-production-database-url"
+NEXTAUTH_URL="https://your-domain.com"
+NEXTAUTH_SECRET="your-production-secret"
+NODE_ENV="production"
+```
+
+### Deployment Platforms
+
+- **Vercel**: Connect your GitHub repository for automatic deployments
+- **Netlify**: Build command: `npm run build`, Publish directory: `.next`
+- **Docker**: Use the included Dockerfile for containerized deployments
+
+## �📚 Getting Started
 
 For development setup and detailed documentation, please see [NextJS Application Template](http://ics-software-engineering.github.io/nextjs-application-template/).
