@@ -1,6 +1,6 @@
 /* eslint-disable arrow-body-style */
 import { compare } from 'bcrypt';
-import { type NextAuthOptions } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
 

@@ -1,7 +1,9 @@
 'use client';
 
+import React from 'react';
 import { useSession } from 'next-auth/react';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import Link from 'next/link';
 
@@ -11,6 +13,20 @@ const SignIn = () => {
   const currentUser = session?.user?.email;
   const userWithRole = session?.user as { email: string; randomKey?: string };
   const role = userWithRole?.randomKey;
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
+
+  // Redirect immediately if user is already signed in
+  React.useEffect(() => {
+    if (currentUser && (role === 'USER' || role === 'ADMIN')) {
+      setIsRedirecting(true);
+      if (role === 'ADMIN') {
+        router.push('/admin-dashboard');
+      } else {
+        router.push('/member-event-sign-up');
+      }
+    }
+  }, [currentUser, role, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,27 +37,49 @@ const SignIn = () => {
     const email = target.email.value;
     const password = target.password.value;
     const result = await signIn('credentials', {
-      callbackUrl: '/member-event-sign-up',
       email,
       password,
+      redirect: false,
     });
 
     if (result?.error) {
       console.error('Sign in failed: ', result.error);
+    } else if (result?.ok) {
+      setIsRedirecting(true);
+      // Get the user's role and redirect accordingly
+      const response = await fetch('/api/auth/session');
+      const sessionData = await response.json();
+      const userRole = sessionData?.user?.randomKey;
+      
+      if (userRole === 'ADMIN') {
+        router.push('/admin-dashboard');
+      } else {
+        router.push('/member-event-sign-up');
+      }
     }
   };
+
+  // Show loading state while redirecting
+  if (isRedirecting) {
+    return (
+      <main>
+        <Container>
+          <div className="text-center mt-5">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3">Redirecting...</p>
+          </div>
+        </Container>
+      </main>
+    );
+  }
 
   return (
     <main>
       <Container>
-        {currentUser && (role === 'USER' || role === 'ADMIN') ? (
-          <h2 key="signed-in" className="text-center mt-5">
-            You are already signed in!
-            <br />
-            <br />
-            Please use the navigation bar to go to another page.
-          </h2>
-        ) : (
+        {/* Only show the sign-in form if user is not signed in */}
+        {!currentUser ? (
           <Row key="signin-form" className="justify-content-center">
             <Col xs={5}>
               <h1 className="text-center fw-bold">Sign In</h1>
@@ -68,6 +106,14 @@ const SignIn = () => {
               </Card>
             </Col>
           </Row>
+        ) : (
+          /* Show nothing while redirecting */
+          <div className="text-center mt-5">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3">Redirecting...</p>
+          </div>
         )}
       </Container>
     </main>

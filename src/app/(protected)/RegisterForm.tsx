@@ -1,6 +1,7 @@
 // components/RegisterForm.tsx
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface RegisterFormData {
   firstName: string;
@@ -20,6 +21,7 @@ const RegisterForm: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,12 +48,26 @@ const RegisterForm: React.FC = () => {
         });
         
         // Automatically sign in the user after successful registration
-        await signIn('credentials', {
+        const signInResult = await signIn('credentials', {
           email: formData.email,
           password: formData.password,
-          callbackUrl: '/member-event-sign-up',
-          redirect: true,
+          redirect: false,
         });
+
+        if (signInResult?.ok) {
+          // Get the user's role and redirect accordingly
+          const sessionResponse = await fetch('/api/auth/session');
+          const sessionData = await sessionResponse.json();
+          const userRole = sessionData?.user?.randomKey;
+          
+          if (userRole === 'ADMIN') {
+            router.push('/admin-dashboard');
+          } else {
+            router.push('/member-event-sign-up');
+          }
+        } else {
+          setError('Registration successful, but sign-in failed. Please sign in manually.');
+        }
       } else {
         setError(data.error || 'Registration failed');
       }
