@@ -54,6 +54,15 @@ export const EventList = ({
     return dateA - dateB;
   });
 
+  // Function to reconstruct the QR URL
+  const getQRUrl = (event: any) => {
+    const eventIdentifier = `EVENT-${event.date.replace(/\//g, '')}-${event.title.trim().replace(/\s+/g, '-')}`;
+    // Get the base URL from environment or use current location
+    const baseUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL
+                   || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    return `${baseUrl}/event-check-in/${eventIdentifier}`;
+  };
+
   return (
     <>
       {sortedEvents.map((event) => (
@@ -92,6 +101,7 @@ export const EventList = ({
                       <body>
                         <div>
                           <h3>QR Code for Event: ${event.title}</h3>
+                          <p><strong>URL:</strong> ${getQRUrl(event)}</p>
                           <img src="${qrImageUrl}" alt="QR Code" style="width:400px;height:400px;" />
                         </div>
                       </body>
@@ -192,6 +202,13 @@ export const EventList = ({
                 {event.description}
               </p>
             </DropdownButton>
+            <div className="mt-2 mb-2">
+              <small className="text-muted">
+                <strong>QR URL:</strong>
+                {' '}
+                {getQRUrl(event)}
+              </small>
+            </div>
             <Image src={event.qr} alt="Event QR Code" fluid />
           </Col>
         </Row>
