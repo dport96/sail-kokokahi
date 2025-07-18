@@ -46,7 +46,7 @@ const RegisterForm: React.FC = () => {
         await new Promise<void>((resolve) => {
           setTimeout(() => resolve(), 500);
         });
-        
+
         // Automatically sign in the user after successful registration
         const signInResult = await signIn('credentials', {
           email: formData.email,
@@ -59,7 +59,7 @@ const RegisterForm: React.FC = () => {
           const sessionResponse = await fetch('/api/auth/session');
           const sessionData = await sessionResponse.json();
           const userRole = sessionData?.user?.randomKey;
-          
+
           if (userRole === 'ADMIN') {
             router.push('/admin-dashboard');
           } else {

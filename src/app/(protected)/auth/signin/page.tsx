@@ -34,14 +34,14 @@ const SignIn = () => {
     e.preventDefault();
     setError(''); // Clear any previous errors
     setIsLoading(true);
-    
+
     const target = e.target as typeof e.target & {
       email: { value: string };
       password: { value: string };
     };
     const email = target.email.value;
     const password = target.password.value;
-    
+
     const result = await signIn('credentials', {
       email,
       password,
@@ -58,7 +58,7 @@ const SignIn = () => {
       const response = await fetch('/api/auth/session');
       const sessionData = await response.json();
       const userRole = sessionData?.user?.randomKey;
-      
+
       if (userRole === 'ADMIN') {
         router.push('/admin-dashboard');
       } else {
