@@ -110,7 +110,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               className="btn btn-link text-decoration-none text-dark d-flex align-items-center flex-grow-1"
               style={{ cursor: 'pointer' }}
             >
-              <h5 className="mb-0">New Users Progress</h5>
+              <h5 className="mb-0">User Progress</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '200px' }}>
               <Form.Select
