@@ -13,7 +13,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 const AddEventForm: React.FC = () => {
   const searchParams = useSearchParams();
   const isDuplicateMode = searchParams?.get('duplicate') === 'true';
-  
+
   const {
     register,
     handleSubmit,
@@ -28,7 +28,7 @@ const AddEventForm: React.FC = () => {
   // Check for duplication parameters and populate form
   useEffect(() => {
     if (!searchParams) return;
-    
+
     const isDuplicate = searchParams.get('duplicate');
     if (isDuplicate === 'true') {
       const title = searchParams.get('title');
@@ -44,18 +44,18 @@ const AddEventForm: React.FC = () => {
       if (location) setValue('location', location);
       if (hours) setValue('hours', parseFloat(hours));
       if (signupReq) setValue('signupReq', signupReq === 'true');
-      
+
       // Parse and set the time if provided
       if (time) {
         // Convert time string (e.g., "2:00PM") to Date object for the time picker
         const timeDate = new Date();
         const [timePart, period] = time.split(/([AP]M)/);
         const [hours12, minutes] = timePart.split(':').map(Number);
-        
+
         let hours24 = hours12;
         if (period === 'PM' && hours12 !== 12) hours24 += 12;
         if (period === 'AM' && hours12 === 12) hours24 = 0;
-        
+
         timeDate.setHours(hours24, minutes || 0, 0, 0);
         setValue('time', timeDate);
       }

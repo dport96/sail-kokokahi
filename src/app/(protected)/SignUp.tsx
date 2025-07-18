@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Col, DropdownButton, Row } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 import swal from 'sweetalert';
 
 interface Event {

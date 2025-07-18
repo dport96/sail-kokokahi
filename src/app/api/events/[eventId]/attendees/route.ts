@@ -18,7 +18,7 @@ export async function GET(
     // Get all attendees for this event
     const attendees = await prisma.userEvent.findMany({
       where: {
-        eventId: eventId,
+        eventId,
         attended: true, // Only get users who are marked as attended
       },
       include: {
@@ -67,8 +67,8 @@ export async function POST(
     const existingAttendee = await prisma.userEvent.findUnique({
       where: {
         userId_eventId: {
-          userId: userId,
-          eventId: eventId,
+          userId,
+          eventId,
         },
       },
     });

@@ -1,3 +1,6 @@
+/* eslint-disable no-nested-ternary, react/jsx-one-expression-per-line */
+/* eslint-disable react/jsx-closing-tag-location, react/jsx-indent */
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -147,14 +150,16 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
 
   // Filter out users who are already attendees
   const availableUsers = allUsers.filter(
-    user => !attendees.some(attendee => attendee.userId === user.id)
+    user => !attendees.some(attendee => attendee.userId === user.id),
   );
 
   return (
     <Modal show={isOpen} onHide={onClose} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
-          Manage Attendance - {event.title}
+          Manage Attendance -
+          {' '}
+          {event.title}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -188,7 +193,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                     {' '}
                     {user.lastName}
                     {' '}
-                    ({user.email})
+                    (
+                    {user.email}
+                    )
                   </option>
                 ))}
               </Form.Select>
@@ -210,7 +217,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
           <h6>
             Event Attendees
             {' '}
-            ({attendees.length})
+            (
+            {attendees.length}
+            )
           </h6>
           {loading ? (
             <Alert variant="info">Loading attendees...</Alert>
@@ -218,45 +227,42 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
             <Alert variant="warning">No attendees found for this event.</Alert>
           ) : (
             <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendees.map(attendee => (
-                  <tr key={attendee.id}>
-                    <td>
-                      {attendee.User.firstName}
-                      {' '}
-                      {attendee.User.lastName}
-                    </td>
-                    <td>{attendee.User.email}</td>
-                    <td>
-                      <span className={`badge ${attendee.attended ? 'bg-success' : 'bg-warning'}`}>
-                        {attendee.attended ? 'Attended' : 'Registered'}
-                      </span>
-                    </td>
-                    <td>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => 
-                          removeUserFromEvent(
-                            attendee.id, 
-                            `${attendee.User.firstName} ${attendee.User.lastName}`
-                          )
-                        }
-                      >
-                        Remove
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendees.map(attendee => (
+                      <tr key={attendee.id}>
+                        <td>
+                          {attendee.User.firstName}
+                          {' '}
+                          {attendee.User.lastName}
+                        </td>
+                        <td>{attendee.User.email}</td>
+                        <td>
+                          <span className={`badge ${attendee.attended ? 'bg-success' : 'bg-warning'}`}>
+                            {attendee.attended ? 'Attended' : 'Registered'}
+                          </span>
+                        </td>
+                        <td>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => removeUserFromEvent(
+                              attendee.id,
+                              `${attendee.User.firstName} ${attendee.User.lastName}`,
+                            )}
+                          >
+                            Remove
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}              </tbody>
             </Table>
           )}
         </div>

@@ -23,13 +23,13 @@ const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           return null;
         }
-        
+
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
-        
+
         if (!user) {
           return null;
         }
@@ -81,12 +81,12 @@ const authOptions: NextAuthOptions = {
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
       }
-      
+
       // If URL is already absolute and starts with baseUrl, use it
       if (url.startsWith(baseUrl)) {
         return url;
       }
-      
+
       // Otherwise default to the landing page
       return baseUrl;
     },

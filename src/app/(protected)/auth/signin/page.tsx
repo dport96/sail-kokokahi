@@ -120,7 +120,8 @@ const SignIn = () => {
                   </Form>
                 </Card.Body>
                 <Card.Footer>
-                  Don&apos;t have an account?{' '}
+                  Don&apos;t have an account?
+                  {' '}
                   <Link href="/register">Sign up</Link>
                 </Card.Footer>
               </Card>

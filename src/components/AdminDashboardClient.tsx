@@ -92,7 +92,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, approvedHours: user.approvedHours }),
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to update approved hours');
         }
@@ -105,7 +105,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId }),
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to approve pending hours');
         }
@@ -115,7 +115,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
       setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
         ? { ...u, approvedHours: u.approvedHours + u.pendingHours, pendingHours: 0, status: 'approved' }
         : u)));
-      
+
       // Update original hours to reflect the new approved state
       setOriginalApprovedHours((prevOriginal) => {
         const updatedOriginal = new Map(prevOriginal);
@@ -167,7 +167,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
           ? { ...u, pendingHours: 0, status: 'denied' }
           : u)));
       }
-      
+
       // Update original hours to reflect the current approved hours (reverted if changed)
       setOriginalApprovedHours((prevOriginal) => {
         const updatedOriginal = new Map(prevOriginal);
@@ -229,7 +229,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
 
   const handleBulkDeny = async () => {
     const usersWithPendingHours = getSelectedUsersWithPendingHours();
-    
+
     if (usersWithPendingHours.length === 0) {
       toast.warning('Please select users with pending hours to deny');
       return;
@@ -336,14 +336,14 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
       ? { ...user, approvedHours: newHours }
       : user)));
-    
+
     // Automatically select the user when approved hours are changed
     setSelectedUsers((prevSelected) => {
       const newSelected = new Set(prevSelected);
       newSelected.add(userId);
       return newSelected;
     });
-    
+
     // Don't update originalApprovedHours here - this keeps the change as "pending"
     // The change will only be committed to the database when approved
   };

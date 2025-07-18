@@ -1,3 +1,5 @@
+/* eslint-disable react/require-default-props */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -46,7 +48,7 @@ export const EventList = ({
       const [month, day, year] = dateString.split('/').map(Number);
       return new Date(year, month - 1, day);
     };
-    
+
     const dateA = parseEventDate(a.date).getTime();
     const dateB = parseEventDate(b.date).getTime();
     return dateA - dateB;

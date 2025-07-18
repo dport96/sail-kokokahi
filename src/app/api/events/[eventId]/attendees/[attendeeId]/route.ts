@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -82,7 +83,7 @@ export async function DELETE(
       } else {
         // If not enough pending hours, subtract from pending first, then from approved
         const remainingToSubtract = eventHours - currentPendingHours;
-        
+
         // Get current approved hours
         const currentUser = await tx.user.findUnique({
           where: { id: attendee.userId },
