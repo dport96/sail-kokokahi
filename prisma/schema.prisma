@@ -39,7 +39,7 @@ model Event {
   hours       Float
   time        String
   status      String @default("pending")
-  qr          String //field to store qr data
+  qr          String? //field to store qr data (optional for runtime generation)
   users       UserEvent[]  // Connects events to the users signed up for them
   signupReq   Boolean @default(false)
 }

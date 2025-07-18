@@ -3,11 +3,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button, DropdownButton, Image, Row, Col } from 'react-bootstrap';
+import { Button, DropdownButton, Row, Col } from 'react-bootstrap';
 import swal from 'sweetalert';
 import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
 import React from 'react';
 import Modal from '@mui/material/Modal';
+import { RuntimeQRCode } from './RuntimeQRCode';
 
 export const EventList = ({
   events,
@@ -54,12 +55,11 @@ export const EventList = ({
     return dateA - dateB;
   });
 
-  // Function to reconstruct the QR URL
+  // Function to get QR URL (moved from hook since we need it in callbacks)
   const getQRUrl = (event: any) => {
     const eventIdentifier = `EVENT-${event.date.replace(/\//g, '')}-${event.title.trim().replace(/\s+/g, '-')}`;
-    // Get the base URL from environment or use current location
-    const baseUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL
-                   || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     return `${baseUrl}/event-check-in/${eventIdentifier}`;
   };
 
@@ -72,43 +72,53 @@ export const EventList = ({
             <Button
               variant="primary"
               style={{ float: 'right' }}
-              onClick={() => {
-                const printWindow = window.open('', '', 'height=600,width=800');
-                if (printWindow) {
-                  const qrImageUrl = event.qr;
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Print QR Code</title>
-                        <style>
-                          body {
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100%;
-                            margin: 0;
-                          }
-                          h3 {
-                            text-align: center;
-                          }
-                          img {
-                            display: block;
-                            margin: 20px auto;
-                          }
-                        </style>
-                      </head>
-                      <body>
-                        <div>
-                          <h3>QR Code for Event: ${event.title}</h3>
-                          <p><strong>URL:</strong> ${getQRUrl(event)}</p>
-                          <img src="${qrImageUrl}" alt="QR Code" style="width:400px;height:400px;" />
-                        </div>
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  printWindow.onload = () => printWindow.print();
+              onClick={async () => {
+                const qrUrl = getQRUrl(event);
+                try {
+                  // Generate QR code via API
+                  const response = await fetch(`/api/generate-qr?url=${encodeURIComponent(qrUrl)}`);
+                  const data = await response.json();
+
+                  if (data.qrCode) {
+                    const printWindow = window.open('', '', 'height=600,width=800');
+                    if (printWindow) {
+                      printWindow.document.write(`
+                        <html>
+                          <head>
+                            <title>Print QR Code</title>
+                            <style>
+                              body {
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100%;
+                                margin: 0;
+                              }
+                              h3 {
+                                text-align: center;
+                              }
+                              img {
+                                display: block;
+                                margin: 20px auto;
+                              }
+                            </style>
+                          </head>
+                          <body>
+                            <div>
+                              <h3>QR Code for Event: ${event.title}</h3>
+                              <p><strong>URL:</strong> ${qrUrl}</p>
+                              <img src="${data.qrCode}" alt="QR Code" style="width:400px;height:400px;" />
+                            </div>
+                          </body>
+                        </html>
+                      `);
+                      printWindow.document.close();
+                      printWindow.onload = () => printWindow.print();
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error generating QR for print:', error);
                 }
               }}
             >
@@ -209,7 +219,7 @@ export const EventList = ({
                 {getQRUrl(event)}
               </small>
             </div>
-            <Image src={event.qr} alt="Event QR Code" fluid />
+            <RuntimeQRCode event={event} fluid />
           </Col>
         </Row>
       ))}
