@@ -1,6 +1,6 @@
 // components/RegisterForm.tsx
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+import { signIn } from 'next-auth/react';
 
 interface RegisterFormData {
   firstName: string;
@@ -21,8 +21,6 @@ const RegisterForm: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -39,14 +37,27 @@ const RegisterForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        router.push('/');
+        // Wait a moment to ensure registration is fully complete
+        await new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 500);
+        });
+        
+        // Automatically sign in the user after successful registration
+        await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          callbackUrl: '/member-event-sign-up',
+          redirect: true,
+        });
       } else {
-        const data = await response.json();
-        setError(data.error || 'Something went wrong');
+        setError(data.error || 'Registration failed');
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      console.error('Registration error:', err);
+      setError('An unexpected error occurred during registration.');
     } finally {
       setLoading(false);
     }
@@ -151,7 +162,7 @@ const RegisterForm: React.FC = () => {
                 {loading ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                    Creating Account...
+                    Creating Account & Signing In...
                   </>
                 ) : (
                   'Create Account'

@@ -337,6 +337,13 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
       ? { ...user, approvedHours: newHours }
       : user)));
     
+    // Automatically select the user when approved hours are changed
+    setSelectedUsers((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      newSelected.add(userId);
+      return newSelected;
+    });
+    
     // Don't update originalApprovedHours here - this keeps the change as "pending"
     // The change will only be committed to the database when approved
   };

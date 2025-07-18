@@ -156,7 +156,6 @@ const AddEventForm: React.FC = () => {
                             dateFormat="MM/dd/yyyy"
                             className={`form-control ${errors.date ? 'is-invalid' : ''}`}
                             placeholderText="Select a date"
-                            minDate={new Date()}
                             showPopperArrow={false}
                           />
                         )}
