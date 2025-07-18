@@ -15,6 +15,8 @@ const SignIn = () => {
   const role = userWithRole?.randomKey;
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // Redirect immediately if user is already signed in
   React.useEffect(() => {
@@ -30,12 +32,16 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(''); // Clear any previous errors
+    setIsLoading(true);
+    
     const target = e.target as typeof e.target & {
       email: { value: string };
       password: { value: string };
     };
     const email = target.email.value;
     const password = target.password.value;
+    
     const result = await signIn('credentials', {
       email,
       password,
@@ -44,6 +50,8 @@ const SignIn = () => {
 
     if (result?.error) {
       console.error('Sign in failed: ', result.error);
+      setError('Invalid email or password. Please try again.');
+      setIsLoading(false);
     } else if (result?.ok) {
       setIsRedirecting(true);
       // Get the user's role and redirect accordingly
@@ -85,6 +93,11 @@ const SignIn = () => {
               <h1 className="text-center fw-bold">Sign In</h1>
               <Card>
                 <Card.Body>
+                  {error && (
+                    <div className="alert alert-danger" role="alert">
+                      {error}
+                    </div>
+                  )}
                   <Form method="post" onSubmit={handleSubmit}>
                     <Form.Group controlId="formBasicEmail">
                       <Form.Label>Email</Form.Label>
@@ -94,8 +107,15 @@ const SignIn = () => {
                       <Form.Label>Password</Form.Label>
                       <input name="password" type="password" className="form-control" />
                     </Form.Group>
-                    <Button type="submit" className="mt-3">
-                      Signin
+                    <Button type="submit" className="mt-3" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                          Signing In...
+                        </>
+                      ) : (
+                        'Signin'
+                      )}
                     </Button>
                   </Form>
                 </Card.Body>
