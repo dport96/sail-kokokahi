@@ -401,3 +401,183 @@ NODE_ENV="production"
 ## �📚 Getting Started
 
 For development setup and detailed documentation, please see [NextJS Application Template](http://ics-software-engineering.github.io/nextjs-application-template/).
+
+## 🖥️ Ubuntu Auto-Start Configuration
+
+If you're running this application on Ubuntu and want it to start automatically when the system boots, here are three methods:
+
+### Method 1: Using systemd (Recommended)
+
+#### Step 1: Create a systemd service file
+
+```bash
+sudo nano /etc/systemd/system/sail-kokokahi.service
+```
+
+Add the following content (update paths and username for your system):
+
+```ini
+[Unit]
+Description=SAIL KOKOKAHI Next.js Application
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=your-username
+WorkingDirectory=/home/your-username/sail-kokokahi
+Environment=NODE_ENV=production
+Environment=PORT=3000
+EnvironmentFile=/home/your-username/sail-kokokahi/.env
+ExecStartPre=/usr/bin/npm run build
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sail-kokokahi
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### Step 2: Enable and start the service
+
+```bash
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
+
+# Enable the service to start on boot
+sudo systemctl enable sail-kokokahi.service
+
+# Start the service now
+sudo systemctl start sail-kokokahi.service
+
+# Check the status
+sudo systemctl status sail-kokokahi.service
+```
+
+#### Step 3: Service management commands
+
+```bash
+# View logs
+sudo journalctl -u sail-kokokahi.service -f
+
+# Stop the service
+sudo systemctl stop sail-kokokahi.service
+
+# Restart the service
+sudo systemctl restart sail-kokokahi.service
+
+# Disable auto-start
+sudo systemctl disable sail-kokokahi.service
+```
+
+### Method 2: Using PM2 (Alternative)
+
+#### Install PM2 globally
+
+```bash
+sudo npm install -g pm2
+```
+
+#### Configure PM2 with ecosystem file
+
+The project includes an `ecosystem.config.js` file. Update the `cwd` path for your system:
+
+```javascript
+module.exports = {
+  apps: [{
+    name: 'sail-kokokahi',
+    script: 'npm',
+    args: 'start',
+    cwd: '/home/your-username/sail-kokokahi', // Update this path
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    env_file: '.env',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true
+  }]
+};
+```
+
+#### PM2 commands
+
+```bash
+# Start the application
+pm2 start ecosystem.config.js
+
+# Save PM2 process list
+pm2 save
+
+# Generate startup script
+pm2 startup
+
+# Follow the instructions provided by the startup command
+```
+
+### Method 3: Using crontab (Simple)
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add this line to start the app on reboot
+@reboot cd /home/your-username/sail-kokokahi && npm start
+```
+
+### Important Ubuntu Considerations
+
+#### 1. Database Service Dependency
+
+Ensure PostgreSQL starts before your app:
+
+```bash
+# Check if PostgreSQL is enabled
+sudo systemctl is-enabled postgresql
+
+# Enable PostgreSQL if not already enabled
+sudo systemctl enable postgresql
+```
+
+#### 2. Environment Variables
+
+Update your `.env` file for Ubuntu deployment:
+
+- Verify `DATABASE_URL` points to your PostgreSQL instance
+- Update `NEXTAUTH_URL` and `NEXT_PUBLIC_APP_URL` with your server's IP or domain
+
+#### 3. Firewall Configuration
+
+Open the necessary port:
+
+```bash
+sudo ufw allow 3000
+```
+
+#### 4. Build for Production
+
+Always build your application first:
+
+```bash
+cd /path/to/your/project
+npm run build
+```
+
+### Recommended Approach
+
+**Use systemd (Method 1)** for production Ubuntu deployments because it:
+
+- Integrates with Ubuntu's init system
+- Provides automatic restart on failure
+- Manages service dependencies properly
+- Offers excellent logging through journalctl
+- Is the standard way to manage services on Ubuntu
