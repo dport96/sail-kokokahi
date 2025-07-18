@@ -34,18 +34,16 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   const [originalApprovedHours, setOriginalApprovedHours] = useState<Map<number, number>>(
     new Map(users.map(user => [user.id, user.approvedHours])),
   );
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Only update original hours on the very first load, not on subsequent refreshes
-  // unless the user was approved/denied (which commits the changes)
+  // Only update original hours when component first loads or when changes are actually approved/denied
   React.useEffect(() => {
-    if (isInitialLoad) {
-      setOriginalApprovedHours(new Map(users.map(user => [user.id, user.approvedHours])));
-      setIsInitialLoad(false);
-    }
-    // Always update the current user state
     setUpdatedUsers(users);
-  }, [users, isInitialLoad]);
+    // Only update original hours if this is the first time we're seeing this data
+    // or if the user count has changed (new users added/removed)
+    if (originalApprovedHours.size === 0 || originalApprovedHours.size !== users.length) {
+      setOriginalApprovedHours(new Map(users.map(user => [user.id, user.approvedHours])));
+    }
+  }, [users, originalApprovedHours.size]);
 
   const hasPendingChanges = (user: User) => {
     const originalHours = originalApprovedHours.get(user.id) || 0;
@@ -80,41 +78,59 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
 
   const handleApprove = async (userId: number, showToast: boolean = true) => {
     try {
-      const response = await fetch('/api/admin/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
+      const user = updatedUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      const originalHours = originalApprovedHours.get(userId) || 0;
+      const hasManuallyChangedHours = user.approvedHours !== originalHours;
+
+      let response;
+      if (hasManuallyChangedHours) {
+        // If approved hours were manually changed, use the update-hours endpoint first
+        response = await fetch('/api/admin/update-hours', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, approvedHours: user.approvedHours }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update approved hours');
+        }
+      }
+
+      // Then approve any pending hours
+      if (user.pendingHours > 0) {
+        response = await fetch('/api/admin/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to approve pending hours');
+        }
+      }
+
+      // Update the UI state
+      setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
+        ? { ...u, approvedHours: u.approvedHours + u.pendingHours, pendingHours: 0, status: 'approved' }
+        : u)));
+      
+      // Update original hours to reflect the new approved state
+      setOriginalApprovedHours((prevOriginal) => {
+        const updatedOriginal = new Map(prevOriginal);
+        updatedOriginal.set(userId, user.approvedHours + user.pendingHours);
+        return updatedOriginal;
       });
 
-      if (response.ok) {
-        setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
-          ? { ...user, approvedHours: user.approvedHours + user.pendingHours, pendingHours: 0, status: 'approved' }
-          : user)));
-        
-        // Update original hours to reflect the new approved state
-        setOriginalApprovedHours((prevOriginal) => {
-          const updatedOriginal = new Map(prevOriginal);
-          const user = updatedUsers.find(u => u.id === userId);
-          if (user) {
-            updatedOriginal.set(userId, user.approvedHours + user.pendingHours);
-          }
-          return updatedOriginal;
-        });
-
-        if (showToast) {
-          toast.success('Pending hours approved successfully!');
-          // Refresh the page to get updated data from server
-          setTimeout(() => router.refresh(), 1000);
-        }
-      } else {
-        if (showToast) {
-          toast.error('Failed to approve hours.');
-        }
-        throw new Error('Failed to approve hours');
+      if (showToast) {
+        toast.success('Changes approved successfully!');
+        // Refresh the page to get updated data from server
+        setTimeout(() => router.refresh(), 1000);
       }
     } catch (error) {
       if (showToast) {
-        toast.error('Error approving hours. Please try again.');
+        toast.error('Error approving changes. Please try again.');
       }
       throw error;
     }
@@ -122,41 +138,51 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
 
   const handleDeny = async (userId: number, showToast: boolean = true) => {
     try {
-      const response = await fetch('/api/admin/deny', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      });
+      const user = updatedUsers.find(u => u.id === userId);
+      if (!user) return;
 
-      if (response.ok) {
-        setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
-          ? { ...user, pendingHours: 0, status: 'denied' }
-          : user)));
-        
-        // Update original hours to reflect the current approved hours (no change since we're just denying pending)
-        setOriginalApprovedHours((prevOriginal) => {
-          const updatedOriginal = new Map(prevOriginal);
-          const user = updatedUsers.find(u => u.id === userId);
-          if (user) {
-            updatedOriginal.set(userId, user.approvedHours);
-          }
-          return updatedOriginal;
+      const originalHours = originalApprovedHours.get(userId) || 0;
+      const hasManuallyChangedHours = user.approvedHours !== originalHours;
+
+      // If approved hours were manually changed, revert them to original
+      if (hasManuallyChangedHours) {
+        setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
+          ? { ...u, approvedHours: originalHours }
+          : u)));
+      }
+
+      // Deny any pending hours
+      if (user.pendingHours > 0) {
+        const response = await fetch('/api/admin/deny', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
         });
 
-        if (showToast) {
-          toast.success('Pending hours denied successfully!');
-          // Refresh the page to get updated data from server
-          setTimeout(() => router.refresh(), 1000);
+        if (!response.ok) {
+          throw new Error('Failed to deny pending hours');
         }
-      } else {
-        if (showToast) {
-          toast.error('Failed to deny hours.');
-        }
-        throw new Error('Failed to deny hours');
+
+        setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
+          ? { ...u, pendingHours: 0, status: 'denied' }
+          : u)));
+      }
+      
+      // Update original hours to reflect the current approved hours (reverted if changed)
+      setOriginalApprovedHours((prevOriginal) => {
+        const updatedOriginal = new Map(prevOriginal);
+        updatedOriginal.set(userId, originalHours);
+        return updatedOriginal;
+      });
+
+      if (showToast) {
+        toast.success('Changes denied successfully!');
+        // Refresh the page to get updated data from server
+        setTimeout(() => router.refresh(), 1000);
       }
     } catch (error) {
       if (showToast) {
-        toast.error('Error denying hours. Please try again.');
+        toast.error('Error denying changes. Please try again.');
       }
       throw error;
     }
@@ -305,19 +331,14 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   };
 
   const updateApprovedHours = async (userId: number, newHours: number) => {
-    const response = await fetch('/api/admin/update-hours', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, approvedHours: newHours }),
-    });
-    if (response.ok) {
-      setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
-        ? { ...user, approvedHours: newHours }
-        : user)));
-      // Don't refresh immediately - let the change remain pending until admin approves/denies
-    } else {
-      console.error('Failed to update approved hours');
-    }
+    // Only update the UI state, don't update the database directly
+    // This makes the change appear as "pending" until it's approved
+    setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
+      ? { ...user, approvedHours: newHours }
+      : user)));
+    
+    // Don't update originalApprovedHours here - this keeps the change as "pending"
+    // The change will only be committed to the database when approved
   };
 
   const getStatusBadge = (user: User) => {
