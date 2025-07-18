@@ -92,7 +92,7 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
             <EventList
               events={upcomingEvents}
               onManageAttendance={handleManageAttendance}
-              showAttendanceButton={false}
+              showAttendanceButton
             />
           ) : (
             <Alert variant="warning" className="text-center">
