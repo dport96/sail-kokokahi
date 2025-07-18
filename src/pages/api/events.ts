@@ -12,11 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Generate a unique barcode
       const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
 
-      // Get the current app URL dynamically
-      const { host } = req.headers;
-      const protocol = req.headers['x-forwarded-proto']
-        || (host?.includes('localhost') ? 'http' : 'https');
-      const baseUrl = `${protocol}://${host}`;
+      // Use NEXTAUTH_URL for the QR code address
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
       const qrData = `${baseUrl}/event-check-in/${eventIdentifier}`;
       const qrCodeUrl = await QRCode.toDataURL(qrData);

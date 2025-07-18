@@ -69,7 +69,12 @@ const MemberDashboard = async () => {
   return (
     <main>
       <Container>
-        <h1 className="fw-bolder pt-3">Member Dashboard</h1>
+        <h1 className="fw-bolder pt-3">
+          Welcome,
+          {' '}
+          {user ? `${user.firstName} ${user.lastName}` : 'Member'}
+        </h1>
+        <h2 className="text-muted">Member Dashboard</h2>
         <hr />
         <Container className="center my-5">
           <Row className="mx-auto px-2">
