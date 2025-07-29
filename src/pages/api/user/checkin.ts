@@ -70,6 +70,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           eventId: Number(eventId),
         },
       });
+    } else if (userEvent.attended) {
+      // If user is already checked in (attended = true), prevent duplicate check-in
+      return res.status(400).json({
+        success: false,
+        message: 'You have already checked in for this event',
+      });
     }
 
     // Set the 'attended' field to true for the check-in

@@ -7,6 +7,8 @@ export async function GET(
 ) {
   try {
     const eventId = parseInt(params.eventId, 10);
+    const { searchParams } = new URL(req.url);
+    const includeAll = searchParams.get('includeAll') === 'true';
 
     if (Number.isNaN(eventId)) {
       return NextResponse.json(
@@ -15,12 +17,13 @@ export async function GET(
       );
     }
 
-    // Get all attendees for this event
+    // Get attendees for this event based on query parameter
+    const whereClause = includeAll
+      ? { eventId } // Get all users signed up for the event
+      : { eventId, attended: true }; // Only get users who are marked as attended
+
     const attendees = await prisma.userEvent.findMany({
-      where: {
-        eventId,
-        attended: true, // Only get users who are marked as attended
-      },
+      where: whereClause,
       include: {
         User: {
           select: {
@@ -54,7 +57,7 @@ export async function POST(
 ) {
   try {
     const eventId = parseInt(params.eventId, 10);
-    const { userId, attended = true } = await req.json();
+    const { userId, attended = false } = await req.json(); // Default to false (registered, not attended)
 
     if (Number.isNaN(eventId) || !userId) {
       return NextResponse.json(
@@ -127,13 +130,15 @@ export async function POST(
         },
       });
 
-      // Update user's pending hours
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          pendingHours: currentUser.pendingHours + event.hours,
-        },
-      });
+      // Only update user's pending hours if they are marked as attended
+      if (attended) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            pendingHours: currentUser.pendingHours + event.hours,
+          },
+        });
+      }
 
       return newAttendee;
     });

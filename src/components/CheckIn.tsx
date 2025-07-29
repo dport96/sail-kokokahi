@@ -13,7 +13,12 @@ interface Event {
   description: string;
 }
 
-export default function CheckInComponent({ event }: { event: Event }) {
+interface CheckInProps {
+  event: Event;
+  isAlreadyCheckedIn: boolean;
+}
+
+export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCheckIn = async (eventId: number) => {
@@ -66,12 +71,27 @@ export default function CheckInComponent({ event }: { event: Event }) {
                     </p>
                   </div>
                 </DropdownButton>
-                <Button
-                  onClick={() => handleCheckIn(event.id)}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Checking in...' : 'Check In'}
-                </Button>
+                {isAlreadyCheckedIn ? (
+                  <div>
+                    <Button
+                      variant="success"
+                      disabled
+                      className="mb-2"
+                    >
+                      ✓ Already Checked In
+                    </Button>
+                    <p className="text-success small">
+                      You have already checked in for this event.
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => handleCheckIn(event.id)}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Checking in...' : 'Check In'}
+                  </Button>
+                )}
               </Col>
             </Row>
           </div>

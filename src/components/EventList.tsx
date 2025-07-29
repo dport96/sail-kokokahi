@@ -13,11 +13,15 @@ import { RuntimeQRCode } from './RuntimeQRCode';
 export const EventList = ({
   events,
   onManageAttendance,
+  onManageSignup,
   showAttendanceButton = false,
+  showSignupButton = false,
 }: {
   events: any[];
   onManageAttendance?: (event: any) => void;
+  onManageSignup?: (event: any) => void;
   showAttendanceButton?: boolean;
+  showSignupButton?: boolean;
 }) => {
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
@@ -157,6 +161,17 @@ export const EventList = ({
                   title="Manage event attendance"
                 >
                   👥 Attendance
+                </Button>
+              )}
+              {showSignupButton && event.signupReq && onManageSignup && (
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageSignup(event)}
+                  title="Manage event signups"
+                >
+                  📝 Signup
                 </Button>
               )}
               <Button

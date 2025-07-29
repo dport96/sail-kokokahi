@@ -29,13 +29,19 @@ const EventsAnalytics = ({ events }: { events: any[] }) => {
           { key: 'eventName', label: 'Event Name' },
           { key: 'signupCount', label: 'Member Signups' },
           { key: 'attendanceCount', label: 'Member Attendance' },
+          { key: 'status', label: 'Status' },
         ]}
         sortKey={sortKey}
         sortOrder={sortOrder}
         onSort={handleSort}
         renderRow={(event) => (
           <tr key={event.id}>
-            <td>{event.eventName}</td>
+            <td>
+              <div>
+                <div className="fw-bold">{event.eventName}</div>
+                <div className="text-muted small">{event.eventDate}</div>
+              </div>
+            </td>
             <td>
               <EventProgressBar
                 value={event.signupCount}
@@ -49,6 +55,11 @@ const EventsAnalytics = ({ events }: { events: any[] }) => {
                 total={event.totalUsers}
                 label={`Members who Attended (${event.attendanceCount} of ${event.totalUsers} total members)`}
               />
+            </td>
+            <td>
+              {event.isUserSignedUp && (
+                <span className="badge bg-success">Signed Up</span>
+              )}
             </td>
           </tr>
         )}

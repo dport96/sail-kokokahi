@@ -21,9 +21,7 @@ export default async function EventPage({ params }: { params: { eventId: string 
   const title = titleParts.join(' ');
 
   const formattedDate = `${date.slice(0, 2)}/${date.slice(2, 4)}/${date.slice(4)}`;
-  console.log(formattedDate);
   const normalizedTitle = title.replace(/-/g, ' ');
-  console.log(normalizedTitle);
   const event = await prisma.event.findFirst({
     where: {
       date: formattedDate,
@@ -39,5 +37,22 @@ export default async function EventPage({ params }: { params: { eventId: string 
     );
   }
 
-  return <CheckInComponent event={event} />;
+  // Check if the user is already checked in for this event
+  let isAlreadyCheckedIn = false;
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (user) {
+      const userEvent = await prisma.userEvent.findUnique({
+        where: {
+          userId_eventId: { userId: user.id, eventId: event.id },
+        },
+      });
+      isAlreadyCheckedIn = userEvent?.attended || false;
+    }
+  }
+
+  return <CheckInComponent event={event} isAlreadyCheckedIn={isAlreadyCheckedIn} />;
 }

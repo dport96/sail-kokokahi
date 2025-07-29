@@ -41,8 +41,7 @@ const ChangePassword = () => {
   });
 
   const onSubmit = async (data: ChangePasswordForm) => {
-    // console.log(JSON.stringify(data, null, 2));
-    await changePassword({ email, ...data });
+    await changePassword({ email, password: data.password });
     await swal('Password Changed', 'Your password has been changed', 'success', { timer: 2000 });
     reset();
   };

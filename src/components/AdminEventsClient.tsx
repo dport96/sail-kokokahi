@@ -17,6 +17,8 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showAttendanceManager, setShowAttendanceManager] = useState(false);
+  const [showSignupManager, setShowSignupManager] = useState(false);
+  const [managerMode, setManagerMode] = useState<'attendance' | 'signup'>('attendance');
 
   const togglePastEvents = () => {
     setShowPastEvents(!showPastEvents);
@@ -24,11 +26,21 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
 
   const handleManageAttendance = (event: any) => {
     setSelectedEvent(event);
+    setManagerMode('attendance');
     setShowAttendanceManager(true);
+    setShowSignupManager(false);
   };
 
-  const handleCloseAttendanceManager = () => {
+  const handleManageSignup = (event: any) => {
+    setSelectedEvent(event);
+    setManagerMode('signup');
+    setShowSignupManager(true);
     setShowAttendanceManager(false);
+  };
+
+  const handleCloseManager = () => {
+    setShowAttendanceManager(false);
+    setShowSignupManager(false);
     setSelectedEvent(null);
   };
 
@@ -77,7 +89,9 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
             <EventList
               events={pastEvents}
               onManageAttendance={handleManageAttendance}
+              onManageSignup={handleManageSignup}
               showAttendanceButton
+              showSignupButton
             />
           ) : (
             <Alert variant="info" className="text-center">
@@ -92,7 +106,9 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
             <EventList
               events={upcomingEvents}
               onManageAttendance={handleManageAttendance}
+              onManageSignup={handleManageSignup}
               showAttendanceButton
+              showSignupButton
             />
           ) : (
             <Alert variant="warning" className="text-center">
@@ -109,12 +125,13 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
         </div>
       )}
 
-      {/* Attendance Manager Modal */}
+      {/* Attendance/Signup Manager Modal */}
       {selectedEvent && (
         <EventAttendanceManager
           event={selectedEvent}
-          isOpen={showAttendanceManager}
-          onClose={handleCloseAttendanceManager}
+          isOpen={showAttendanceManager || showSignupManager}
+          onClose={handleCloseManager}
+          mode={managerMode}
         />
       )}
     </div>

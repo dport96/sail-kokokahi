@@ -34,12 +34,14 @@ interface EventAttendanceManagerProps {
   event: Event;
   isOpen: boolean;
   onClose: () => void;
+  mode: 'attendance' | 'signup'; // Make mode required
 }
 
 const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
   event,
   isOpen,
   onClose,
+  mode,
 }) => {
   const router = useRouter();
   const [attendees, setAttendees] = useState<EventAttendee[]>([]);
@@ -50,7 +52,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
   const fetchEventAttendees = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/events/${event.id}/attendees`);
+      // For signup mode, get all signed up users; for attendance mode, get only attended users
+      const queryParam = mode === 'signup' ? '?includeAll=true' : '';
+      const response = await fetch(`/api/events/${event.id}/attendees${queryParam}`);
       if (response.ok) {
         const data = await response.json();
         setAttendees(data);
@@ -62,7 +66,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [event.id]);
+  }, [event.id, mode]);
 
   const fetchAllUsers = useCallback(async () => {
     try {
@@ -98,12 +102,12 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: parseInt(selectedUserId, 10),
-          attended: true,
+          attended: mode === 'attendance', // Only mark as attended if in attendance mode
         }),
       });
 
       if (response.ok) {
-        swal('Success', 'User added to event successfully', 'success');
+        swal('Success', `User ${mode === 'signup' ? 'signed up for' : 'added to'} event successfully`, 'success');
         setSelectedUserId('');
         fetchEventAttendees();
         // Refresh the page to get updated data from server
@@ -115,6 +119,41 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     } catch (error) {
       console.error('Error adding user to event:', error);
       swal('Error', 'Failed to add user to event', 'error');
+    }
+  };
+
+  const toggleAttendance = async (attendeeId: number, currentAttended: boolean, userName: string) => {
+    const action = currentAttended ? 'mark as registered' : 'mark as attended';
+    const confirm = await swal({
+      title: 'Change Attendance Status',
+      text: `Are you sure you want to ${action} for ${userName}?`,
+      icon: 'question',
+      buttons: ['Cancel', 'Confirm'],
+    });
+
+    if (confirm) {
+      try {
+        const response = await fetch(`/api/events/${event.id}/attendees/${attendeeId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            attended: !currentAttended,
+          }),
+        });
+
+        if (response.ok) {
+          swal('Success', `User ${!currentAttended ? 'marked as attended' : 'marked as registered'}`, 'success');
+          fetchEventAttendees();
+          // Refresh the page to get updated data from server
+          setTimeout(() => router.refresh(), 1000);
+        } else {
+          const error = await response.json();
+          swal('Error', error.message || 'Failed to update attendance status', 'error');
+        }
+      } catch (error) {
+        console.error('Error updating attendance status:', error);
+        swal('Error', 'Failed to update attendance status', 'error');
+      }
     }
   };
 
@@ -157,7 +196,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     <Modal show={isOpen} onHide={onClose} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
-          Manage Attendance -
+          {mode === 'signup' ? 'Manage Event Signups' : 'Manage Attendance'} -
           {' '}
           {event.title}
         </Modal.Title>
@@ -179,7 +218,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
 
         {/* Add User Section */}
         <div className="mb-4">
-          <h6>Add User to Event</h6>
+          <h6>{mode === 'signup' ? 'Add User to Event Signup' : 'Add User to Event'}</h6>
           <Row>
             <Col md={8}>
               <Form.Select
@@ -215,7 +254,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
         {/* Attendees List */}
         <div>
           <h6>
-            Event Attendees
+            {mode === 'signup' ? 'Event Signups' : 'Event Attendees'}
             {' '}
             (
             {attendees.length}
@@ -232,6 +271,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                       <th>Name</th>
                       <th>Email</th>
                       <th>Status</th>
+                      {mode === 'signup' && <th>Attended</th>}
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -249,6 +289,24 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                             {attendee.attended ? 'Attended' : 'Registered'}
                           </span>
                         </td>
+                        {mode === 'signup' && (
+                          <td>
+                            <label htmlFor={`attendance-${attendee.id}`} className="visually-hidden">
+                              Mark {attendee.User.firstName} {attendee.User.lastName} as attended
+                            </label>
+                            <input
+                              id={`attendance-${attendee.id}`}
+                              type="checkbox"
+                              checked={attendee.attended}
+                              onChange={() => toggleAttendance(
+                                attendee.id,
+                                attendee.attended,
+                                `${attendee.User.firstName} ${attendee.User.lastName}`,
+                              )}
+                              className="form-check-input"
+                            />
+                          </td>
+                        )}
                         <td>
                           <Button
                             variant="outline-danger"
