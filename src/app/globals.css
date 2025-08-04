@@ -14,6 +14,20 @@ body {
   flex-direction: column;
 }
 
+main {
+  padding-top: 5rem;
+  margin-top: 0;
+}
+
+/* Landing page should not have top padding since navbar is transparent overlay */
+#landing-page {
+  padding-top: 0 !important;
+}
+
+main:has(#landing-page) {
+  padding-top: 0 !important;
+}
+
 .background {
   background-image: url('/sandbar.jpg');
   background-size: cover;

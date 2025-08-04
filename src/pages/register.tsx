@@ -8,7 +8,10 @@ const RegisterPage: React.FC = () => (
   <div className="wrapper">
     <NavBar />
     <main>
-      <div className="min-vh-100 d-flex align-items-center bg-light py-5">
+      <div
+        className="min-vh-100 d-flex align-items-center bg-light"
+        style={{ paddingTop: '2rem', paddingBottom: '2rem' }}
+      >
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-12 col-md-8 col-lg-6">

@@ -19,6 +19,9 @@ const NavBar: React.FC = () => {
   // Check if we're on the event-check-in page
   const isEventCheckIn = pathName?.startsWith('/event-check-in') || false;
 
+  // Check if we're on the sign in page
+  const isSignInPage = pathName === '/auth/signin';
+
   // Style based on page
   const navStyle = {
     backgroundColor: isLandingPage ? 'transparent' : 'rgba(0, 0, 0, 0.35)',
@@ -115,7 +118,13 @@ const NavBar: React.FC = () => {
                   Sign Out
                 </NavDropdown.Item>
               </NavDropdown>
-            ) : (
+            ) : null}
+            {!currentUser && isSignInPage && (
+              <Link href="/" className="nav-link text-white">
+                HOME
+              </Link>
+            )}
+            {!currentUser && !isSignInPage && (
               <Link href="/auth/signin" className="nav-link text-white">
                 SIGN IN
               </Link>
