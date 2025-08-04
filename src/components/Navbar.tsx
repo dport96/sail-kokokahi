@@ -2,8 +2,9 @@
 
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { Container, Nav, Navbar } from 'react-bootstrap';
+import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import Link from 'next/link';
+import { GearFill } from 'react-bootstrap-icons';
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
@@ -88,35 +89,36 @@ const NavBar: React.FC = () => {
                 >
                   EVENTS
                 </Link>
-                <Link
-                  href="/settings"
-                  className={`nav-link text-white ${pathName === '/settings' ? 'active' : ''}`}
-                >
-                  SETTINGS
-                </Link>
               </>
             )}
             {currentUser ? (
-              <>
-                <Link
-                  href="/auth/change-password"
-                  className={`nav-link text-white ${pathName === '/auth/change-password' ? 'active' : ''}`}
-                >
-                  CHANGE PASSWORD
-                </Link>
-                <Link href="/api/auth/signout" className="nav-link text-white">
-                  SIGN OUT
-                </Link>
-              </>
+              <NavDropdown
+                title={(
+                  <span className="text-white">
+                    <GearFill className="me-1" />
+                    ACCOUNT
+                  </span>
+                )}
+                id="account-dropdown"
+                className="text-white"
+              >
+                {role === 'USER' && (
+                  <NavDropdown.Item as={Link} href="/settings">
+                    Settings
+                  </NavDropdown.Item>
+                )}
+                <NavDropdown.Item as={Link} href="/auth/change-password">
+                  Change Password
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item as={Link} href="/api/auth/signout">
+                  Sign Out
+                </NavDropdown.Item>
+              </NavDropdown>
             ) : (
-              <>
-                <Link href="/auth/signin" className="nav-link text-white">
-                  SIGN IN
-                </Link>
-                <Link href="/register" className="nav-link text-white">
-                  SIGN UP
-                </Link>
-              </>
+              <Link href="/auth/signin" className="nav-link text-white">
+                SIGN IN
+              </Link>
             )}
           </Nav>
         </Navbar.Collapse>

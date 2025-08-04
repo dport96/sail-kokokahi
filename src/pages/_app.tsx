@@ -1,7 +1,9 @@
 // pages/_app.tsx
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../app/globals.css';
 import { useEffect } from 'react';
 import type { AppProps } from 'next/app';
+import Providers from '../app/providers';
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -17,7 +19,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     loadBootstrap();
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <Providers>
+      <Component {...pageProps} />
+    </Providers>
+  );
 }
 
 export default MyApp;
