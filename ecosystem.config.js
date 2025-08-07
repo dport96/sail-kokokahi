@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'sail-kokokahi',
-    script: 'npm',
+    script: 'node_modules/.bin/next',
     args: 'start',
     cwd: __dirname, // Use the directory where this config file is located
     env: {
