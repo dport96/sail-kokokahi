@@ -1,10 +1,10 @@
 module.exports = {
   apps: [{
     name: 'sail-kokokahi',
-    script: './node_modules/.bin/next',
+    script: 'npm',
     args: 'start',
-    cwd: __dirname, // Use the directory where this config file is located
-    interpreter: 'node',
+    cwd: __dirname,
+    interpreter: 'none', // This tells PM2 not to use node interpreter for npm
     env: {
       NODE_ENV: 'production',
       PORT: 3000,
@@ -18,6 +18,12 @@ module.exports = {
     error_file: './logs/err.log',
     out_file: './logs/out.log',
     log_file: './logs/combined.log',
-    time: true
+    time: true,
+    // Ubuntu-specific settings
+    uid: process.getuid?.() || 'livingroom',
+    gid: process.getgid?.() || 'livingroom',
+    // Increase startup time for slower systems
+    listen_timeout: 8000,
+    kill_timeout: 5000
   }]
 };
