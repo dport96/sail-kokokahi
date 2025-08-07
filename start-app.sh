@@ -32,22 +32,26 @@ if [ ! -d ".next" ] || [ "package.json" -nt ".next" ]; then
     fi
 fi
 
-# Test if the application can start manually first
-echo "Testing manual start..."
-timeout 10s npm start &
-TEST_PID=$!
-sleep 3
-if kill -0 $TEST_PID 2>/dev/null; then
-    echo "Manual start successful, proceeding with PM2..."
-    kill $TEST_PID 2>/dev/null
-else
-    echo "Manual start failed! Check application configuration."
-    echo "Try running: npm start"
-    exit 1
+# Check for port conflicts
+echo "Checking for port conflicts..."
+if netstat -tuln 2>/dev/null | grep -q ":3000 "; then
+    echo "⚠ Port 3000 is already in use. Attempting to resolve..."
+    
+    # Find and stop processes using port 3000
+    PID=$(lsof -ti :3000 2>/dev/null)
+    if [ ! -z "$PID" ]; then
+        echo "Found process using port 3000: $PID"
+        kill -TERM $PID 2>/dev/null
+        sleep 2
+        kill -KILL $PID 2>/dev/null || true
+    fi
 fi
 
 # Stop any existing PM2 processes for this app
 /usr/local/bin/pm2 delete sail-kokokahi 2>/dev/null || true
+
+# Wait for port to be released
+sleep 2
 
 # Start the application with PM2
 echo "Starting application with PM2..."

@@ -24,6 +24,45 @@ echo "Installing dependencies and building application..."
 npm install
 npm run build
 
+# Check if port 3000 is already in use
+echo "Checking if port 3000 is available..."
+if netstat -tuln 2>/dev/null | grep -q ":3000 "; then
+    echo "⚠ Port 3000 is already in use. Finding processes using port 3000:"
+    netstat -tuln | grep ":3000 "
+    echo ""
+    echo "Attempting to find and stop conflicting processes..."
+    
+    # Try to find processes using port 3000
+    PID=$(lsof -ti :3000 2>/dev/null)
+    if [ ! -z "$PID" ]; then
+        echo "Found process(es) using port 3000: $PID"
+        echo "Attempting to stop them..."
+        kill -TERM $PID 2>/dev/null
+        sleep 3
+        # Force kill if still running
+        kill -KILL $PID 2>/dev/null
+        echo "Processes stopped."
+    fi
+fi
+
+# Stop any existing PM2 processes for this app
+echo "Stopping any existing PM2 processes..."
+pm2 delete sail-kokokahi 2>/dev/null || true
+
+# Wait a moment for port to be released
+sleep 2
+
+# Verify port is now available
+if netstat -tuln 2>/dev/null | grep -q ":3000 "; then
+    echo "✗ Port 3000 is still in use. You may need to:"
+    echo "  1. Manually kill the process using port 3000"
+    echo "  2. Use a different port by setting PORT environment variable"
+    echo "  3. Run: sudo lsof -i :3000 to find what's using the port"
+    exit 1
+else
+    echo "✓ Port 3000 is now available"
+fi
+
 # Start the application with PM2
 echo "Starting application with PM2..."
 pm2 start ecosystem.config.js

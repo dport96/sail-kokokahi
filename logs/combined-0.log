@@ -1,0 +1,128 @@
+2025-08-07T09:49:52:   ▲ Next.js 14.2.10
+2025-08-07T09:49:52:   - Local:        http://localhost:3000
+2025-08-07T09:49:52: 
+2025-08-07T09:49:52:  ✓ Starting...
+2025-08-07T09:49:52: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:52:   ▲ Next.js 14.2.10
+2025-08-07T09:49:52:   - Local:        http://localhost:3000
+2025-08-07T09:49:52: 
+2025-08-07T09:49:52:  ✓ Starting...
+2025-08-07T09:49:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:53:   ▲ Next.js 14.2.10
+2025-08-07T09:49:53:   - Local:        http://localhost:3000
+2025-08-07T09:49:53: 
+2025-08-07T09:49:53:  ✓ Starting...
+2025-08-07T09:49:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:53:   ▲ Next.js 14.2.10
+2025-08-07T09:49:53:   - Local:        http://localhost:3000
+2025-08-07T09:49:53: 
+2025-08-07T09:49:53:  ✓ Starting...
+2025-08-07T09:49:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:53:   ▲ Next.js 14.2.10
+2025-08-07T09:49:53:   - Local:        http://localhost:3000
+2025-08-07T09:49:53: 
+2025-08-07T09:49:53:  ✓ Starting...
+2025-08-07T09:49:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:53:   ▲ Next.js 14.2.10
+2025-08-07T09:49:53:   - Local:        http://localhost:3000
+2025-08-07T09:49:53: 
+2025-08-07T09:49:53:  ✓ Starting...
+2025-08-07T09:49:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:54:   ▲ Next.js 14.2.10
+2025-08-07T09:49:54:   - Local:        http://localhost:3000
+2025-08-07T09:49:54: 
+2025-08-07T09:49:54:  ✓ Starting...
+2025-08-07T09:49:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:54:   ▲ Next.js 14.2.10
+2025-08-07T09:49:54:   - Local:        http://localhost:3000
+2025-08-07T09:49:54: 
+2025-08-07T09:49:54:  ✓ Starting...
+2025-08-07T09:49:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:54:   ▲ Next.js 14.2.10
+2025-08-07T09:49:54:   - Local:        http://localhost:3000
+2025-08-07T09:49:54: 
+2025-08-07T09:49:54:  ✓ Starting...
+2025-08-07T09:49:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:54:   ▲ Next.js 14.2.10
+2025-08-07T09:49:54:   - Local:        http://localhost:3000
+2025-08-07T09:49:54: 
+2025-08-07T09:49:54:  ✓ Starting...
+2025-08-07T09:49:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:55:   ▲ Next.js 14.2.10
+2025-08-07T09:49:55:   - Local:        http://localhost:3000
+2025-08-07T09:49:55: 
+2025-08-07T09:49:55:  ✓ Starting...
+2025-08-07T09:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:55:   ▲ Next.js 14.2.10
+2025-08-07T09:49:55:   - Local:        http://localhost:3000
+2025-08-07T09:49:55: 
+2025-08-07T09:49:55:  ✓ Starting...
+2025-08-07T09:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:55:   ▲ Next.js 14.2.10
+2025-08-07T09:49:55:   - Local:        http://localhost:3000
+2025-08-07T09:49:55: 
+2025-08-07T09:49:55:  ✓ Starting...
+2025-08-07T09:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:55:   ▲ Next.js 14.2.10
+2025-08-07T09:49:55:   - Local:        http://localhost:3000
+2025-08-07T09:49:55: 
+2025-08-07T09:49:55:  ✓ Starting...
+2025-08-07T09:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:56:   ▲ Next.js 14.2.10
+2025-08-07T09:49:56:   - Local:        http://localhost:3000
+2025-08-07T09:49:56: 
+2025-08-07T09:49:56:  ✓ Starting...
+2025-08-07T09:49:56: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
+2025-08-07T09:49:56:   ▲ Next.js 14.2.10
+2025-08-07T09:49:56:   - Local:        http://localhost:3000
+2025-08-07T09:49:56: 
+2025-08-07T09:49:56:  ✓ Starting...
+2025-08-07T09:49:56: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-utils/filesystem.js:151:19)
+    at async initialize (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/router-server.js:62:23)
+    at async Server.<anonymous> (/Users/danport/Documents/GitHub/sail-kokokahi/node_modules/next/dist/server/lib/start-server.js:249:36)
