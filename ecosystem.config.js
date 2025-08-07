@@ -3,7 +3,7 @@ module.exports = {
     name: 'sail-kokokahi',
     script: 'npm',
     args: 'start',
-    cwd: '/home/your-username/sail-kokokahi', // Update this path to your project location
+    cwd: __dirname, // Use the directory where this config file is located
     env: {
       NODE_ENV: 'production',
       PORT: 3000
