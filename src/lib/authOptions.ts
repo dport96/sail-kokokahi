@@ -49,10 +49,6 @@ const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signout',
-    //   error: '/auth/error',
-    //   verifyRequest: '/auth/verify-request',
-    //   newUser: '/auth/new-user'
   },
   callbacks: {
     session: ({ session, token }) => {
@@ -75,20 +71,6 @@ const authOptions: NextAuthOptions = {
         };
       }
       return token;
-    },
-    redirect: ({ url, baseUrl }) => {
-      // If there's a specific URL requested and it's a valid relative path
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
-      }
-
-      // If URL is already absolute and starts with baseUrl, use it
-      if (url.startsWith(baseUrl)) {
-        return url;
-      }
-
-      // Otherwise default to the landing page
-      return baseUrl;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
