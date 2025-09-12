@@ -72,15 +72,19 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
         });
       case 'name-asc':
         return filteredData.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`;
-          const nameB = `${b.firstName} ${b.lastName}`;
-          return nameA.localeCompare(nameB);
+          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return -1;
+          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return 1;
+          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return -1;
+          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
+          return 0;
         });
       case 'name-desc':
         return filteredData.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`;
-          const nameB = `${b.firstName} ${b.lastName}`;
-          return nameB.localeCompare(nameA);
+          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return -1;
+          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return 1;
+          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return -1;
+          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return 1;
+          return 0;
         });
       default:
         return filteredData;

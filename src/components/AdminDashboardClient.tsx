@@ -440,8 +440,8 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                   onChange={(e) => handleSelectAll(e.target.checked)}
                 />
               </th>
-              <th>First Name</th>
               <th>Last Name</th>
+              <th>First Name</th>
               <th>Approved Hours</th>
               <th>Pending Hours</th>
               <th>Amount Due</th>
@@ -468,8 +468,8 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     onChange={(e) => handleUserSelect(user.id, e.target.checked)}
                   />
                 </td>
-                <td>{user.firstName}</td>
                 <td>{user.lastName}</td>
+                <td>{user.firstName}</td>
                 <td>
                   <Button
                     variant="outline-secondary"

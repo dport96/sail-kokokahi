@@ -24,9 +24,14 @@ const AdminDashboard = async () => {
         gte: oneYearAgo, // Only get users created after this date
       },
     },
-    orderBy: {
-      createdAt: 'asc', // Sort by creation date
-    },
+    orderBy: [
+      {
+        lastName: 'asc',
+      },
+      {
+        firstName: 'asc',
+      },
+    ],
     select: {
       id: true,
       firstName: true,
