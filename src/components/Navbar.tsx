@@ -104,6 +104,8 @@ const NavBar: React.FC = () => {
                 )}
                 id="account-dropdown"
                 className="text-white"
+                align="end"
+                menuVariant="dark"
               >
                 {role === 'USER' && (
                   <NavDropdown.Item as={Link} href="/settings">
