@@ -72,6 +72,16 @@ const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    redirect: async ({ url, baseUrl }) => {
+      // If signing out, redirect to the base URL (original domain)
+      if (url.includes('/auth/signout')) {
+        return baseUrl;
+      }
+      // Default behavior for other redirects
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

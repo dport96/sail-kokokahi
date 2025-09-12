@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { GearFill } from 'react-bootstrap-icons';
@@ -15,6 +15,13 @@ const NavBar: React.FC = () => {
   const pathName = usePathname() || ''; // Provide empty string as fallback
 
   const handleNavCollapse = () => setExpanded(false);
+
+  const handleSignOut = async () => {
+    handleNavCollapse();
+    // Get the base URL (protocol + host) without any path
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    await signOut({ callbackUrl: baseUrl });
+  };
 
   // Determine if we're on the landing page
   const isLandingPage = pathName === '/';
@@ -127,7 +134,7 @@ const NavBar: React.FC = () => {
                   Change Password
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item href="/api/auth/signout" onClick={handleNavCollapse}>
+                <NavDropdown.Item onClick={handleSignOut}>
                   Sign Out
                 </NavDropdown.Item>
               </NavDropdown>
