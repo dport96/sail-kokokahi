@@ -8,7 +8,7 @@ export NODE_ENV=production
 export PORT=3000
 
 # Change to project directory
-cd /home/livingroom/Documents/GitHub/sail-kokokahi
+#cd /home/livingroom/Documents/GitHub/sail-kokokahi
 
 # Create logs directory if it doesn't exist
 mkdir -p logs
