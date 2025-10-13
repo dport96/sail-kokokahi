@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
 import AdminDashboardContent from '@/components/AdminDashboardContent';
+import { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT } from '@/lib/constants';
 
 const AdminDashboard = async () => {
   const session = await getServerSession(authOptions);
@@ -44,15 +45,13 @@ const AdminDashboard = async () => {
     },
   });
 
-  const amount = 120;
-
   const usersWithAmountDue = users.map((user) => ({
     id: user.id,
     firstName: user.firstName,
     lastName: user.lastName,
     approvedHours: user.approvedHours,
     pendingHours: user.pendingHours,
-    amountDue: user.approvedHours > 6 ? 0 : amount - 20 * user.approvedHours,
+    amountDue: user.approvedHours > 6 ? 0 : MEMBERSHIP_BASE_AMOUNT - HOURLY_RATE * user.approvedHours,
     createdAt: user.createdAt,
     status: user.status,
     role: user.role,

@@ -20,8 +20,8 @@ module.exports = {
     log_file: './logs/combined.log',
     time: true,
     // Ubuntu-specific settings
-    uid: process.getuid?.() || 'livingroom',
-    gid: process.getgid?.() || 'livingroom',
+    uid: process.getuid?.(),
+    gid: process.getgid?.(),
     // Increase startup time for slower systems
     listen_timeout: 8000,
     kill_timeout: 5000

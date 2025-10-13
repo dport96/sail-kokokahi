@@ -7,7 +7,6 @@ import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React from 'react';
-import Modal from '@mui/material/Modal';
 import { deleteUser } from '@/lib/dbActions';
 import swal from 'sweetalert';
 
@@ -28,8 +27,7 @@ interface AdminDashboardClientProps {
 const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) => {
   const router = useRouter();
   const [updatedUsers, setUpdatedUsers] = useState(users);
-  const [open, setOpen] = React.useState(false);
-  const [confirmationText, setConfirmationText] = useState('');
+  // modal/confirmation removed from this component; kept simple admin dashboard
   const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
   const [originalApprovedHours, setOriginalApprovedHours] = useState<Map<number, number>>(
     new Map(users.map(user => [user.id, user.approvedHours])),
@@ -298,37 +296,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     toast.success('Exported as Excel successfully!');
   };
 
-  const databaseReset = async (userId: number) => {
-    const hoursReset = 0;
-    const response = await fetch('/api/admin/update-hours', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, approvedHours: hoursReset, pendingHours: hoursReset }),
-    });
-    if (response.ok) {
-      setUpdatedUsers((prevUsers) => prevUsers.map((user) => (user.id === userId
-        ? { ...user, approvedHours: hoursReset, pendingHours: hoursReset }
-        : user)));
-    } else {
-      console.error('Failed to update approved hours');
-    }
-  };
-
-  const handleResetAll = async () => {
-    try {
-      // Create an array of promises for each user's databaseReset call
-      const resetPromises = updatedUsers.map((user) => databaseReset(user.id));
-
-      // Execute all promises concurrently
-      await Promise.all(resetPromises);
-
-      console.log('All users reset successfully!');
-      // Refresh the page to get updated data from server
-      setTimeout(() => router.refresh(), 500);
-    } catch (error) {
-      console.error('Error resetting the database:', error);
-    }
-  };
+  // Reset functionality moved to maintenance page (handled in maintenance UI)
 
   const updateApprovedHours = async (userId: number, newHours: number) => {
     // Only update the UI state, don't update the database directly
@@ -518,59 +486,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
           <Button onClick={exportToExcel}>Export as Excel</Button>
         </div>
         <div style={{ float: 'right' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
-          <Button
-            variant="danger"
-            onClick={() => setOpen(true)}
-          >
-            Reset Database
-          </Button>
-          <Modal open={open} onClose={() => setOpen(false)}>
-            <div style={{
-              borderRadius: '15px',
-              textAlign: 'justify',
-              background: 'white',
-              padding: '20px',
-              margin: '10% auto',
-              width: '50%',
-              height: 'auto',
-            }}
-            >
-              <h1 className="fw-bold">Reset Database</h1>
-              <hr />
-              <p className="">
-                Are you sure you want to reset the database? This button is expected to only be used on November 31st
-                to reset all hours back to zero. Please type
-                <i className="fw-bold">&quot;Reset Database&quot; </i>
-                and click the button to confirm your reset, then refresh to see changes.
-              </p>
-              <div className="d-flex flex-column align-items-center mt-4">
-                <input
-                  type="text"
-                  placeholder="Type 'Reset Database' here"
-                  value={confirmationText}
-                  onChange={(e) => setConfirmationText(e.target.value)}
-                  style={{
-                    width: '80%',
-                    padding: '10px',
-                    marginBottom: '20px',
-                    borderRadius: '5px',
-                    border: '1px solid #ccc',
-                  }}
-                />
-                <Button
-                  variant="danger"
-                  disabled={confirmationText !== 'Reset Database'}
-                  onClick={async () => {
-                    await handleResetAll();
-                    setOpen(false);
-                    setConfirmationText('');
-                  }}
-                >
-                  Reset Database
-                </Button>
-              </div>
-            </div>
-          </Modal>
+          <Button variant="outline-secondary" href="/admin-maintenance">Maintenance</Button>
         </div>
       </Container>
       <ToastContainer />

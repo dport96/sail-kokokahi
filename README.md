@@ -581,3 +581,33 @@ npm run build
 - Manages service dependencies properly
 - Offers excellent logging through journalctl
 - Is the standard way to manage services on Ubuntu
+
+#### make a backup of the DB
+```
+# ensure pg_dump is installed (macOS Homebrew libpq or system package)
+# If pg_dump not in PATH on macOS (Homebrew), you can add: export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# 1. Extract DATABASE_URL from .env (handles quoted value)
+export DATABASE_URL=$(grep '^DATABASE_URL' .env | cut -d'=' -f2- | tr -d '"')
+
+# 2. Create backup dir
+mkdir -p backups
+
+# 3. Timestamp + compressed custom-format dump (recommended)
+TS=$(date +%Y%m%d_%H%M%S)
+OUT="backups/sail_kokokahi_${TS}.dump"
+pg_dump -d "$DATABASE_URL" -F c -b -v -f "$OUT"
+
+# 4. Show file
+ls -lh "$OUT"
+```
+
+
+To restore
+```
+# create target DB first if needed:
+createdb -d "$DATABASE_URL" -T template0 new_dbname   # or use psql/create DB as appropriate
+
+# restore (overwrite existing objects)
+pg_restore --verbose --clean --no-owner -d "$DATABASE_URL" "backups/sail_kokokahi_YYYYMMDD_HHMMSS.dump"
+```

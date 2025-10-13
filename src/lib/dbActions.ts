@@ -36,6 +36,44 @@ export async function addEvent(event: {
 }
 
 /**
+ * Create an event without performing a Next.js redirect.
+ * This is intended for CLI / import scripts that need to reuse the
+ * server-side event creation logic but can't run inside a Next.js
+ * action context.
+ */
+export async function createEventForImport(event: {
+  title: string;
+  description?: string;
+  date?: string | null;
+  location?: string | null;
+  hours?: number | null;
+  time?: string | null;
+  signupReq?: boolean;
+  qr?: string | null;
+  ownerId?: number | null;
+}) {
+  // Prisma schema currently marks some fields as required (non-nullable).
+  // Provide safe defaults when values are missing in import data so the
+  // import script can create events without causing type errors.
+  const created = await prisma.event.create({
+    data: {
+      title: event.title,
+      description: event.description ?? '',
+      // Event schema expects strings/numbers for these fields; fall back to
+      // empty string or 0 when missing so Prisma accepts the create call.
+      date: event.date ?? '',
+      location: event.location ?? '',
+      hours: event.hours ?? 0,
+      time: event.time ?? '',
+      signupReq: !!event.signupReq,
+      qr: event.qr ?? undefined,
+    },
+  });
+
+  return created;
+}
+
+/**
  * Deletes an existing event from the database.
  * @param id, the id of the event to delete.
  */

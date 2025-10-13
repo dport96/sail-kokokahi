@@ -8,7 +8,7 @@
     "dev-local": "next dev",
     "dev-https": "next dev --experimental-https",
     "build": "prisma generate && next build",
-    "start": "next start",
+  "start": "NEXTAUTH_URL=${NEXT_PUBLIC_APP_URL:-$NEXTAUTH_URL} next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "test": "playwright test",
     "playwright-development": "npx playwright test",
@@ -46,7 +46,8 @@
     "sweetalert": "^2.1.2",
     "ts-node": "10.9.2",
     "xlsx": "^0.18.5",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.2",
