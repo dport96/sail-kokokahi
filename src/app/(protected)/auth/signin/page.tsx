@@ -17,6 +17,7 @@ const SignIn = () => {
   const [isRedirecting, setIsRedirecting] = React.useState(false);
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   // Redirect immediately if user is already signed in
   React.useEffect(() => {
@@ -39,7 +40,7 @@ const SignIn = () => {
       email: { value: string };
       password: { value: string };
     };
-    const email = target.email.value;
+    const email = target.email.value.trim().toLowerCase();
     const password = target.password.value;
 
     const result = await signIn('credentials', {
@@ -58,6 +59,13 @@ const SignIn = () => {
       const response = await fetch('/api/auth/session');
       const sessionData = await response.json();
       const userRole = sessionData?.user?.randomKey;
+      const mustChange = sessionData?.user?.mustChangePassword;
+
+      if (mustChange) {
+        // Force the user to change password before proceeding
+        router.push('/auth/change-password');
+        return;
+      }
 
       if (userRole === 'ADMIN') {
         router.push('/admin-dashboard');
@@ -105,7 +113,22 @@ const SignIn = () => {
                     </Form.Group>
                     <Form.Group>
                       <Form.Label>Password</Form.Label>
-                      <input name="password" type="password" className="form-control" />
+                      <div className="input-group">
+                        <input
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          className="form-control"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setShowPassword((s) => !s)}
+                          aria-pressed={showPassword}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? '🙈' : '👁️'}
+                        </button>
+                      </div>
                     </Form.Group>
                     <Button type="submit" className="mt-3" disabled={isLoading}>
                       {isLoading ? (

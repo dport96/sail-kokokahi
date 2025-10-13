@@ -4,6 +4,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
+import { Role } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Table, Alert, Form, Row, Col } from 'react-bootstrap';
 import swal from 'sweetalert';
@@ -48,6 +50,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
   const fetchEventAttendees = useCallback(async () => {
     try {
@@ -81,6 +84,10 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
       console.error('Error fetching users:', error);
     }
   }, []);
+
+  // Helper to determine current session user's role
+  const sessionUserRole = (session?.user as any)?.role as Role | undefined;
+  const sessionUserIsNotRegular = !!sessionUserRole && sessionUserRole !== Role.USER;
 
   // Fetch event attendees and all users when modal opens
   useEffect(() => {
@@ -228,13 +235,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                 <option value="">Select a user to add...</option>
                 {availableUsers.map(user => (
                   <option key={user.id} value={user.id}>
-                    {user.firstName}
-                    {' '}
-                    {user.lastName}
-                    {' '}
-                    (
-                    {user.email}
-                    )
+                    {user.firstName} {user.lastName} ({user.email})
                   </option>
                 ))}
               </Form.Select>
@@ -243,7 +244,8 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
               <Button
                 variant="success"
                 onClick={addUserToEvent}
-                disabled={!selectedUserId}
+                disabled={!selectedUserId || sessionUserIsNotRegular}
+                title={sessionUserIsNotRegular ? 'Admins cannot add users to events' : undefined}
               >
                 Add User
               </Button>

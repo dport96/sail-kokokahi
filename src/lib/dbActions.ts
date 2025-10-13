@@ -159,9 +159,10 @@ export const deleteUser = async (userId: number) => {
  */
 export async function createUser(credentials: { email: string; password: string }) {
   const password = await hash(credentials.password, 10);
+  const email = credentials.email.trim().toLowerCase();
   await prisma.user.create({
     data: {
-      email: credentials.email,
+      email,
       password,
     },
   });
@@ -173,10 +174,11 @@ export async function createUser(credentials: { email: string; password: string 
  */
 export async function changePassword(credentials: { email: string; password: string }) {
   const password = await hash(credentials.password, 10);
-  await prisma.user.update({
-    where: { email: credentials.email },
-    data: {
-      password,
-    },
+  const email = credentials.email.trim().toLowerCase();
+  // Update password and clear mustChangePassword flag.
+  // Use case-insensitive match on email and update matching users.
+  await prisma.user.updateMany({
+    where: { email: { equals: email, mode: 'insensitive' } },
+    data: { password, mustChangePassword: false },
   });
 }

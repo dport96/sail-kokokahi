@@ -24,9 +24,15 @@ const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
+        // Normalize and perform a case-insensitive lookup so sign-in is not affected by email casing.
+        const lookupEmail = credentials.email.trim().toLowerCase();
+
+        const user = await prisma.user.findFirst({
           where: {
-            email: credentials.email,
+            email: {
+              equals: lookupEmail,
+              mode: 'insensitive',
+            },
           },
         });
 

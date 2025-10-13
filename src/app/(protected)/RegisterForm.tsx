@@ -8,6 +8,7 @@ interface RegisterFormData {
   lastName: string;
   email: string;
   password: string;
+  confirmPassword?: string;
   phone?: string;
 }
 
@@ -17,10 +18,12 @@ const RegisterForm: React.FC = () => {
     lastName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,11 +35,27 @@ const RegisterForm: React.FC = () => {
     setLoading(true);
     setError('');
 
+    // Client-side password confirmation check
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Send only the fields the server expects (exclude confirmPassword)
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      };
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -154,9 +173,9 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="col-12">
-              <div className="form-floating">
+              <div className="form-floating position-relative">
                 <input
-                  type="password"
+                  type={showPasswords ? 'text' : 'password'}
                   className="form-control"
                   id="password"
                   name="password"
@@ -164,8 +183,46 @@ const RegisterForm: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  style={{ paddingRight: '3rem' }}
                 />
                 <label htmlFor="password">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((s) => !s)}
+                  aria-pressed={showPasswords}
+                  aria-label={showPasswords ? 'Hide password' : 'Show password'}
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}
+                >
+                  {showPasswords ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-floating position-relative">
+                <input
+                  type={showPasswords ? 'text' : 'password'}
+                  className="form-control"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  style={{ paddingRight: '3rem' }}
+                />
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((s) => !s)}
+                  aria-pressed={showPasswords}
+                  aria-label={showPasswords ? 'Hide confirmation password' : 'Show confirmation password'}
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}
+                >
+                  {showPasswords ? '🙈' : '👁️'}
+                </button>
               </div>
             </div>
 

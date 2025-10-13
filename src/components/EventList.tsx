@@ -7,6 +7,8 @@ import { Button, DropdownButton, Row, Col } from 'react-bootstrap';
 import swal from 'sweetalert';
 import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
 import React from 'react';
+import { useSession } from 'next-auth/react';
+import { Role } from '@prisma/client';
 import Modal from '@mui/material/Modal';
 import { RuntimeQRCode } from './RuntimeQRCode';
 
@@ -26,6 +28,7 @@ export const EventList = ({
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const { data: session } = useSession();
 
   // Update local state when props change
   useEffect(() => {
@@ -158,6 +161,10 @@ export const EventList = ({
                   size="sm"
                   className="me-2"
                   onClick={() => onManageAttendance(event)}
+                  disabled={(() => {
+                    const currentRole = (session?.user as any)?.role;
+                    return currentRole && currentRole !== Role.USER;
+                  })()}
                   title="Manage event attendance"
                 >
                   👥 Attendance
@@ -169,6 +176,10 @@ export const EventList = ({
                   size="sm"
                   className="me-2"
                   onClick={() => onManageSignup(event)}
+                  disabled={(() => {
+                    const currentRole = (session?.user as any)?.role;
+                    return currentRole && currentRole !== Role.USER;
+                  })()}
                   title="Manage event signups"
                 >
                   📝 Signup

@@ -21,6 +21,7 @@ model User {
   hoursLogs            HoursLog[] // Added opposite relation field
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
+  mustChangePassword   Boolean    @default(false)
   status               String     @default("pending") // Add this field if required
 }
 

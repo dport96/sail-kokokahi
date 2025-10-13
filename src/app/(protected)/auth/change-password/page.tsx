@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import swal from 'sweetalert';
 import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
-import { changePassword } from '@/lib/dbActions';
+// server-side change happens via /api/auth/change-password
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 type ChangePasswordForm = {
@@ -18,8 +18,7 @@ type ChangePasswordForm = {
 
 /** The change password page. */
 const ChangePassword = () => {
-  const { data: session, status } = useSession();
-  const email = session?.user?.email || '';
+  const { status } = useSession();
   const validationSchema = Yup.object().shape({
     oldpassword: Yup.string().required('Password is required'),
     password: Yup.string()
@@ -41,9 +40,25 @@ const ChangePassword = () => {
   });
 
   const onSubmit = async (data: ChangePasswordForm) => {
-    await changePassword({ email, password: data.password });
-    await swal('Password Changed', 'Your password has been changed', 'success', { timer: 2000 });
-    reset();
+    try {
+      const resp = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword: data.oldpassword, newPassword: data.password }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        await swal('Error', err?.error || 'Failed to change password', 'error');
+        return;
+      }
+
+      await swal('Password Changed', 'Your password has been changed', 'success', { timer: 2000 });
+      reset();
+    } catch (error) {
+      console.error('Change password error:', error);
+      await swal('Error', 'Unexpected error changing password', 'error');
+    }
   };
 
   if (status === 'loading') {
