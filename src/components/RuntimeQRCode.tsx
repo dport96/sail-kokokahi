@@ -30,10 +30,13 @@ export const RuntimeQRCode = ({
 
   // Function to get the QR URL for the event
   const getQRUrl = (eventData: { title: string; date: string }) => {
-    const eventIdentifier = `EVENT-${eventData.date.replace(/\//g, '')}-${eventData.title.trim().replace(/\s+/g, '-')}`;
+    const datePart = eventData.date.replace(/\//g, '');
+    const titlePart = eventData.title.trim().replace(/\s+/g, '-');
+    const eventIdentifier = `EVENT-${datePart}-${titlePart}`;
     // Use NEXT_PUBLIC_APP_URL first, then fallback to window.location.origin
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (
+      typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+    );
     return `${baseUrl}/event-check-in/${eventIdentifier}`;
   };
 
@@ -94,8 +97,15 @@ export const RuntimeQRCode = ({
 
 // Hook to get the QR URL (useful for displaying the URL text)
 export const useQRUrl = (event: { title: string; date: string }) => {
-  const eventIdentifier = `EVENT-${event.date.replace(/\//g, '')}-${event.title.trim().replace(/\s+/g, '-')}`;
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const datePart = event.date.replace(/\//g, '');
+  const titlePart = event.title.trim().replace(/\s+/g, '-');
+  const eventIdentifier = `EVENT-${datePart}-${titlePart}`;
+  // Prefer NEXT_PUBLIC_APP_URL, then window origin, NEXTAUTH_URL, then localhost.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  );
   return `${baseUrl}/event-check-in/${eventIdentifier}`;
 };
 

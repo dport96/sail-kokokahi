@@ -19,9 +19,9 @@ module.exports = {
     out_file: './logs/out.log',
     log_file: './logs/combined.log',
     time: true,
-    // Ubuntu-specific settings
-    uid: process.getuid?.(),
-    gid: process.getgid?.(),
+  // Ubuntu-specific settings (removed uid/gid to avoid requiring root when starting pm2)
+  // uid: process.getuid?.(),
+  // gid: process.getgid?.(),
     // Increase startup time for slower systems
     listen_timeout: 8000,
     kill_timeout: 5000

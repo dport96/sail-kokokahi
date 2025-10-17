@@ -16,10 +16,14 @@ test.describe('Admin Pages', () => {
 
   adminPages.forEach((path) => {
     test(`should navigate to ${path}`, async ({ page }) => {
-      const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Use environment variable for flexibility
+      // Prefer BASE_URL, then NEXT_PUBLIC_APP_URL, then NEXTAUTH_URL, then localhost
+      const baseUrl = process.env.BASE_URL
+        || process.env.NEXT_PUBLIC_APP_URL
+        || process.env.NEXTAUTH_URL
+        || 'http://localhost:3000';
       const pageUrl = `${baseUrl}${path}`;
 
-      await page.goto(pageUrl); // Navigate to the URL
+      await page.goto(pageUrl);
     });
   });
 });
