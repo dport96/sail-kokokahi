@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import Link from 'next/link';
 
@@ -14,6 +14,8 @@ const SignIn = () => {
   const userWithRole = session?.user as { email: string; randomKey?: string };
   const role = userWithRole?.randomKey;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') ?? null;
   const [isRedirecting, setIsRedirecting] = React.useState(false);
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -23,13 +25,16 @@ const SignIn = () => {
   React.useEffect(() => {
     if (currentUser && (role === 'USER' || role === 'ADMIN')) {
       setIsRedirecting(true);
-      if (role === 'ADMIN') {
+      // If a callbackUrl was provided (e.g., from QR scan), honor it first.
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else if (role === 'ADMIN') {
         router.push('/admin-dashboard');
       } else {
         router.push('/member-event-sign-up');
       }
     }
-  }, [currentUser, role, router]);
+  }, [currentUser, role, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,6 +69,12 @@ const SignIn = () => {
       if (mustChange) {
         // Force the user to change password before proceeding
         router.push('/auth/change-password');
+        return;
+      }
+
+      // If the sign-in was triggered with a callbackUrl (from QR), redirect there.
+      if (callbackUrl) {
+        router.push(callbackUrl);
         return;
       }
 
