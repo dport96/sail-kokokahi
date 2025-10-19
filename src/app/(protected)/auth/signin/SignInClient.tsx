@@ -68,7 +68,12 @@ const SignInClient = () => {
 
       if (mustChange) {
         // Force the user to change password before proceeding
-        router.push('/auth/change-password');
+        // Preserve callbackUrl so they can be redirected after changing password
+        if (callbackUrl) {
+          router.push(`/auth/change-password?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+        } else {
+          router.push('/auth/change-password');
+        }
         return;
       }
 

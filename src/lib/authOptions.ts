@@ -49,6 +49,7 @@ const authOptions: NextAuthOptions = {
           id: `${user.id}`,
           email: user.email,
           randomKey: user.role,
+          mustChangePassword: user.mustChangePassword,
         };
       },
     }),
@@ -64,6 +65,7 @@ const authOptions: NextAuthOptions = {
           ...session.user,
           id: token.id,
           randomKey: token.randomKey,
+          mustChangePassword: token.mustChangePassword,
         },
       };
     },
@@ -74,6 +76,7 @@ const authOptions: NextAuthOptions = {
           ...token,
           id: u.id,
           randomKey: u.randomKey,
+          mustChangePassword: u.mustChangePassword,
         };
       }
       return token;

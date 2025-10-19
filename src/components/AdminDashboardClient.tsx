@@ -18,6 +18,7 @@ interface User {
   pendingHours: number;
   amountDue: number;
   status: string;
+  mustChangePassword?: boolean;
 }
 
 interface AdminDashboardClientProps {
@@ -471,34 +472,42 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                 <td>{getStatusBadge(user)}</td>
                 <td>
                   <div className="d-flex gap-2">
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      onClick={async () => {
-                        const confirmReset = await swal({
-                          title: 'Reset Password',
-                          text: `Reset password for ${user.firstName} ${user.lastName} to 'changeme!'?`,
-                          icon: 'warning',
-                          buttons: ['Cancel', 'Reset'],
-                        });
-                        if (!confirmReset) return;
-
-                        try {
-                          const resp = await fetch('/api/admin/reset-password', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: user.id }),
+                    {!user.mustChangePassword && (
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={async () => {
+                          const confirmReset = await swal({
+                            title: 'Reset Password',
+                            text: `Reset password for ${user.firstName} ${user.lastName} to 'changeme!'?`,
+                            icon: 'warning',
+                            buttons: ['Cancel', 'Reset'],
                           });
-                          if (!resp.ok) throw new Error('Reset failed');
-                          toast.success('Password reset to "changeme!"');
-                        } catch (err) {
-                          console.error('Reset error:', err);
-                          toast.error('Failed to reset password');
-                        }
-                      }}
-                    >
-                      Reset PW
-                    </Button>
+                          if (!confirmReset) return;
+
+                          try {
+                            const resp = await fetch('/api/admin/reset-password', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ userId: user.id }),
+                            });
+                            if (!resp.ok) throw new Error('Reset failed');
+
+                            // Immediately update local state to hide the button
+                            setUpdatedUsers((prevUsers) => prevUsers.map((u) => (
+                              u.id === user.id ? { ...u, mustChangePassword: true } : u
+                            )));
+
+                            toast.success('Password reset to "changeme!"');
+                          } catch (err) {
+                            console.error('Reset error:', err);
+                            toast.error('Failed to reset password');
+                          }
+                        }}
+                      >
+                        Reset PW
+                      </Button>
+                    )}
                     <Button
                       variant="danger"
                       size="sm"

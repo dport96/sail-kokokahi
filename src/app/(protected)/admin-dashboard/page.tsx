@@ -42,6 +42,7 @@ const AdminDashboard = async () => {
       status: true,
       createdAt: true,
       role: true,
+      mustChangePassword: true,
     },
   });
 
@@ -55,6 +56,7 @@ const AdminDashboard = async () => {
     createdAt: user.createdAt,
     status: user.status,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
   }));
 
   if (!users || users.length === 0) {

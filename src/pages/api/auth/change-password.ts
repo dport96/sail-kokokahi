@@ -15,14 +15,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const email = String(session.user.email).trim().toLowerCase();
   const { oldPassword, newPassword } = req.body;
-  if (!oldPassword || !newPassword) return res.status(400).json({ error: 'Missing passwords' });
+  if (!newPassword) return res.status(400).json({ error: 'Missing new password' });
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const isValid = await compare(String(oldPassword), user.password);
-    if (!isValid) return res.status(403).json({ error: 'Current password is incorrect' });
+    // If user is NOT forced to change password, verify old password
+    if (!user.mustChangePassword) {
+      if (!oldPassword) return res.status(400).json({ error: 'Current password is required' });
+      const isValid = await compare(String(oldPassword), user.password);
+      if (!isValid) return res.status(403).json({ error: 'Current password is incorrect' });
+    }
 
     const hashed = await hash(String(newPassword), 10);
     // Update password and clear mustChangePassword flag using typed Prisma
