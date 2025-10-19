@@ -19,11 +19,8 @@ export default async function EventPage({ params }: { params: { eventId: string 
   }
 
   // For authenticated users, run the existing protection checks (authorization)
-  loggedInProtectedPage(
-    session as {
-      user: { email: string; id: string; randomKey: string };
-    } | null,
-  );
+  // Cast via unknown to satisfy TypeScript when narrowing session to our expected shape
+  loggedInProtectedPage(session as unknown as { user: { email: string; id: string; randomKey: string } } | null);
 
   const { eventId } = params;
 
