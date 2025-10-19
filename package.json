@@ -7,7 +7,7 @@
   "dev-network": "DATABASE_HOST=0.0.0.0 bash ./scripts/dev.sh -H 0.0.0.0",
   "dev-local": "bash ./scripts/dev.sh",
   "dev-https": "NEXT_DEV_HTTPS=1 bash ./scripts/dev.sh --experimental-https",
-    "build": "prisma generate && next build",
+  "build": "bash ./scripts/build.sh",
   "start": "export DATABASE_URL=${DATABASE_URL:-'postgresql://sail_user:your_password@localhost:5432/sail_kokokahi'} && NEXTAUTH_URL=${NEXT_PUBLIC_APP_URL:-$NEXTAUTH_URL} next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "test": "playwright test",
