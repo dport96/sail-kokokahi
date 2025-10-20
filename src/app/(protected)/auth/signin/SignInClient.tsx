@@ -31,7 +31,7 @@ const SignInClient = () => {
       } else if (role === 'ADMIN') {
         router.push('/admin-dashboard');
       } else {
-        router.push('/member-event-sign-up');
+        router.push('/member-dashboard');
       }
     }
   }, [currentUser, role, router, callbackUrl]);
@@ -86,7 +86,7 @@ const SignInClient = () => {
       if (userRole === 'ADMIN') {
         router.push('/admin-dashboard');
       } else {
-        router.push('/member-event-sign-up');
+        router.push('/member-dashboard');
       }
     }
   };

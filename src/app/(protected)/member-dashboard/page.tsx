@@ -1,8 +1,9 @@
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { loggedInProtectedPage } from '@/lib/page-protection';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, ProgressBar } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
+import { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT } from '@/lib/constants';
 
 const MemberDashboard = async () => {
   // Protect the page, only logged in users can access it.
@@ -22,6 +23,15 @@ const MemberDashboard = async () => {
 
   // Get the current user's ID for querying their event history
   const user = users[0];
+
+  // Calculate progress and amount due
+  const totalHours = user ? user.approvedHours + user.pendingHours : 0;
+  const hoursNeeded = 6;
+  const progressPercentage = Math.min((totalHours / hoursNeeded) * 100, 100);
+  const amountDue = user && user.approvedHours > 6
+    ? 0
+    : MEMBERSHIP_BASE_AMOUNT - HOURLY_RATE * (user?.approvedHours || 0);
+
   // Get all events the user has been credited for (attended events)
   const userAttendedEvents = user ? await prisma.userEvent.findMany({
     where: {
@@ -76,6 +86,33 @@ const MemberDashboard = async () => {
         </h1>
         <h2 className="text-muted">Member Dashboard</h2>
         <hr />
+
+        {/* Progress toward membership requirement */}
+        <Container className="my-4">
+          <h4>Membership Progress</h4>
+          <p className="text-muted">
+            Complete 6 hours of volunteer service to fulfill your membership requirement
+          </p>
+          <ProgressBar
+            now={progressPercentage}
+            label={`${totalHours.toFixed(1)} / ${hoursNeeded} hours`}
+            variant={progressPercentage >= 100 ? 'success' : 'primary'}
+            className="mb-2"
+            style={{ height: '30px', fontSize: '1rem' }}
+          />
+          <div className="d-flex justify-content-between">
+            <span>
+              <strong>Amount Due:</strong>
+              {' '}
+              $
+              {amountDue.toFixed(2)}
+            </span>
+            {progressPercentage >= 100 && (
+              <span className="text-success fw-bold">✓ Requirement Met!</span>
+            )}
+          </div>
+        </Container>
+
         <Container className="center my-5">
           <Row className="mx-auto px-2">
             <Col className="box py-2">
