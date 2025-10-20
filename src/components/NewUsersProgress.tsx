@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
+import { HOURS_REQUIRED } from '@/lib/constants';
 
 interface User {
   id: number;
@@ -23,7 +24,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
   const newUsers = users.filter(user => new Date(user.createdAt) >= oneYearAgo);
 
   const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
-    if (approvedHours >= 6) return 'success';
+    if (approvedHours >= HOURS_REQUIRED) return 'success';
     if (percentage >= 50) return 'info';
     return 'warning';
   };
@@ -32,7 +33,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
     <>
       {newUsers.map(user => {
         const { approvedHours, pendingHours } = user;
-        const progressPercentage = Math.min((approvedHours / 6) * 100, 100);
+        const progressPercentage = Math.min((approvedHours / HOURS_REQUIRED) * 100, 100);
         const registrationDate = new Date(user.createdAt).toLocaleDateString();
 
         return (
@@ -71,7 +72,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
               {pendingHours}
               {' '}
               hrs
-              {approvedHours >= 6 && ' (Complete)'}
+              {approvedHours >= HOURS_REQUIRED && ' (Complete)'}
             </small>
             <hr />
           </div>
