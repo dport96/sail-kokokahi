@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Button, Badge, Container } from 'react-bootstrap';
+import { Table, Button, Badge, Container, Modal, Spinner } from 'react-bootstrap';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
@@ -28,6 +28,34 @@ interface AdminDashboardClientProps {
 const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) => {
   const router = useRouter();
   const [updatedUsers, setUpdatedUsers] = useState(users);
+  const [showUserEvents, setShowUserEvents] = useState(false);
+  const [userEventsLoading, setUserEventsLoading] = useState(false);
+  const [userEventsError, setUserEventsError] = useState<string | null>(null);
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [activeUserEvents, setActiveUserEvents] = useState<{
+    attended: Array<{
+      id: number;
+      Event: {
+        id: number;
+        title: string;
+        date: string;
+        time: string;
+        location: string;
+        hours: number;
+      };
+    }>;
+    signups: Array<{
+      id: number;
+      Event: {
+        id: number;
+        title: string;
+        date: string;
+        time: string;
+        location: string;
+        hours: number;
+      };
+    }>;
+  }>({ attended: [], signups: [] });
   // modal/confirmation removed from this component; kept simple admin dashboard
   const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
   const [originalApprovedHours, setOriginalApprovedHours] = useState<Map<number, number>>(
@@ -195,6 +223,24 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
       setSelectedUsers(new Set(pendingUserIds));
     } else {
       setSelectedUsers(new Set());
+    }
+  };
+
+  const openUserEvents = async (user: User) => {
+    setActiveUser(user);
+    setShowUserEvents(true);
+    setUserEventsLoading(true);
+    setUserEventsError(null);
+    try {
+      const resp = await fetch(`/api/admin/user-events?userId=${user.id}`);
+      if (!resp.ok) throw new Error('Failed to load user events');
+      const data = await resp.json();
+      setActiveUserEvents({ attended: data.attended || [], signups: data.signups || [] });
+    } catch (e: any) {
+      console.error(e);
+      setUserEventsError(e?.message || 'Error loading events');
+    } finally {
+      setUserEventsLoading(false);
     }
   };
 
@@ -437,8 +483,24 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     onChange={(e) => handleUserSelect(user.id, e.target.checked)}
                   />
                 </td>
-                <td>{user.lastName}</td>
-                <td>{user.firstName}</td>
+                <td>
+                  <button
+                    type="button"
+                    className="btn btn-link p-0"
+                    onClick={() => openUserEvents(user)}
+                  >
+                    {user.lastName}
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    className="btn btn-link p-0"
+                    onClick={() => openUserEvents(user)}
+                  >
+                    {user.firstName}
+                  </button>
+                </td>
                 <td>
                   <Button
                     variant="outline-secondary"
@@ -528,6 +590,105 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
           <Button variant="outline-secondary" href="/admin-maintenance">Maintenance</Button>
         </div>
       </Container>
+      <Modal show={showUserEvents} onHide={() => setShowUserEvents(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {activeUser ? `${activeUser.firstName} ${activeUser.lastName} — Events` : 'User Events'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {activeUser && (
+            <div className="mb-3 d-flex gap-3">
+              <Badge bg="warning" text="dark">
+                Unapproved hours:
+                {' '}
+                {activeUser.pendingHours}
+              </Badge>
+              <Badge bg="success">
+                Approved hours:
+                {' '}
+                {activeUser.approvedHours}
+              </Badge>
+            </div>
+          )}
+          {userEventsLoading && (
+            <div className="d-flex align-items-center gap-2">
+              <Spinner size="sm" />
+              <span>Loading…</span>
+            </div>
+          )}
+          {userEventsError && (
+            <div className="text-danger">{userEventsError}</div>
+          )}
+          {!userEventsLoading && !userEventsError && (
+            <div className="row">
+              <div className="col-md-6">
+                <h6>Attended (Checked-In)</h6>
+                <div className="list-group">
+                  {activeUserEvents.attended.length === 0 && <div className="text-muted">No credited events</div>}
+                  {activeUserEvents.attended.map((ue) => (
+                    <div key={ue.id} className="list-group-item">
+                      <div className="fw-semibold">{ue.Event.title}</div>
+                      <small className="text-muted">
+                        {ue.Event.date}
+                        {' '}
+                        •
+                        {' '}
+                        {ue.Event.time}
+                        {' '}
+                        •
+                        {' '}
+                        {ue.Event.location}
+                      </small>
+                      <div>
+                        <Badge bg="success">
+                          {ue.Event.hours}
+                          {' '}
+                          hr
+                          {ue.Event.hours !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="col-md-6">
+                <h6>Signed Up (Not Checked-In)</h6>
+                <div className="list-group">
+                  {activeUserEvents.signups.length === 0 && <div className="text-muted">No pending events</div>}
+                  {activeUserEvents.signups.map((ue) => (
+                    <div key={ue.id} className="list-group-item">
+                      <div className="fw-semibold">{ue.Event.title}</div>
+                      <small className="text-muted">
+                        {ue.Event.date}
+                        {' '}
+                        •
+                        {' '}
+                        {ue.Event.time}
+                        {' '}
+                        •
+                        {' '}
+                        {ue.Event.location}
+                      </small>
+                      <div>
+                        <Badge bg="warning" text="dark">
+                          {ue.Event.hours}
+                          {' '}
+                          hr
+                          {ue.Event.hours !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowUserEvents(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
       <ToastContainer />
     </>
   );

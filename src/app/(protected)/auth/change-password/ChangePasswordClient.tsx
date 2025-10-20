@@ -29,6 +29,11 @@ const ChangePasswordClient = () => {
   const role = userWithRole?.randomKey;
   const mustChangePassword = userWithRole?.mustChangePassword ?? false;
 
+  // Local state to toggle password visibility
+  const [showOld, setShowOld] = React.useState(false);
+  const [showNew, setShowNew] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
+
   // Create validation schema dynamically based on mustChangePassword flag
   const validationSchema = React.useMemo(() => {
     const schema: any = {
@@ -114,31 +119,61 @@ const ChangePasswordClient = () => {
                   {!mustChangePassword && (
                     <Form.Group className="form-group">
                       <Form.Label>Old Password</Form.Label>
-                      <input
-                        type="password"
-                        {...register('oldpassword')}
-                        className={`form-control ${errors.oldpassword ? 'is-invalid' : ''}`}
-                      />
+                      <div className="input-group">
+                        <input
+                          type={showOld ? 'text' : 'password'}
+                          {...register('oldpassword')}
+                          className={`form-control ${errors.oldpassword ? 'is-invalid' : ''}`}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setShowOld((v) => !v)}
+                          aria-label={showOld ? 'Hide old password' : 'Show old password'}
+                        >
+                          {showOld ? '🙈' : '👁️'}
+                        </button>
+                      </div>
                       <div className="invalid-feedback">{errors.oldpassword?.message}</div>
                     </Form.Group>
                   )}
 
                   <Form.Group className="form-group">
                     <Form.Label>New Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('password')}
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                    />
+                    <div className="input-group">
+                      <input
+                        type={showNew ? 'text' : 'password'}
+                        {...register('password')}
+                        className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowNew((v) => !v)}
+                        aria-label={showNew ? 'Hide new password' : 'Show new password'}
+                      >
+                        {showNew ? '🙈' : '👁️'}
+                      </button>
+                    </div>
                     <div className="invalid-feedback">{errors.password?.message}</div>
                   </Form.Group>
                   <Form.Group className="form-group">
                     <Form.Label>Confirm Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('confirmPassword')}
-                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                    />
+                    <div className="input-group">
+                      <input
+                        type={showConfirm ? 'text' : 'password'}
+                        {...register('confirmPassword')}
+                        className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowConfirm((v) => !v)}
+                        aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                      >
+                        {showConfirm ? '🙈' : '👁️'}
+                      </button>
+                    </div>
                     <div className="invalid-feedback">{errors.confirmPassword?.message}</div>
                   </Form.Group>
                   <Form.Group className="form-group py-3">
