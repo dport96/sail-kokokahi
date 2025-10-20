@@ -86,6 +86,11 @@ is_port_in_use() {
     fi
 }
 
+
+# Stop any existing PM2 processes for this app BEFORE port check
+echo "Stopping any existing PM2 processes..."
+pm2 delete "$APP_NAME" 2>/dev/null || true
+
 echo "Checking if port $PORT is available..."
 if is_port_in_use "$PORT"; then
     echo "⚠ Port $PORT is already in use. Finding processes using port $PORT:"
@@ -114,10 +119,6 @@ if is_port_in_use "$PORT"; then
         echo "Processes stopped."
     fi
 fi
-
-# Stop any existing PM2 processes for this app
-echo "Stopping any existing PM2 processes..."
-pm2 delete "$APP_NAME" 2>/dev/null || true
 
 # Wait a moment for port to be released
 sleep 2
