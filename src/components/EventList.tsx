@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button, DropdownButton, Row, Col } from 'react-bootstrap';
+import { Button, DropdownButton, Row, Col, Modal as RBModal, Form } from 'react-bootstrap';
 import swal from 'sweetalert';
 import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
 import React from 'react';
@@ -28,6 +28,9 @@ export const EventList = ({
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any | null>(null);
+  const [propagateMode, setPropagateMode] = useState<'none' | 'audit' | 'adjust-approved'>('none');
   const { data: session } = useSession();
 
   // Update local state when props change
@@ -196,6 +199,18 @@ export const EventList = ({
               >
                 🗑️ Delete
               </Button>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  setEditingEvent(event);
+                  setEditOpen(true);
+                }}
+                title="Edit this event"
+              >
+                ✏️ Edit
+              </Button>
             </div>
             <Modal open={open} onClose={() => setOpen(false)}>
               <div
@@ -221,6 +236,183 @@ export const EventList = ({
                 </div>
               </div>
             </Modal>
+
+            {/* Edit modal (react-bootstrap) */}
+            <RBModal show={editOpen} onHide={() => { setEditOpen(false); setEditingEvent(null); }} centered>
+              <RBModal.Header closeButton>
+                <RBModal.Title>Edit Event</RBModal.Title>
+              </RBModal.Header>
+              <RBModal.Body>
+                {editingEvent && (
+                  <Form id="edit-event-form" onSubmit={(e) => { e.preventDefault(); }}>
+                    <Form.Group className="mb-3" controlId="eventTitle">
+                      <Form.Label>Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.title}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventDate">
+                      <Form.Label>Date (MM/DD/YYYY)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.date}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventTime">
+                      <Form.Label>Time</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.time}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, time: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventLocation">
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.location}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventHours">
+                      <Form.Label>Hours</Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.5"
+                        defaultValue={editingEvent.hours}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, hours: Number(e.target.value) })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventDescription">
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        defaultValue={editingEvent.description}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventSignupReq">
+                      <Form.Check
+                        type="checkbox"
+                        label="Requires signup"
+                        checked={!!editingEvent.signupReq}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, signupReq: e.target.checked })}
+                      />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="propagateMode">
+                      <Form.Label>Propagation mode (opt-in)</Form.Label>
+                      <div>
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-none-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="None"
+                          checked={propagateMode === 'none'}
+                          onChange={() => setPropagateMode('none')}
+                        />
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-audit-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="Audit only"
+                          checked={propagateMode === 'audit'}
+                          onChange={() => setPropagateMode('audit')}
+                        />
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-adjust-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="Adjust approved/pending (destructive)"
+                          checked={propagateMode === 'adjust-approved'}
+                          onChange={() => setPropagateMode('adjust-approved')}
+                        />
+                      </div>
+                      <small className="text-muted d-block mt-1">
+                        &quot;Audit only&quot; will create HoursLog entries describing the hours delta.
+                        &quot;Adjust approved/pending&quot; will attempt to update user totals (heuristic).
+                        Use &quot;Adjust&quot; only when you understand the consequences.
+                      </small>
+                    </Form.Group>
+                  </Form>
+                )}
+              </RBModal.Body>
+              <RBModal.Footer>
+                <Button variant="secondary" onClick={() => { setEditOpen(false); setEditingEvent(null); }}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={async () => {
+                    if (!editingEvent) return;
+                    try {
+                      // If admin selected destructive adjust mode, ask for explicit confirmation
+                      if (propagateMode === 'adjust-approved') {
+                        const confirmed = await swal({
+                          title: 'Confirm destructive propagation',
+                          text:
+                            'You selected \'Adjust approved/pending\'. This will update users\' '
+                          + 'approved or pending hours and cannot be easily undone. Are you sure you '
+                          + 'want to proceed?',
+                          icon: 'warning',
+                          buttons: ['Cancel', 'Yes, adjust users'],
+                          dangerMode: true,
+                        });
+
+                        if (!confirmed) {
+                          // User cancelled the destructive action
+                          return;
+                        }
+                      }
+
+                      const body = {
+                        title: editingEvent.title,
+                        description: editingEvent.description,
+                        date: editingEvent.date,
+                        location: editingEvent.location,
+                        hours: Number(editingEvent.hours),
+                        time: editingEvent.time,
+                        signupReq: !!editingEvent.signupReq,
+                        propagateMode: propagateMode === 'none' ? undefined : propagateMode,
+                      };
+
+                      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                      });
+
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        console.error('Update failed', err);
+                        swal('Error', 'Failed to update event', 'error');
+                        return;
+                      }
+
+                      const data = await res.json();
+                      // Replace the event locally
+                      const updatedEvent = data.event ?? data;
+                      setEventList((prev) => prev.map((ev) => (ev.id === updatedEvent.id ? updatedEvent : ev)));
+                      setEditOpen(false);
+                      setEditingEvent(null);
+                      swal('Success', 'Event updated', 'success', { timer: 1500 });
+                    } catch (err) {
+                      console.error('Failed to update event', err);
+                      swal('Error', 'Failed to update event', 'error');
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+              </RBModal.Footer>
+            </RBModal>
           </div>
           <Col>
             <DropdownButton title="Information" variant="light">

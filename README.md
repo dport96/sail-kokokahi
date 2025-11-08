@@ -398,6 +398,60 @@ NODE_ENV="production"
 - **Netlify**: Build command: `npm run build`, Publish directory: `.next`
 - **Docker**: Use the included Dockerfile for containerized deployments
 
+## ⚠️ Admin: Event propagation modes (hours changes)
+
+When editing an Event via the Admin UI you can choose how changes to an event's
+`hours` value should be propagated to users. This repository supports two opt-in
+modes for propagation when updating `hours`:
+
+- `audit` (Audit only): The server will create one or more `HoursLog` entries of
+  type `event-hours-audit` describing the delta in hours for every user who
+  attended the event. This is non-destructive and intended to provide an
+  auditable trail so admins can review and apply manual corrections if needed.
+
+- `adjust-approved` (Adjust approved/pending): The server will attempt to
+  update user totals in-place. Because the schema does not record a per-event
+  approval flag, the handler uses a heuristic:
+  - If a user's `pendingHours` &gt; 0, the server adjusts `pendingHours` by the
+    delta (newHours - oldHours).
+  - Otherwise, the server adjusts `approvedHours` by the delta.
+  For each affected user the server also creates a `HoursLog` entry with action
+  `event-hours-adjust` describing the change and who performed it.
+
+### Safety notes
+
+- The `adjust-approved` mode is destructive and can change many user rows.
+  It's an explicit opt-in in the Admin Edit modal and the UI will prompt for a
+  confirmation before proceeding.
+- All adjustments are performed inside a Prisma transaction for consistency and
+  logged to `HoursLog`, but because `HoursLog` entries do not contain `eventId`
+  the auditing relationship is approximate.
+- Always run changes in a staging environment first and take a database backup
+  prior to applying destructive propagation in production.
+
+### How to use
+
+- Open the Admin Events page and click Edit on the event you want to modify.
+- Change the `Hours` value and select a Propagation mode:
+  - `None` — do nothing besides updating the Event row.
+  - `Audit only` — create HoursLog entries only (non-destructive).
+  - `Adjust approved/pending` — update users' `pendingHours` or `approvedHours`
+    using the heuristic described above (destructive).
+- If you select `Adjust approved/pending`, the UI will ask you to confirm the
+  destructive action before it runs.
+
+### Recommended workflow
+
+- Backup the database (or take a dump) before running destructive adjustments.
+- Prefer `audit` mode first to review how many users would be affected.
+- If you need automated adjustments, run `adjust-approved` in a small test
+  window first, verify results in Prisma Studio or `psql`, then proceed.
+
+If you need a custom propagation rule (for example, only adjust `approvedHours`
+for users who were explicitly approved for this event), consider adding an
+auditable per-event approval flag to `UserEvent` and using that as the source of
+truth. I can help add that change if you'd like.
+
 ## �📚 Getting Started
 
 For development setup and detailed documentation, please see [NextJS Application Template](http://ics-software-engineering.github.io/nextjs-application-template/).
@@ -582,8 +636,9 @@ npm run build
 - Offers excellent logging through journalctl
 - Is the standard way to manage services on Ubuntu
 
-#### make a backup of the DB
-```
+#### Make a backup of the DB
+
+```bash
 # ensure pg_dump is installed (macOS Homebrew libpq or system package)
 # If pg_dump not in PATH on macOS (Homebrew), you can add: export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
@@ -602,11 +657,11 @@ pg_dump -d "$DATABASE_URL" -F c -b -v -f "$OUT"
 ls -lh "$OUT"
 ```
 
-
 To restore
-```
+
+```bash
 # create target DB first if needed:
-createdb -d "$DATABASE_URL" -T template0 new_dbname   # or use psql/create DB as appropriate
+# createdb -U <user> new_dbname   # or use psql/create DB as appropriate
 
 # restore (overwrite existing objects)
 pg_restore --verbose --clean --no-owner -d "$DATABASE_URL" "backups/sail_kokokahi_YYYYMMDD_HHMMSS.dump"
