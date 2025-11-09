@@ -92,6 +92,13 @@ const NavBar: React.FC = () => {
                 >
                   ANALYTICS
                 </a>
+                <a
+                  href="/admin-maintenance"
+                  className={`nav-link text-white ${pathName === '/admin-maintenance' ? 'active' : ''}`}
+                  onClick={handleNavCollapse}
+                >
+                  MAINTENANCE
+                </a>
               </>
             )}
             {role === 'USER' && (

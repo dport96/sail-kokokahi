@@ -586,9 +586,6 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
         <div style={{ float: 'left' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
           <Button onClick={exportToExcel}>Export as Excel</Button>
         </div>
-        <div style={{ float: 'right' }} className="d-flex justify-content-between align-items-center mt-2 mb-5">
-          <Button variant="outline-secondary" href="/admin-maintenance">Maintenance</Button>
-        </div>
       </Container>
       <Modal show={showUserEvents} onHide={() => setShowUserEvents(false)} size="lg" centered>
         <Modal.Header closeButton>

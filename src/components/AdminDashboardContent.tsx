@@ -26,8 +26,9 @@ interface AdminDashboardContentProps {
 }
 
 const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWithAmountDue }) => {
-  const [showProgress, setShowProgress] = useState(true);
-  const [showTable, setShowTable] = useState(true);
+  // Initialize collapsed by default
+  const [showProgress, setShowProgress] = useState(false);
+  const [showTable, setShowTable] = useState(false);
   const [progressFilter, setProgressFilter] = useState('none');
   const [tableFilter, setTableFilter] = useState('none');
   const [pendingFilter, setPendingFilter] = useState('all');
@@ -184,6 +185,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
                 <option value="pending">With Pending Hours</option>
                 <option value="no-pending">No Pending Hours</option>
               </Form.Select>
+              {/* Maintenance moved to the admin navigation bar to avoid duplication */}
             </div>
             <Button variant="link" onClick={handleTableHeaderClick}>
               {showTable ? '−' : '+'}

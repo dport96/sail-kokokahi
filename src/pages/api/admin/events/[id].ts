@@ -67,19 +67,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (propagateMode === 'audit') {
         // Find all attended userEvent rows for the event
         const userEvents = await prisma.userEvent.findMany({ where: { eventId, attended: true } });
-        const operated: any[] = [];
-
         // Build create operations for the transaction
-        const ops = userEvents.map((ue) =>
-          prisma.hoursLog.create({
-            data: {
-              userId: ue.userId,
-              action: 'event-hours-audit',
-              hours: delta,
-              performedBy: (session?.user as any)?.email ?? 'admin',
-            },
-          })
-        );
+        const ops = userEvents.map((ue) => prisma.hoursLog.create({
+          data: {
+            userId: ue.userId,
+            action: 'event-hours-audit',
+            hours: delta,
+            performedBy: (session?.user as any)?.email ?? 'admin',
+          },
+        }));
 
         if (ops.length > 0) {
           await prisma.$transaction(ops);
@@ -101,29 +97,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (attendedUserEvents.length > 0) {
           await prisma.$transaction(async (tx) => {
-            for (const ue of attendedUserEvents) {
-              const user = await tx.user.findUnique({ where: { id: ue.userId } });
-              if (!user) continue;
+            // Fetch all affected users in one query to avoid awaiting inside a loop
+            const userIds = attendedUserEvents.map((u) => u.userId);
+            const users = await tx.user.findMany({ where: { id: { in: userIds } } });
 
+            const updateOps: Promise<any>[] = [];
+            const logOps: Promise<any>[] = [];
+
+            for (const user of users) {
               // Decide whether to adjust pending or approved
               if (Number(user.pendingHours || 0) > 0) {
                 const newPending = Math.max(0, Number(user.pendingHours || 0) + delta);
-                await tx.user.update({ where: { id: user.id }, data: { pendingHours: newPending } });
+                updateOps.push(tx.user.update({ where: { id: user.id }, data: { pendingHours: newPending } }));
               } else {
                 const newApproved = Math.max(0, Number(user.approvedHours || 0) + delta);
-                await tx.user.update({ where: { id: user.id }, data: { approvedHours: newApproved } });
+                updateOps.push(tx.user.update({ where: { id: user.id }, data: { approvedHours: newApproved } }));
               }
 
-              // Create an audit log entry describing the change for traceability
-              await tx.hoursLog.create({
-                data: {
-                  userId: user.id,
-                  action: 'event-hours-adjust',
-                  hours: delta,
-                  performedBy: (session?.user as any)?.email ?? 'admin',
-                },
-              });
+              // Prepare audit log entries describing the change for traceability
+              logOps.push(
+                tx.hoursLog.create({
+                  data: {
+                    userId: user.id,
+                    action: 'event-hours-adjust',
+                    hours: delta,
+                    performedBy: (session?.user as any)?.email ?? 'admin',
+                  },
+                }),
+              );
             }
+
+            // Execute all updates and logs concurrently inside the transaction
+            await Promise.all([...updateOps, ...logOps]);
           });
         }
 
