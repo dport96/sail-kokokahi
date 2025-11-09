@@ -35,6 +35,7 @@ const AdminDashboard = async () => {
     ],
     select: {
       id: true,
+      email: true,
       firstName: true,
       lastName: true,
       approvedHours: true,
@@ -48,6 +49,7 @@ const AdminDashboard = async () => {
 
   const usersWithAmountDue = users.map((user) => ({
     id: user.id,
+    email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
     approvedHours: user.approvedHours,

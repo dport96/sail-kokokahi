@@ -32,6 +32,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
   const [progressFilter, setProgressFilter] = useState('none');
   const [tableFilter, setTableFilter] = useState('none');
   const [pendingFilter, setPendingFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleProgressHeaderClick = () => {
     setShowProgress(!showProgress);
@@ -93,7 +94,15 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
   };
 
   const filteredProgressUsers = filterAndSortUsers(usersWithAmountDue, progressFilter, 'all');
-  const filteredTableUsers = filterAndSortUsers(usersWithAmountDue, tableFilter, pendingFilter);
+  // Apply search filter (case-insensitive) before sorting
+  const searchedUsers = searchQuery
+    ? usersWithAmountDue.filter((u) => {
+      const hay = `${u.firstName} ${u.lastName} ${('email' in u ? (u as any).email : '')}`.toLowerCase();
+      return hay.includes(searchQuery.toLowerCase());
+    })
+    : usersWithAmountDue;
+
+  const filteredTableUsers = filterAndSortUsers(searchedUsers, tableFilter, pendingFilter);
 
   return (
     <Container>
@@ -163,6 +172,14 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               <h5 className="mb-0 me-3">Members Table</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '400px' }}>
+              <input
+                type="search"
+                placeholder="Search members..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ minWidth: '200px' }}
+              />
               <Form.Select
                 size="sm"
                 value={tableFilter}

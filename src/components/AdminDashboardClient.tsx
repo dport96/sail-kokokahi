@@ -526,6 +526,8 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     +
                   </Button>
                 </td>
+                {/* Hidden email value so test selectors can find rows by email */}
+                <td className="visually-hidden">{(user as any).email || ''}</td>
                 <td>{user.pendingHours}</td>
                 <td>
                   $
