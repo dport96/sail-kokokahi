@@ -115,7 +115,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               className="btn btn-link text-decoration-none text-dark d-flex align-items-center flex-grow-1"
               style={{ cursor: 'pointer' }}
             >
-              <h5 className="mb-0">User Progress</h5>
+              <h5 className="mb-0">Member Progress</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '200px' }}>
               <Form.Select
@@ -160,7 +160,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               className="btn btn-link text-decoration-none text-dark d-flex align-items-center flex-grow-1"
               style={{ cursor: 'pointer' }}
             >
-              <h5 className="mb-0 me-3">Users Table</h5>
+              <h5 className="mb-0 me-3">Members Table</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '400px' }}>
               <Form.Select
@@ -181,7 +181,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPendingFilter(e.target.value)}
                 style={{ minWidth: '150px' }}
               >
-                <option value="all">All Users</option>
+                <option value="all">All Members</option>
                 <option value="pending">With Pending Hours</option>
                 <option value="no-pending">No Pending Hours</option>
               </Form.Select>

@@ -337,7 +337,7 @@ export const EventList = ({
                       </div>
                       <small className="text-muted d-block mt-1">
                         &quot;Audit only&quot; will create HoursLog entries describing the hours delta.
-                        &quot;Adjust approved/pending&quot; will attempt to update user totals (heuristic).
+                        &quot;Adjust approved/pending&quot; will attempt to update member totals (heuristic).
                         Use &quot;Adjust&quot; only when you understand the consequences.
                       </small>
                     </Form.Group>
@@ -358,11 +358,11 @@ export const EventList = ({
                         const confirmed = await swal({
                           title: 'Confirm destructive propagation',
                           text:
-                            'You selected \'Adjust approved/pending\'. This will update users\' '
+                            'You selected \'Adjust approved/pending\'. This will update members\' '
                           + 'approved or pending hours and cannot be easily undone. Are you sure you '
                           + 'want to proceed?',
                           icon: 'warning',
-                          buttons: ['Cancel', 'Yes, adjust users'],
+                          buttons: ['Cancel', 'Yes, adjust members'],
                           dangerMode: true,
                         });
 

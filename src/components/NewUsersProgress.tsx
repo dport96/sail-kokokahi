@@ -80,7 +80,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
       })}
       {newUsers.length === 0 && (
         <p className="text-center text-muted">
-          No users registered within the last year
+          No members registered within the last year
         </p>
       )}
     </>

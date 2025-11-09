@@ -99,7 +99,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
 
   const addUserToEvent = async () => {
     if (!selectedUserId) {
-      swal('Error', 'Please select a user to add', 'error');
+      swal('Error', 'Please select a member to add', 'error');
       return;
     }
 
@@ -114,18 +114,18 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
       });
 
       if (response.ok) {
-        swal('Success', `User ${mode === 'signup' ? 'signed up for' : 'added to'} event successfully`, 'success');
+        swal('Success', `Member ${mode === 'signup' ? 'signed up for' : 'added to'} event successfully`, 'success');
         setSelectedUserId('');
         fetchEventAttendees();
         // Refresh the page to get updated data from server
         setTimeout(() => router.refresh(), 1000);
       } else {
         const error = await response.json();
-        swal('Error', error.message || 'Failed to add user to event', 'error');
+        swal('Error', error.message || 'Failed to add member to event', 'error');
       }
     } catch (error) {
       console.error('Error adding user to event:', error);
-      swal('Error', 'Failed to add user to event', 'error');
+      swal('Error', 'Failed to add member to event', 'error');
     }
   };
 
@@ -149,7 +149,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
         });
 
         if (response.ok) {
-          swal('Success', `User ${!currentAttended ? 'marked as attended' : 'marked as registered'}`, 'success');
+          swal('Success', `Member ${!currentAttended ? 'marked as attended' : 'marked as registered'}`, 'success');
           fetchEventAttendees();
           // Refresh the page to get updated data from server
           setTimeout(() => router.refresh(), 1000);
@@ -166,7 +166,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
 
   const removeUserFromEvent = async (attendeeId: number, userName: string) => {
     const confirm = await swal({
-      title: 'Remove User',
+      title: 'Remove Member',
       text: `Are you sure you want to remove ${userName} from this event?`,
       icon: 'warning',
       buttons: ['Cancel', 'Remove'],
@@ -180,16 +180,16 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
         });
 
         if (response.ok) {
-          swal('Success', 'User removed from event successfully', 'success');
+          swal('Success', 'Member removed from event successfully', 'success');
           fetchEventAttendees();
           // Refresh the page to get updated data from server
           setTimeout(() => router.refresh(), 1000);
         } else {
-          swal('Error', 'Failed to remove user from event', 'error');
+          swal('Error', 'Failed to remove member from event', 'error');
         }
       } catch (error) {
         console.error('Error removing user from event:', error);
-        swal('Error', 'Failed to remove user from event', 'error');
+        swal('Error', 'Failed to remove member from event', 'error');
       }
     }
   };
@@ -223,16 +223,16 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
           {event.hours}
         </div>
 
-        {/* Add User Section */}
+        {/* Add Member Section */}
         <div className="mb-4">
-          <h6>{mode === 'signup' ? 'Add User to Event Signup' : 'Add User to Event'}</h6>
+          <h6>{mode === 'signup' ? 'Add Member to Event Signup' : 'Add Member to Event'}</h6>
           <Row>
             <Col md={8}>
               <Form.Select
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
               >
-                <option value="">Select a user to add...</option>
+                <option value="">Select a member to add...</option>
                 {availableUsers.map(user => (
                   <option key={user.id} value={user.id}>
                     {user.firstName} {user.lastName} ({user.email})
@@ -245,9 +245,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                 variant="success"
                 onClick={addUserToEvent}
                 disabled={!selectedUserId || sessionUserIsNotRegular}
-                title={sessionUserIsNotRegular ? 'Admins cannot add users to events' : undefined}
+                title={sessionUserIsNotRegular ? 'Admins cannot add members to events' : undefined}
               >
-                Add User
+                Add Member
               </Button>
             </Col>
           </Row>
@@ -263,9 +263,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
             )
           </h6>
           {loading ? (
-            <Alert variant="info">Loading attendees...</Alert>
+            <Alert variant="info">Loading members...</Alert>
           ) : attendees.length === 0 ? (
-            <Alert variant="warning">No attendees found for this event.</Alert>
+            <Alert variant="warning">No members found for this event.</Alert>
           ) : (
             <Table striped bordered hover size="sm">
                   <thead>

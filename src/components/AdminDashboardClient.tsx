@@ -246,23 +246,23 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
 
   const handleBulkApprove = async () => {
     if (selectedUsers.size === 0) {
-      toast.warning('Please select users to approve');
+      toast.warning('Please select members to approve');
       return;
     }
 
     const confirm = await swal({
       title: 'Bulk Approve',
-      text: `Are you sure you want to approve pending hours for ${selectedUsers.size} selected user(s)?`,
+      text: `Are you sure you want to approve pending hours for ${selectedUsers.size} selected member(s)?`,
       icon: 'warning',
       buttons: ['Cancel', 'Approve'],
     });
 
     if (confirm) {
       try {
-        const approvePromises = Array.from(selectedUsers).map(userId => handleApprove(userId, false));
+        const approvePromises = Array.from(selectedUsers).map((userId) => handleApprove(userId, false));
         await Promise.all(approvePromises);
         setSelectedUsers(new Set());
-        toast.success(`Successfully approved ${selectedUsers.size} user(s)`);
+        toast.success(`Successfully approved ${selectedUsers.size} member(s)`);
         // Refresh the page to get updated data from server
         setTimeout(() => router.refresh(), 1000);
       } catch (error) {
@@ -276,13 +276,13 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
     const usersWithPendingHours = getSelectedUsersWithPendingHours();
 
     if (usersWithPendingHours.length === 0) {
-      toast.warning('Please select users with pending hours to deny');
+      toast.warning('Please select members with pending hours to deny');
       return;
     }
 
     const confirm = await swal({
       title: 'Bulk Deny',
-      text: `Are you sure you want to deny pending hours for ${usersWithPendingHours.length} selected user(s)?`,
+      text: `Are you sure you want to deny pending hours for ${usersWithPendingHours.length} selected member(s)?`,
       icon: 'warning',
       buttons: ['Cancel', 'Deny'],
       dangerMode: true,
@@ -290,10 +290,10 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
 
     if (confirm) {
       try {
-        const denyPromises = usersWithPendingHours.map(user => handleDeny(user.id, false));
+        const denyPromises = usersWithPendingHours.map((user) => handleDeny(user.id, false));
         await Promise.all(denyPromises);
         setSelectedUsers(new Set());
-        toast.success(`Successfully denied ${usersWithPendingHours.length} user(s)`);
+        toast.success(`Successfully denied ${usersWithPendingHours.length} member(s)`);
         // Refresh the page to get updated data from server
         setTimeout(() => router.refresh(), 1000);
       } catch (error) {
@@ -306,7 +306,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
   const handleDelete = async (id: number) => {
     swal({
       title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this users data!',
+      text: "Once deleted, you will not be able to recover this member's data!",
       icon: 'warning',
       buttons: ['Cancel', 'Delete'],
       dangerMode: true,
@@ -315,12 +315,12 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
         try {
           await deleteUser(id);
           setUpdatedUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-          swal('Deleted!', 'The user has been deleted successfully.', 'success');
+          swal('Deleted!', 'The member has been deleted successfully.', 'success');
           // Refresh the page to get updated data from server
           setTimeout(() => router.refresh(), 1000);
         } catch (error) {
-          console.error('Delete user error:', error);
-          swal('Error', 'Failed to delete the user. Please try again.', 'error');
+          console.error('Delete member error:', error);
+          swal('Error', 'Failed to delete the member. Please try again.', 'error');
         }
       }
     });
@@ -461,14 +461,14 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               <th>Pending Hours</th>
               <th>Amount Due</th>
               <th>Status</th>
-              <th>Delete User</th>
+              <th>Delete Member</th>
             </tr>
           </thead>
           <tbody>
             {updatedUsers.map((user) => (
               <tr key={user.id}>
                 <td>
-                  <label htmlFor={`user-${user.id}`} className="visually-hidden">
+                  <label htmlFor={`member-${user.id}`} className="visually-hidden">
                     Select
                     {' '}
                     {user.firstName}
@@ -476,7 +476,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     {user.lastName}
                   </label>
                   <input
-                    id={`user-${user.id}`}
+                    id={`member-${user.id}`}
                     type="checkbox"
                     checked={selectedUsers.has(user.id)}
                     disabled={!hasPendingChanges(user)}
@@ -590,7 +590,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
       <Modal show={showUserEvents} onHide={() => setShowUserEvents(false)} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>
-            {activeUser ? `${activeUser.firstName} ${activeUser.lastName} — Events` : 'User Events'}
+            {activeUser ? `${activeUser.firstName} ${activeUser.lastName} — Events` : 'Member Events'}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
