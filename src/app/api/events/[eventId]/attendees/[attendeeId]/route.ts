@@ -2,10 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { eventId: string; attendeeId: string } },
-) {
+export async function PATCH(req: NextRequest, context: any) {
+  // Normalize params: Next.js may provide params as an object or a Promise depending on typings/runtime
+  // Ensure we await if it's a Promise so we always have { eventId, attendeeId }
+  const paramsSource = context?.params;
+  const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
   try {
     const eventId = parseInt(params.eventId, 10);
     const attendeeId = parseInt(params.attendeeId, 10);
@@ -129,10 +130,9 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { eventId: string; attendeeId: string } },
-) {
+export async function DELETE(req: NextRequest, context: any) {
+  const paramsSource = context?.params;
+  const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
   try {
     const eventId = parseInt(params.eventId, 10);
     const attendeeId = parseInt(params.attendeeId, 10);

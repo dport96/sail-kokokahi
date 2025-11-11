@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { eventId: string } },
-) {
+export async function GET(req: NextRequest, context: any) {
+  const paramsSource = context?.params;
+  const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
   try {
     const eventId = parseInt(params.eventId, 10);
     const { searchParams } = new URL(req.url);
@@ -51,10 +50,9 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { eventId: string } },
-) {
+export async function POST(req: NextRequest, context: any) {
+  const paramsSource = context?.params;
+  const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
   try {
     const eventId = parseInt(params.eventId, 10);
     const { userId, attended = false } = await req.json(); // Default to false (registered, not attended)

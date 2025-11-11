@@ -21,6 +21,13 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
+  const formatDate = (date: Date) => {
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+  };
+
   const newUsers = users.filter(user => new Date(user.createdAt) >= oneYearAgo);
 
   const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
@@ -34,7 +41,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
       {newUsers.map(user => {
         const { approvedHours, pendingHours } = user;
         const progressPercentage = Math.min((approvedHours / HOURS_REQUIRED) * 100, 100);
-        const registrationDate = new Date(user.createdAt).toLocaleDateString();
+        const registrationDate = formatDate(new Date(user.createdAt));
 
         return (
           <div key={user.id} className="mb-3">

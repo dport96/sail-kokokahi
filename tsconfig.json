@@ -14,7 +14,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "baseUrl": ".",
     "paths": {
@@ -41,6 +41,8 @@
     ".next/types/**/*.ts",
     "tests/**/*.ts", // Changed from "tests" to be more specific
     "tests/**/*.tsx" // Add this for any TSX test files
+    ,
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules" // Remove the test file exclusions

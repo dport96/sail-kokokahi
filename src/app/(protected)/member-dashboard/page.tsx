@@ -200,7 +200,7 @@ const MemberDashboard = async () => {
                 <tbody>
                   {userHoursLog.slice(0, 10).map(log => (
                     <tr key={log.id}>
-                      <td>{new Date(log.createdAt).toLocaleDateString()}</td>
+            <td>{formatDate(new Date(log.createdAt))}</td>
                       <td>{log.action}</td>
                       <td>{log.hours}</td>
                       <td>{log.performedBy}</td>
