@@ -458,6 +458,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               <th>Last Name</th>
               <th>First Name</th>
               <th>Approved Hours</th>
+              <th className="visually-hidden">Email</th>
               <th>Pending Hours</th>
               <th>Amount Due</th>
               <th>Status</th>
