@@ -25,21 +25,32 @@ export default async function EventPage({ params }: { params: Promise<{ eventId:
   // Cast via unknown to satisfy TypeScript when narrowing session to our expected shape
   loggedInProtectedPage(session as unknown as { user: { email: string; id: string; randomKey: string } } | null);
 
-  // Extract the date and title from eventId
-  const cleanedId = eventId.replace(/^EVENT-/, '');
-  const parts = cleanedId.split('-');
-  const date = parts[0];
-  const titleParts = parts.slice(1);
-  const title = titleParts.join(' ');
+  // Try to resolve event by numeric ID first; fall back to legacy EVENT-<date>-<title> format
+  let event = null as Awaited<ReturnType<typeof prisma.event.findUnique>> | null;
+  if (/^\d+$/.test(eventId)) {
+    event = await prisma.event.findUnique({ where: { id: Number(eventId) } });
+  } else {
+    // Legacy support: Extract the date and title from legacy identifier
+    const cleanedId = eventId.replace(/^EVENT-/, '');
+    const parts = cleanedId.split('-');
+    const date = parts[0] || '';
+    const titleParts = parts.slice(1);
+    const title = titleParts.join(' ');
 
-  const formattedDate = `${date.slice(0, 2)}/${date.slice(2, 4)}/${date.slice(4)}`;
-  const normalizedTitle = title.replace(/-/g, ' ');
-  const event = await prisma.event.findFirst({
-    where: {
-      date: formattedDate,
-      title: normalizedTitle,
-    },
-  });
+    const formattedDate = date && date.length === 8
+      ? `${date.slice(0, 2)}/${date.slice(2, 4)}/${date.slice(4)}`
+      : '';
+    const normalizedTitle = title.replace(/-/g, ' ');
+
+    if (formattedDate && normalizedTitle) {
+      event = await prisma.event.findFirst({
+        where: {
+          date: formattedDate,
+          title: normalizedTitle,
+        },
+      });
+    }
+  }
 
   if (!event) {
     return (
