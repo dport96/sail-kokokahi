@@ -6,7 +6,9 @@ import CheckInComponent from '@/components/CheckIn';
 
 const prisma = new PrismaClient();
 
-export default async function EventPage({ params }: { params: { eventId: string } }) {
+export default async function EventPage(
+  { params }: PageProps<'/event-check-in/[eventId]'>,
+) {
   const session = await getServerSession(authOptions);
   loggedInProtectedPage(
     session as {
@@ -14,7 +16,7 @@ export default async function EventPage({ params }: { params: { eventId: string 
     } | null,
   );
 
-  const { eventId } = params;
+  const { eventId } = await params;
 
   // Extract the date and title from eventId
   const [date, ...titleParts] = eventId.replace(/^EVENT-/, '').split('-');
