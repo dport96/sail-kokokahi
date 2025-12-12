@@ -29,7 +29,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
     "multiselect-react-dropdown": "^2.0.25",
-    "next": "14.2.10",
+    "next": "^15.5.9",
     "next-auth": "^4.24.7",
     "qrcode": "^1.5.4",
     "react": "^18",
