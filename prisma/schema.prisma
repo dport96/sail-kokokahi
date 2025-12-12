@@ -3,55 +3,54 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  // for local development
-  // url      = env("DATABASE_URL")
-  // for Vercel
-
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id                   Int         @id @default(autoincrement())
-  email                String      @unique
+  id                   Int       @id @default(autoincrement())
+  email                String    @unique
   password             String
-  role                 Role        @default(USER)
-  firstName            String      @default("John")
-  lastName             String      @default("Doe")
-  approvedHours        Float       @default(0)
-  pendingHours         Float       @default(0)
+  role                 Role      @default(USER)
+  firstName            String    @default("John")
+  lastName             String    @default("Doe")
+  approvedHours        Float     @default(0)
+  pendingHours         Float     @default(0)
+  billingNotifications Boolean   @default(false)
+  emailNotifications   Boolean   @default(false)
   phone                String?
-  events               UserEvent[] // Connects users to the events they sign up for
-  hoursLogs            HoursLog[] // Added opposite relation field
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  status               String     @default("pending") // Add this field if required
+  cardCVV              String?
+  cardExpiry           String?
+  cardNumber           String?
+  reminders            Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  status               String    @default("pending")
+  mustChangePassword   Boolean?  @default(false)
+  Billing              Billing[]
 }
 
 model Event {
-  id          Int    @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
   description String
   date        String
   location    String
   hours       Float
   time        String
-  status      String @default("pending")
-  qr          String //field to store qr data
-  users       UserEvent[]  // Connects events to the users signed up for them
+  status      String      @default("pending")
+  qr          String?
+  signupReq   Boolean     @default(false)
+  users       UserEvent[]
 }
 
 model UserEvent {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  eventId   Int
-  attended  Boolean @default(false) // Tracks if the user attended the event
-  User      User    @relation(fields: [userId], references: [id])
-  Event     Event   @relation(fields: [eventId], references: [id])
+  id       Int     @id @default(autoincrement())
+  userId   Int
+  eventId  Int
+  attended Boolean @default(false)
+  Event    Event   @relation(fields: [eventId], references: [id])
 
-  // Ensure a user can't sign up for the same event twice
   @@unique([userId, eventId])
 }
 
@@ -62,16 +61,39 @@ model HoursLog {
   hours       Float
   performedBy String
   createdAt   DateTime @default(now())
-  User        User     @relation(fields: [userId], references: [id])
 }
 
 model Qr {
+  id        Int      @id @default(autoincrement())
+  data      String
+  createdAt DateTime @default(now())
+}
+
+model Billing {
   id          Int      @id @default(autoincrement())
-  data        String
+  userId      Int
+  amount      Float
+  description String
   createdAt   DateTime @default(now())
+  User        User     @relation(fields: [userId], references: [id])
+}
+
+model Stuff {
+  id        Int       @id @default(autoincrement())
+  name      String
+  quantity  Int
+  condition Condition
+  owner     String
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+enum Condition {
+  excellent
+  good
+  fair
+  poor
 }
