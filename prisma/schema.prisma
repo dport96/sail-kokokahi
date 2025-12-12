@@ -27,6 +27,7 @@ model User {
   updatedAt            DateTime  @updatedAt
   status               String    @default("pending")
   mustChangePassword   Boolean?  @default(false)
+  userEvents           UserEvent[]
   Billing              Billing[]
 }
 
@@ -49,6 +50,7 @@ model UserEvent {
   userId   Int
   eventId  Int
   attended Boolean @default(false)
+  User     User    @relation(fields: [userId], references: [id])
   Event    Event   @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
