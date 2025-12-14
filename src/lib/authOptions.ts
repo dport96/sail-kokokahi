@@ -1,6 +1,6 @@
 /* eslint-disable arrow-body-style */
 import { compare } from 'bcrypt';
-import { type NextAuthOptions } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
 
@@ -23,11 +23,19 @@ const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           return null;
         }
-        const user = await prisma.user.findUnique({
+
+        // Normalize and perform a case-insensitive lookup so sign-in is not affected by email casing.
+        const lookupEmail = credentials.email.trim().toLowerCase();
+
+        const user = await prisma.user.findFirst({
           where: {
-            email: credentials.email,
+            email: {
+              equals: lookupEmail,
+              mode: 'insensitive',
+            },
           },
         });
+
         if (!user) {
           return null;
         }
@@ -41,16 +49,13 @@ const authOptions: NextAuthOptions = {
           id: `${user.id}`,
           email: user.email,
           randomKey: user.role,
+          mustChangePassword: user.mustChangePassword,
         };
       },
     }),
   ],
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signout',
-    //   error: '/auth/error',
-    //   verifyRequest: '/auth/verify-request',
-    //   newUser: '/auth/new-user'
   },
   callbacks: {
     session: ({ session, token }) => {
@@ -60,6 +65,7 @@ const authOptions: NextAuthOptions = {
           ...session.user,
           id: token.id,
           randomKey: token.randomKey,
+          mustChangePassword: token.mustChangePassword,
         },
       };
     },
@@ -70,12 +76,20 @@ const authOptions: NextAuthOptions = {
           ...token,
           id: u.id,
           randomKey: u.randomKey,
+          mustChangePassword: u.mustChangePassword,
         };
       }
       return token;
     },
-    redirect: () => {
-      return '/'; // Redirect to landing page
+    redirect: async ({ url, baseUrl }) => {
+      // If signing out, redirect to the base URL (original domain)
+      if (url.includes('/auth/signout')) {
+        return baseUrl;
+      }
+      // Default behavior for other redirects
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

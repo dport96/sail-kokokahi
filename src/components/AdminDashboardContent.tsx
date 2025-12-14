@@ -26,11 +26,13 @@ interface AdminDashboardContentProps {
 }
 
 const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWithAmountDue }) => {
-  const [showProgress, setShowProgress] = useState(true);
-  const [showTable, setShowTable] = useState(true);
+  // Initialize collapsed by default
+  const [showProgress, setShowProgress] = useState(false);
+  const [showTable, setShowTable] = useState(false);
   const [progressFilter, setProgressFilter] = useState('none');
   const [tableFilter, setTableFilter] = useState('none');
   const [pendingFilter, setPendingFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleProgressHeaderClick = () => {
     setShowProgress(!showProgress);
@@ -72,15 +74,19 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
         });
       case 'name-asc':
         return filteredData.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`;
-          const nameB = `${b.firstName} ${b.lastName}`;
-          return nameA.localeCompare(nameB);
+          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return -1;
+          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return 1;
+          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return -1;
+          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
+          return 0;
         });
       case 'name-desc':
         return filteredData.sort((a, b) => {
-          const nameA = `${a.firstName} ${a.lastName}`;
-          const nameB = `${b.firstName} ${b.lastName}`;
-          return nameB.localeCompare(nameA);
+          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return -1;
+          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return 1;
+          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return -1;
+          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return 1;
+          return 0;
         });
       default:
         return filteredData;
@@ -88,7 +94,15 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
   };
 
   const filteredProgressUsers = filterAndSortUsers(usersWithAmountDue, progressFilter, 'all');
-  const filteredTableUsers = filterAndSortUsers(usersWithAmountDue, tableFilter, pendingFilter);
+  // Apply search filter (case-insensitive) before sorting
+  const searchedUsers = searchQuery
+    ? usersWithAmountDue.filter((u) => {
+      const hay = `${u.firstName} ${u.lastName} ${('email' in u ? (u as any).email : '')}`.toLowerCase();
+      return hay.includes(searchQuery.toLowerCase());
+    })
+    : usersWithAmountDue;
+
+  const filteredTableUsers = filterAndSortUsers(searchedUsers, tableFilter, pendingFilter);
 
   return (
     <Container>
@@ -110,7 +124,7 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               className="btn btn-link text-decoration-none text-dark d-flex align-items-center flex-grow-1"
               style={{ cursor: 'pointer' }}
             >
-              <h5 className="mb-0">New Users Progress</h5>
+              <h5 className="mb-0">Member Progress</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '200px' }}>
               <Form.Select
@@ -155,9 +169,17 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
               className="btn btn-link text-decoration-none text-dark d-flex align-items-center flex-grow-1"
               style={{ cursor: 'pointer' }}
             >
-              <h5 className="mb-0 me-3">Users Table</h5>
+              <h5 className="mb-0 me-3">Members Table</h5>
             </button>
             <div className="d-flex gap-2" style={{ minWidth: '400px' }}>
+              <input
+                type="search"
+                placeholder="Search members..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ minWidth: '200px' }}
+              />
               <Form.Select
                 size="sm"
                 value={tableFilter}
@@ -176,10 +198,11 @@ const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWith
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPendingFilter(e.target.value)}
                 style={{ minWidth: '150px' }}
               >
-                <option value="all">All Users</option>
+                <option value="all">All Members</option>
                 <option value="pending">With Pending Hours</option>
                 <option value="no-pending">No Pending Hours</option>
               </Form.Select>
+              {/* Maintenance moved to the admin navigation bar to avoid duplication */}
             </div>
             <Button variant="link" onClick={handleTableHeaderClick}>
               {showTable ? '−' : '+'}

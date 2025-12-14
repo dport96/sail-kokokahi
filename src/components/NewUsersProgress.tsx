@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
+import { HOURS_REQUIRED } from '@/lib/constants';
 
 interface User {
   id: number;
@@ -20,10 +21,17 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
+  const formatDate = (date: Date) => {
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+  };
+
   const newUsers = users.filter(user => new Date(user.createdAt) >= oneYearAgo);
 
-  const getProgressBarVariant = (totalHours: number, percentage: number): string => {
-    if (totalHours >= 6) return 'success';
+  const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
+    if (approvedHours >= HOURS_REQUIRED) return 'success';
     if (percentage >= 50) return 'info';
     return 'warning';
   };
@@ -31,9 +39,9 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
   return (
     <>
       {newUsers.map(user => {
-        const totalHours = user.approvedHours + user.pendingHours;
-        const progressPercentage = Math.min((totalHours / 6) * 100, 100);
-        const registrationDate = new Date(user.createdAt).toLocaleDateString();
+        const { approvedHours, pendingHours } = user;
+        const progressPercentage = Math.min((approvedHours / HOURS_REQUIRED) * 100, 100);
+        const registrationDate = formatDate(new Date(user.createdAt));
 
         return (
           <div key={user.id} className="mb-3">
@@ -52,8 +60,8 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <ProgressBar
                 now={progressPercentage}
-                label={`${totalHours} hours`}
-                variant={getProgressBarVariant(totalHours, progressPercentage)}
+                label={`${approvedHours} hours`}
+                variant={getProgressBarVariant(approvedHours, progressPercentage)}
                 className="w-75"
               />
               <span className="ms-2">
@@ -64,14 +72,14 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
             <small className="text-muted">
               Approved:
               {' '}
-              {user.approvedHours}
+              {approvedHours}
               {' '}
               hrs | Pending:
               {' '}
-              {user.pendingHours}
+              {pendingHours}
               {' '}
               hrs
-              {totalHours >= 6}
+              {approvedHours >= HOURS_REQUIRED && ' (Complete)'}
             </small>
             <hr />
           </div>
@@ -79,7 +87,7 @@ const NewUsersProgress: React.FC<NewUsersProgressProps> = ({ users }) => {
       })}
       {newUsers.length === 0 && (
         <p className="text-center text-muted">
-          No users registered within the last year
+          No members registered within the last year
         </p>
       )}
     </>

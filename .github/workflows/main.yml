@@ -10,6 +10,11 @@ on:
 env:
   NEXTAUTH_SECRET: secret
   NEXTAUTH_URL: http://localhost:3000
+  # Ensure CI has a DATABASE_URL available for migrations/tests. Prefer secret, then repo env, then fallback localhost for quick runs.
+  DATABASE_URL: ${{ secrets.DATABASE_URL || env.DATABASE_URL || 'postgresql://sail_user:your_password@localhost:5432/sail_kokokahi' }}
+  # Provide BASE_URL so tests and other workflows can be run against the intended host.
+  # Use NEXT_PUBLIC_APP_URL when available, then NEXTAUTH_URL, otherwise localhost.
+  BASE_URL: ${{ env.NEXT_PUBLIC_APP_URL || env.NEXTAUTH_URL || 'http://localhost:3000' }}
 
 jobs:
   lint-and-test:
@@ -32,6 +37,20 @@ jobs:
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: Run database migrations (deploy)
+      run: npx prisma migrate deploy
+
+    - name: Start Next dev in background
+      run: |
+        export DATABASE_URL=${{ env.DATABASE_URL }}
+        nohup npm run dev >/tmp/next-dev.log 2>&1 &
+        # Wait for server to be available
+        for i in {1..30}; do
+          if curl -sSf http://localhost:3000/_next/health > /dev/null 2>&1; then
+            echo "server up" && break
+          fi
+          sleep 1
+        done
 
     - name: Run Playwright tests
       run: npx playwright test

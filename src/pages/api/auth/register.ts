@@ -5,12 +5,17 @@ import { hash } from 'bcrypt';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const {
-      email,
       password,
       firstName,
       lastName,
       phone,
     } = req.body;
+    let { email } = req.body;
+
+    // Normalize email to lowercase for canonical storage
+    if (typeof email === 'string') {
+      email = email.trim().toLowerCase();
+    }
 
     // Validate required fields
     if (!email || !password || !firstName || !lastName) {

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Role } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -27,6 +28,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Do not allow admins or non-user roles to sign up for events
+    if (user.role !== Role.USER) {
+      return res.status(403).json({ message: 'Admins and staff cannot sign up for events' });
     }
 
     const event = await prisma.event.findUnique({

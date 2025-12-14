@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
 import AdminDashboardContent from '@/components/AdminDashboardContent';
+import { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED } from '@/lib/constants';
 
 const AdminDashboard = async () => {
   const session = await getServerSession(authOptions);
@@ -13,7 +14,7 @@ const AdminDashboard = async () => {
     } | null,
   );
 
-  // Calculate date one year ago
+  // Get the date one year ago from now
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
@@ -24,11 +25,17 @@ const AdminDashboard = async () => {
         gte: oneYearAgo, // Only get users created after this date
       },
     },
-    orderBy: {
-      createdAt: 'asc', // Sort by creation date
-    },
+    orderBy: [
+      {
+        lastName: 'asc',
+      },
+      {
+        firstName: 'asc',
+      },
+    ],
     select: {
       id: true,
+      email: true,
       firstName: true,
       lastName: true,
       approvedHours: true,
@@ -36,21 +43,22 @@ const AdminDashboard = async () => {
       status: true,
       createdAt: true,
       role: true,
+      mustChangePassword: true,
     },
   });
 
-  const amount = 120;
-
   const usersWithAmountDue = users.map((user) => ({
     id: user.id,
+    email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
     approvedHours: user.approvedHours,
     pendingHours: user.pendingHours,
-    amountDue: user.approvedHours > 6 ? 0 : amount - 20 * user.approvedHours,
+    amountDue: user.approvedHours >= HOURS_REQUIRED ? 0 : MEMBERSHIP_BASE_AMOUNT - HOURLY_RATE * user.approvedHours,
     createdAt: user.createdAt,
     status: user.status,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
   }));
 
   if (!users || users.length === 0) {

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
+import { Role } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -42,6 +43,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Do not allow admins or non-user roles to check in
+    if (user.role !== Role.USER) {
+      return res.status(403).json({ success: false, message: 'Admins and staff cannot check in for events' });
+    }
+
     // Fetch the event details
     const event = await prisma.event.findUnique({
       where: { id: Number(eventId) },
@@ -69,6 +75,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           userId: user.id,
           eventId: Number(eventId),
         },
+      });
+    } else if (userEvent.attended) {
+      // If user is already checked in (attended = true), prevent duplicate check-in
+      return res.status(400).json({
+        success: false,
+        message: 'You have already checked in for this event',
       });
     }
 

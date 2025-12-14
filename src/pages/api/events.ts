@@ -1,21 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import QRCode from 'qrcode';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { title, description, date, location, hours, time } = req.body;
-
-      // Generate a unique barcode
-      const eventIdentifier = `EVENT-${date.replace(/\//g, '')}-${title.trim().replace(/\s+/g, '-')}`;
-      // vercel
-      const qrData = `http://sail-kokokahi-nine.vercel.app/event-check-in/${eventIdentifier}`;
-      // localhost
-      // const qrData = `http://localhost:3000/event-check-in/${eventIdentifier}`;
-      const qrCodeUrl = await QRCode.toDataURL(qrData);
+      const { title, description, date, location, hours, time, signupReq } = req.body;
 
       // Save the event to the database
       const event = await prisma.event.create({
@@ -26,10 +17,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location,
           hours,
           time,
-          qr: qrCodeUrl,
+          signupReq,
         },
       });
-      return res.status(200).json({ success: true, event, qrCodeLink: qrData });
+      return res.status(200).json({ success: true, event });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ success: false, message: 'Failed to create event.' });

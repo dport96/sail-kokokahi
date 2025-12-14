@@ -9,10 +9,12 @@ import { getServerSession } from 'next-auth';
 type EventAnalytics = {
   id: number;
   eventName: string;
+  eventDate: string;
   signupCount: number;
   attendanceCount: number;
   totalUsers: number;
   hours: number; // Add hours field
+  isUserSignedUp: boolean; // Add signup status for current user
 };
 
 // This function fetches and transforms the data
@@ -24,6 +26,20 @@ async function getEventsAnalytics(): Promise<EventAnalytics[]> {
     },
   });
 
+  // Get current session to determine current user
+  const session = await getServerSession(authOptions);
+  const currentUserEmail = session?.user?.email;
+
+  // Get current user ID
+  let currentUserId: number | null = null;
+  if (currentUserEmail) {
+    const currentUser = await prisma.user.findUnique({
+      where: { email: currentUserEmail },
+      select: { id: true },
+    });
+    currentUserId = currentUser?.id || null;
+  }
+
   // Get all events with their associated users
   const events = await prisma.event.findMany({
     include: {
@@ -31,6 +47,7 @@ async function getEventsAnalytics(): Promise<EventAnalytics[]> {
         include: {
           User: {
             select: {
+              id: true,
               role: true,
               approvedHours: true,
             },
@@ -52,13 +69,20 @@ async function getEventsAnalytics(): Promise<EventAnalytics[]> {
       userEvent => userEvent.attended === true && userEvent.User.role === 'USER',
     ).length;
 
+    // Check if current user is signed up for this event
+    const isUserSignedUp = currentUserId ? event.users.some(
+      userEvent => userEvent.User.id === currentUserId,
+    ) : false;
+
     return {
       id: event.id,
       eventName: event.title,
+      eventDate: event.date,
       signupCount,
       attendanceCount,
       totalUsers: totalUserCount,
       hours: event.hours,
+      isUserSignedUp,
     };
   });
 

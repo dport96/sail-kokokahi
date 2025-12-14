@@ -1,0 +1,272 @@
+[
+  {
+    "title": "KYC Classboat Race A",
+    "description": "KYC Classboat Race A for F18 racers",
+    "date": "Feb 1",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Feb 9",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race B",
+    "description": "KYC Classboat Race B for F18 racers",
+    "date": "Feb 23",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Mar 8",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race C",
+    "description": "KYC Classboat Race C for F18 racers",
+    "date": "Mar 16",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "Mar 23",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race D",
+    "description": "KYC Classboat Race D for F18 racers",
+    "date": "Apr 6",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Apr 13",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members, possibly in 'the big water'",
+    "date": "Apr 26",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "May 10",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race E",
+    "description": "KYC Classboat Race E for F18 racers",
+    "date": "May 10",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "May 25",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Jun 8",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members to celebrate a birthday",
+    "date": "Jun 14",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race G",
+    "description": "KYC Classboat Race G for F18 racers",
+    "date": "Jun 28",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Jul 12",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race H",
+    "description": "KYC Classboat Race H for F18 racers",
+    "date": "Jul 12",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "Jul 20",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Aug 10",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members with prizes",
+    "date": "Aug 16",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race J",
+    "description": "KYC Classboat Race J for F18 racers",
+    "date": "Aug 23",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "Sep 7",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Sep 13",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "A mix of work and play. An opportunity for members to contribute work hours.",
+    "date": "Oct 12",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "KYC Classboat Race K",
+    "description": "KYC Classboat Race K for F18 racers",
+    "date": "Oct 12",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "Oct 18",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day",
+    "description": "Last Club Day of the year for accumulating work hours.",
+    "date": "Nov 8",
+    "location": "Kokokahi Bay",
+    "hours": 1.5,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members",
+    "date": "Nov 23",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Day & Annual General Meeting",
+    "description": "Club Day combined with the Annual General Meeting.",
+    "date": "Dec 14",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  },
+  {
+    "title": "Club Fun Race",
+    "description": "Fun sailing race for members. Use your new Christmas presents!",
+    "date": "Dec 27",
+    "location": "Kokokahi Bay",
+    "hours": 1,
+    "time": "10:00 AM - 11:00 AM",
+    "owner": "admin@foo.com"
+  }
+]

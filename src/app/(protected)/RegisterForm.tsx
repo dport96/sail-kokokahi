@@ -1,12 +1,14 @@
 // components/RegisterForm.tsx
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface RegisterFormData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  confirmPassword?: string;
   phone?: string;
 }
 
@@ -16,11 +18,12 @@ const RegisterForm: React.FC = () => {
     lastName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [showPasswords, setShowPasswords] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,21 +35,64 @@ const RegisterForm: React.FC = () => {
     setLoading(true);
     setError('');
 
+    // Client-side password confirmation check
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Send only the fields the server expects (exclude confirmPassword)
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      };
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        router.push('/');
+        // Wait a moment to ensure registration is fully complete
+        await new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 500);
+        });
+
+        // Automatically sign in the user after successful registration
+        const signInResult = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        });
+
+        if (signInResult?.ok) {
+          // Get the user's role and redirect accordingly
+          const sessionResponse = await fetch('/api/auth/session');
+          const sessionData = await sessionResponse.json();
+          const userRole = sessionData?.user?.randomKey;
+
+          if (userRole === 'ADMIN') {
+            router.push('/admin-dashboard');
+          } else {
+            router.push('/member-event-sign-up');
+          }
+        } else {
+          setError('Registration successful, but sign-in failed. Please sign in manually.');
+        }
       } else {
-        const data = await response.json();
-        setError(data.error || 'Something went wrong');
+        setError(data.error || 'Registration failed');
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      console.error('Registration error:', err);
+      setError('An unexpected error occurred during registration.');
     } finally {
       setLoading(false);
     }
@@ -127,9 +173,9 @@ const RegisterForm: React.FC = () => {
             </div>
 
             <div className="col-12">
-              <div className="form-floating">
+              <div className="form-floating position-relative">
                 <input
-                  type="password"
+                  type={showPasswords ? 'text' : 'password'}
                   className="form-control"
                   id="password"
                   name="password"
@@ -137,8 +183,46 @@ const RegisterForm: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  style={{ paddingRight: '3rem' }}
                 />
                 <label htmlFor="password">Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((s) => !s)}
+                  aria-pressed={showPasswords}
+                  aria-label={showPasswords ? 'Hide password' : 'Show password'}
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}
+                >
+                  {showPasswords ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-floating position-relative">
+                <input
+                  type={showPasswords ? 'text' : 'password'}
+                  className="form-control"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  style={{ paddingRight: '3rem' }}
+                />
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((s) => !s)}
+                  aria-pressed={showPasswords}
+                  aria-label={showPasswords ? 'Hide confirmation password' : 'Show confirmation password'}
+                  className="btn btn-sm btn-outline-secondary"
+                  style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}
+                >
+                  {showPasswords ? '🙈' : '👁️'}
+                </button>
               </div>
             </div>
 
@@ -151,7 +235,7 @@ const RegisterForm: React.FC = () => {
                 {loading ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                    Creating Account...
+                    Creating Account & Signing In...
                   </>
                 ) : (
                   'Create Account'

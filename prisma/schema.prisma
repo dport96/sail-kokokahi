@@ -8,51 +8,46 @@ datasource db {
 }
 
 model User {
-  id                   Int       @id @default(autoincrement())
-  email                String    @unique
+  id                   Int         @id @default(autoincrement())
+  email                String      @unique
   password             String
-  role                 Role      @default(USER)
-  firstName            String    @default("John")
-  lastName             String    @default("Doe")
-  approvedHours        Float     @default(0)
-  pendingHours         Float     @default(0)
-  billingNotifications Boolean   @default(false)
-  emailNotifications   Boolean   @default(false)
+  role                 Role        @default(USER)
+  firstName            String      @default("John")
+  lastName             String      @default("Doe")
+  approvedHours        Float       @default(0)
+  pendingHours         Float       @default(0)
   phone                String?
-  cardCVV              String?
-  cardExpiry           String?
-  cardNumber           String?
-  reminders            Boolean   @default(false)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  status               String    @default("pending")
-  mustChangePassword   Boolean?  @default(false)
-  userEvents           UserEvent[]
-  Billing              Billing[]
+  events               UserEvent[] // Connects users to the events they sign up for
+  hoursLogs            HoursLog[] // Added opposite relation field
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  mustChangePassword   Boolean    @default(false)
+  status               String     @default("pending") // Add this field if required
 }
 
 model Event {
-  id          Int         @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   title       String
   description String
   date        String
   location    String
   hours       Float
   time        String
-  status      String      @default("pending")
-  qr          String?
-  signupReq   Boolean     @default(false)
-  users       UserEvent[]
+  status      String @default("pending")
+  qr          String? //field to store qr data (optional for runtime generation)
+  users       UserEvent[]  // Connects events to the users signed up for them
+  signupReq   Boolean @default(false)
 }
 
 model UserEvent {
-  id       Int     @id @default(autoincrement())
-  userId   Int
-  eventId  Int
-  attended Boolean @default(false)
-  User     User    @relation(fields: [userId], references: [id])
-  Event    Event   @relation(fields: [eventId], references: [id])
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  attended  Boolean @default(false) // Tracks if the user attended the event
+  User      User    @relation(fields: [userId], references: [id])
+  Event     Event   @relation(fields: [eventId], references: [id])
 
+  // Ensure a user can't sign up for the same event twice
   @@unique([userId, eventId])
 }
 
@@ -63,39 +58,16 @@ model HoursLog {
   hours       Float
   performedBy String
   createdAt   DateTime @default(now())
-}
-
-model Qr {
-  id        Int      @id @default(autoincrement())
-  data      String
-  createdAt DateTime @default(now())
-}
-
-model Billing {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  amount      Float
-  description String
-  createdAt   DateTime @default(now())
   User        User     @relation(fields: [userId], references: [id])
 }
 
-model Stuff {
-  id        Int       @id @default(autoincrement())
-  name      String
-  quantity  Int
-  condition Condition
-  owner     String
+model Qr {
+  id          Int      @id @default(autoincrement())
+  data        String
+  createdAt   DateTime @default(now())
 }
 
 enum Role {
   USER
   ADMIN
-}
-
-enum Condition {
-  excellent
-  good
-  fair
-  poor
 }

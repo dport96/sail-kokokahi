@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button, Col, DropdownButton, Row, Container } from 'react-bootstrap';
 import swal from 'sweetalert';
 
@@ -13,8 +13,42 @@ interface Event {
   description: string;
 }
 
-export default function CheckInComponent({ event }: { event: Event }) {
+interface CheckInProps {
+  event: Event;
+  isAlreadyCheckedIn: boolean;
+}
+
+export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [checkedInStatus, setCheckedInStatus] = useState(isAlreadyCheckedIn);
+  const [statusLoading, setStatusLoading] = useState(true);
+
+  // Function to check current check-in status
+  const checkStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/user/check-status?eventId=${event.id}`);
+      const result = await response.json();
+
+      if (response.ok) {
+        setCheckedInStatus(result.isCheckedIn);
+      } else {
+        console.error('Failed to check status:', result.message);
+        // Fall back to the server-side prop
+        setCheckedInStatus(isAlreadyCheckedIn);
+      }
+    } catch (error) {
+      console.error('Error checking status:', error);
+      // Fall back to the server-side prop
+      setCheckedInStatus(isAlreadyCheckedIn);
+    } finally {
+      setStatusLoading(false);
+    }
+  }, [event.id, isAlreadyCheckedIn]);
+
+  // Check status when component mounts
+  useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
 
   const handleCheckIn = async (eventId: number) => {
     setIsLoading(true);
@@ -29,6 +63,8 @@ export default function CheckInComponent({ event }: { event: Event }) {
 
       if (response.ok) {
         swal('Success', 'Successfully checked in!', 'success');
+        // Update the status immediately after successful check-in
+        setCheckedInStatus(true);
       } else {
         throw new Error(result.message || 'Check-in failed');
       }
@@ -66,12 +102,33 @@ export default function CheckInComponent({ event }: { event: Event }) {
                     </p>
                   </div>
                 </DropdownButton>
-                <Button
-                  onClick={() => handleCheckIn(event.id)}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Checking in...' : 'Check In'}
-                </Button>
+                {statusLoading && (
+                  <Button variant="secondary" disabled className="mb-2">
+                    Checking status...
+                  </Button>
+                )}
+                {!statusLoading && checkedInStatus && (
+                  <div>
+                    <Button
+                      variant="success"
+                      disabled
+                      className="mb-2"
+                    >
+                      ✓ Already Checked In
+                    </Button>
+                    <p className="text-success small">
+                      You have already checked in for this event.
+                    </p>
+                  </div>
+                )}
+                {!statusLoading && !checkedInStatus && (
+                  <Button
+                    onClick={() => handleCheckIn(event.id)}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Checking in...' : 'Check In'}
+                  </Button>
+                )}
               </Col>
             </Row>
           </div>
