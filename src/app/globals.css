@@ -29,7 +29,7 @@ main:has(#landing-page) {
 }
 
 .background {
-  background-image: url('/sandbar.jpg');
+  background-image: url('/Sail_Kokohahi_pic.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
