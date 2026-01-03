@@ -1,137 +1,175 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Button, Container, ListGroup, Row, Col } from 'react-bootstrap';
+import React, { useState, useRef } from 'react';
+import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-interface BackupItem {
-  timestamp: string;
-  filename: string;
-}
-
 const AdminMaintenanceClient: React.FC = () => {
-  const [backups, setBackups] = useState<BackupItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pendingRestore, setPendingRestore] = useState<string | null>(null);
   const [restoreConfirmText, setRestoreConfirmText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchBackups = async () => {
-    setLoading(true);
+  const handleBackup = async () => {
     try {
-      const res = await fetch('/api/admin/list-backups');
-      if (!res.ok) throw new Error('Failed to list backups');
-      const data = await res.json();
-      setBackups(data || []);
+      setLoading(true);
+      toast.info('Creating backup...');
+      
+      const res = await fetch('/api/admin/backup');
+      if (!res.ok) throw new Error('Backup failed');
+      
+      // Download the file
+      const blob = await res.blob();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `sail-kokokahi-backup-${timestamp}.json`;
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('Backup downloaded successfully');
     } catch (err) {
       console.error(err);
-      toast.error('Failed to fetch backup list');
+      toast.error('Backup failed');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchBackups();
-  }, []);
-
-  const handleBackup = async () => {
-    try {
-      toast.info('Starting backup...');
-      const res = await fetch('/api/admin/backup', { method: 'POST' });
-      if (!res.ok) throw new Error('Backup failed');
-      toast.success('Backup created');
-      fetchBackups();
-    } catch (err) {
-      console.error(err);
-      toast.error('Backup failed');
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.name.endsWith('.json')) {
+        toast.error('Please select a valid JSON backup file');
+        return;
+      }
+      setSelectedFile(file);
+      setShowRestoreConfirm(true);
+      setRestoreConfirmText('');
     }
   };
 
-  const handleRestore = async (filename: string) => {
-    // Step 1: request user to confirm in the UI
-    setPendingRestore(filename);
-    setRestoreConfirmText('');
-  };
+  const doRestore = async () => {
+    if (!selectedFile) return;
 
-  const doRestore = async (filename: string) => {
     try {
-      toast.info('Starting restore...');
+      setLoading(true);
+      toast.info('Restoring backup...');
+      
+      const text = await selectedFile.text();
+      const backup = JSON.parse(text);
+      
       const res = await fetch('/api/admin/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename }),
+        body: JSON.stringify(backup),
       });
-      if (!res.ok) throw new Error('Restore failed');
-      toast.success('Restore completed');
-      setPendingRestore(null);
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.details || 'Restore failed');
+      }
+      
+      const result = await res.json();
+      toast.success(`Restore completed: ${result.restored.users} users, ${result.restored.events} events`);
+      
+      setShowRestoreConfirm(false);
+      setSelectedFile(null);
+      setRestoreConfirmText('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
       console.error(err);
-      toast.error('Restore failed');
+      toast.error(err instanceof Error ? err.message : 'Restore failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container>
       <h1 className="fw-bolder pt-3">Admin Maintenance</h1>
-      <p className="text-muted">Backup and restore the database. Backups are timestamped and stored on the server.</p>
+      <p className="text-muted">Export database to JSON file or restore from a backup file.</p>
 
-      <Row className="mb-3">
-        <Col>
-          <Button variant="primary" onClick={handleBackup} disabled={loading}>Create Backup</Button>
+      <Row className="mb-4">
+        <Col md={6}>
+          <div className="border rounded p-3">
+            <h5>Create Backup</h5>
+            <p className="small text-muted">Export all database data to a JSON file</p>
+            <Button variant="primary" onClick={handleBackup} disabled={loading}>
+              Download Backup
+            </Button>
+          </div>
+        </Col>
+        
+        <Col md={6}>
+          <div className="border rounded p-3">
+            <h5>Restore Backup</h5>
+            <p className="small text-muted">Upload a backup file to restore</p>
+            <Form.Group>
+              <Form.Control
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileSelect}
+                disabled={loading}
+              />
+            </Form.Group>
+          </div>
         </Col>
       </Row>
 
-      <ListGroup>
-        {backups.map((b) => (
-          <ListGroup.Item key={b.filename} className="d-flex justify-content-between align-items-center">
-            <div>
-              <strong>{b.timestamp}</strong>
-              <div className="text-muted small">{b.filename}</div>
-            </div>
-            <div>
-              <Button variant="danger" size="sm" onClick={() => handleRestore(b.filename)}>Restore</Button>
-            </div>
-          </ListGroup.Item>
-        ))}
-        {backups.length === 0 && <ListGroup.Item>No backups found</ListGroup.Item>}
-      </ListGroup>
-
-      {pendingRestore && (
-        <div className="mt-3 p-3 border rounded">
-          <h5>Confirm restore</h5>
+      {showRestoreConfirm && selectedFile && (
+        <div className="mt-3 p-3 border border-danger rounded bg-light">
+          <h5 className="text-danger">⚠️ Confirm Restore</h5>
           <p className="small text-muted">
-            Type
+            You are about to restore from
             {' '}
-            <strong>
-              RESTORE
-            </strong>
-            {' '}
-            in the box below and click Confirm to restore from
-            {' '}
-            <em>
-              {pendingRestore}
-            </em>
+            <strong>{selectedFile.name}</strong>
             .
             {' '}
-            This will replace the current database.
+            <span className="text-danger fw-bold">This will DELETE ALL current data and replace it with the backup.</span>
+          </p>
+          <p className="small">
+            Type
+            {' '}
+            <strong>RESTORE</strong>
+            {' '}
+            below to confirm:
           </p>
           <div className="d-flex gap-2">
-            <input
+            <Form.Control
               type="text"
               value={restoreConfirmText}
               onChange={(e) => setRestoreConfirmText(e.target.value)}
               placeholder="Type RESTORE to confirm"
-              className="form-control"
+              disabled={loading}
             />
             <Button
               variant="danger"
-              disabled={restoreConfirmText !== 'RESTORE'}
-              onClick={() => doRestore(pendingRestore)}
+              disabled={restoreConfirmText !== 'RESTORE' || loading}
+              onClick={doRestore}
             >
-              Confirm Restore
+              {loading ? 'Restoring...' : 'Confirm Restore'}
             </Button>
-            <Button variant="secondary" onClick={() => setPendingRestore(null)}>Cancel</Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => {
+                setShowRestoreConfirm(false);
+                setSelectedFile(null);
+                setRestoreConfirmText('');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       )}

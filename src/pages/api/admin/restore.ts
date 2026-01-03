@@ -1,45 +1,59 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path';
-import fs from 'fs';
-import { exec } from 'child_process';
+import { PrismaClient } from '@prisma/client';
 
-function execPromise(cmd: string) {
-  return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
-    exec(cmd, { maxBuffer: 1024 * 1024 * 20 }, (err, stdout, stderr) => {
-      if (err) {
-        const e = new Error(`Command failed: ${err.message || String(err)}`);
-        // @ts-ignore
-        e.stderr = stderr;
-        reject(e);
-        return;
-      }
-      resolve({ stdout, stderr });
-    });
-  });
-}
+const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { filename } = req.body || {};
-  if (!filename || typeof filename !== 'string') return res.status(400).json({ error: 'Missing filename' });
-
-  const backupsDir = path.join(process.cwd(), 'backups');
-  const filePath = path.join(backupsDir, filename);
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Backup file not found' });
-
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) return res.status(500).json({ error: 'DATABASE_URL not configured' });
-
   try {
-    // Use pg_restore to restore the custom-format dump
-    const exportCmd = `export DATABASE_URL='${databaseUrl}'`;
-    const restoreCmd = `pg_restore --clean --no-owner -d "$DATABASE_URL" "${filePath}"`;
-    const cmd = `${exportCmd} && ${restoreCmd}`;
-    await execPromise(cmd);
-    return res.status(200).json({ success: true });
+    const backup = req.body;
+    
+    if (!backup || !backup.data) {
+      return res.status(400).json({ error: 'Invalid backup format' });
+    }
+
+    const { users, events, userEvents, hoursLogs } = backup.data;
+
+    // Delete all existing data (in correct order to handle foreign keys)
+    await prisma.$transaction([
+      prisma.hoursLog.deleteMany(),
+      prisma.userEvent.deleteMany(),
+      prisma.event.deleteMany(),
+      prisma.user.deleteMany(),
+    ]);
+
+    // Restore data (in correct order)
+    if (users && users.length > 0) {
+      await prisma.user.createMany({ data: users, skipDuplicates: true });
+    }
+    
+    if (events && events.length > 0) {
+      await prisma.event.createMany({ data: events, skipDuplicates: true });
+    }
+    
+    if (userEvents && userEvents.length > 0) {
+      await prisma.userEvent.createMany({ data: userEvents, skipDuplicates: true });
+    }
+    
+    if (hoursLogs && hoursLogs.length > 0) {
+      await prisma.hoursLog.createMany({ data: hoursLogs, skipDuplicates: true });
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      restored: {
+        users: users?.length || 0,
+        events: events?.length || 0,
+        userEvents: userEvents?.length || 0,
+        hoursLogs: hoursLogs?.length || 0,
+      }
+    });
   } catch (error) {
     console.error('Restore failed:', error);
-    return res.status(500).json({ error: 'Restore failed' });
+    return res.status(500).json({ 
+      error: 'Restore failed', 
+      details: error instanceof Error ? error.message : String(error) 
+    });
   }
 }
