@@ -395,6 +395,8 @@ NODE_ENV="production"
 ### Deployment Platforms
 
 - **Vercel**: Connect your GitHub repository for automatic deployments
+[https://vercel.com/sail-kokokahis-projects/sail-kokokahi]()
+
 - **Netlify**: Build command: `npm run build`, Publish directory: `.next`
 - **Docker**: Use the included Dockerfile for containerized deployments
 
