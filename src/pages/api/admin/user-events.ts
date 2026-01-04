@@ -39,7 +39,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orderBy: { Event: { date: 'asc' } },
     });
 
-    return res.status(200).json({ attended, signups });
+    const hoursLog = await prisma.hoursLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
+    return res.status(200).json({ attended, signups, hoursLog });
   } catch (err) {
     console.error('Error fetching user events:', err);
     return res.status(500).json({ error: 'Failed to fetch user events' });
