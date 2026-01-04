@@ -10,6 +10,8 @@ const AdminMaintenanceClient: React.FC = () => {
   const [restoreConfirmText, setRestoreConfirmText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const [showNewYearConfirm, setShowNewYearConfirm] = useState(false);
+  const [newYearConfirmText, setNewYearConfirmText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackup = async () => {
@@ -92,10 +94,37 @@ const AdminMaintenanceClient: React.FC = () => {
     }
   };
 
+  const handleStartNewYear = async () => {
+    try {
+      setLoading(true);
+      toast.info('Starting new year...');
+
+      const res = await fetch('/api/admin/start-new-year', { method: 'POST' });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.details || 'Failed to start new year');
+      }
+
+      const result = await res.json();
+      toast.success(
+        `New year started! Cleared: ${result.cleared.events} events, ${result.cleared.userEvents} user-event records, ${result.cleared.hoursLogs} logs, reset ${result.cleared.usersReset} members`,
+      );
+
+      setShowNewYearConfirm(false);
+      setNewYearConfirmText('');
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : 'Failed to start new year');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container>
       <h1 className="fw-bolder pt-3">Admin Maintenance</h1>
-      <p className="text-muted">Export database to JSON file or restore from a backup file.</p>
+      <p className="text-muted">Export database to JSON file, restore from a backup, or start a new year.</p>
 
       <Row className="mb-4">
         <Col md={6}>
@@ -121,6 +150,24 @@ const AdminMaintenanceClient: React.FC = () => {
                 disabled={loading}
               />
             </Form.Group>
+          </div>
+        </Col>
+      </Row>
+
+      <Row className="mb-4">
+        <Col md={12}>
+          <div className="border border-danger rounded p-3 bg-light">
+            <h5 className="text-danger">⚠️ Start New Year</h5>
+            <p className="small text-muted">
+              Clear all events, member event credits, and logs to begin a fresh year.
+            </p>
+            <Button
+              variant="danger"
+              onClick={() => setShowNewYearConfirm(true)}
+              disabled={loading}
+            >
+              Start New Year
+            </Button>
           </div>
         </Col>
       </Row>
@@ -165,6 +212,54 @@ const AdminMaintenanceClient: React.FC = () => {
                 setSelectedFile(null);
                 setRestoreConfirmText('');
                 if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {showNewYearConfirm && (
+        <div className="mt-3 p-3 border border-danger rounded bg-light">
+          <h5 className="text-danger">⚠️ Confirm Start New Year</h5>
+          <p className="small text-danger fw-bold">
+            This will permanently delete:
+          </p>
+          <ul className="small text-danger">
+            <li>All events</li>
+            <li>All user-event associations</li>
+            <li>All hours logs</li>
+            <li>Reset all member approved and pending hours to 0</li>
+          </ul>
+          <p className="small">
+            Type
+            {' '}
+            <strong>START NEW YEAR</strong>
+            {' '}
+            below to confirm:
+          </p>
+          <div className="d-flex gap-2">
+            <Form.Control
+              type="text"
+              value={newYearConfirmText}
+              onChange={(e) => setNewYearConfirmText(e.target.value)}
+              placeholder="Type START NEW YEAR to confirm"
+              disabled={loading}
+            />
+            <Button
+              variant="danger"
+              disabled={newYearConfirmText !== 'START NEW YEAR' || loading}
+              onClick={handleStartNewYear}
+            >
+              {loading ? 'Starting...' : 'Confirm'}
+            </Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => {
+                setShowNewYearConfirm(false);
+                setNewYearConfirmText('');
               }}
               disabled={loading}
             >
