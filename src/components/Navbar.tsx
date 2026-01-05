@@ -56,9 +56,6 @@ const NavBar: React.FC = () => {
       onToggle={() => setExpanded(!expanded)}
     >
       <Container>
-        <a href="/" className="navbar-brand text-white" onClick={handleNavCollapse}>
-          SAIL KOKOKAHI
-        </a>
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
           <Nav className="ms-auto align-items-center">
