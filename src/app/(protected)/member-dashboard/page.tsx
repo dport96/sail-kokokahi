@@ -72,7 +72,15 @@ const MemberDashboard = async () => {
     },
     orderBy: {
       date: 'asc',
-    },
+  },
+  });
+
+  // Filter out past events by comparing with today's date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcomingEvents = events.filter(event => {
+    const eventDate = new Date(event.date);
+    return eventDate >= today;
   });
 
   return (
@@ -217,7 +225,7 @@ const MemberDashboard = async () => {
         <Container>
           <h3 className="custom-text">Upcoming Events:</h3>
           <hr />
-          {events?.map(event => (
+          {upcomingEvents?.map(event => (
             <div key={event.id}>
               {event.date}
               :
