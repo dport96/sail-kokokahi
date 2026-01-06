@@ -49,14 +49,14 @@ const NavBar: React.FC = () => {
 
   return (
     <Navbar
-      expand="lg"
+      expand={isLandingPage ? true : "lg"}
       variant="dark"
       style={navStyle}
-      expanded={expanded}
+      expanded={isLandingPage ? true : expanded}
       onToggle={() => setExpanded(!expanded)}
     >
       <Container>
-        <Navbar.Toggle aria-controls="navbar-nav" />
+        {!isLandingPage && <Navbar.Toggle aria-controls="navbar-nav" />}
         <Navbar.Collapse id="navbar-nav">
           <Nav className="ms-auto align-items-center">
             {role === 'ADMIN' && (
