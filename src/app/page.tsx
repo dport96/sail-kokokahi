@@ -1,11 +1,11 @@
+import { Container } from 'react-bootstrap';
+
 /** The Home page. */
 const Home = () => (
-  <main id="landing-page">
-    <img
-      src="/Sail_Kokohahi_pic.png"
-      alt="Sail Kokokahi"
-      className="landing-image"
-    />
+  <main>
+    <Container className="background" id="landing-page" fluid>
+      {/* Empty container with just the background image */}
+    </Container>
   </main>
 );
 

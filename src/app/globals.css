@@ -28,11 +28,12 @@ main:has(#landing-page) {
   padding-top: 0 !important;
 }
 
-.landing-image {
-  width: 100vw;
+.background {
+  background-image: url('/Sail_Kokohahi_pic.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   height: 100vh;
-  object-fit: fill;
-  display: block;
   filter: brightness(90%);
 }
 

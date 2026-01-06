@@ -113,7 +113,7 @@ const SignInClient = () => {
         {/* Only show the sign-in form if user is not signed in */}
         {!currentUser ? (
           <Row key="signin-form" className="justify-content-center">
-            <Col xs={5}>
+            <Col xs={12} sm={10} md={8} lg={5}>
               <h1 className="text-center fw-bold">Sign In</h1>
               <Card>
                 <Card.Body>
