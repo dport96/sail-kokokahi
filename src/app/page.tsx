@@ -6,6 +6,11 @@ const Home = () => (
     <Container className="background" id="landing-page" fluid>
       {/* Empty container with just the background image */}
     </Container>
+    <img
+      src="/Sail_Kokokahi_logo.png"
+      alt="Sail Kokokahi Logo"
+      className="landing-logo"
+    />
   </main>
 );
 

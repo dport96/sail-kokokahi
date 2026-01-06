@@ -37,6 +37,17 @@ main:has(#landing-page) {
   filter: brightness(90%);
 }
 
+.landing-logo {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 45vw;
+  max-height: 45vh;
+  z-index: 100;
+  pointer-events: none;
+}
+
 .center {
   text-align: center;
   justify-content: center;
