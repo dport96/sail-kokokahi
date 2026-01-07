@@ -48,6 +48,13 @@ main:has(#landing-page) {
   pointer-events: none;
 }
 
+@media (max-width: 640px) {
+  .landing-logo {
+    max-width: 80vw;
+    max-height: 60vh;
+  }
+}
+
 .center {
   text-align: center;
   justify-content: center;
