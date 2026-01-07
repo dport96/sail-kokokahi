@@ -420,7 +420,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
               <th>Member</th>
               <th>Registered</th>
               <th style={{ minWidth: '300px' }}>Progress</th>
-              <th>Approved</th>
+              <th>Adjust Total</th>
               <th>Pending</th>
               <th>Status</th>
               <th>Actions</th>
@@ -484,6 +484,8 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
                       onChange={(e) => handleHourChange(user.id, Number(e.target.value))}
                       style={{ width: '60px' }}
                       className="form-control form-control-sm"
+                      disabled={user.pendingHours > 0}
+                      title={user.pendingHours > 0 ? 'Disable while pending hours exist' : 'Adjust total approved hours'}
                     />
                   </td>
                   <td className="text-center">

@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch the event details
     const event = await prisma.event.findUnique({
       where: { id: Number(eventId) },
-      select: { hours: true, date: true },
+      select: { hours: true, date: true, title: true },
     });
 
     if (!event) {
@@ -103,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await prisma.hoursLog.create({
       data: {
         userId: user.id,
-        action: 'check-in',
+        action: `Check-in for event: ${event.title}`,
         hours: event.hours,
         performedBy: user.email,
       },

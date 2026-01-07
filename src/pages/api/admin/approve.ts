@@ -30,12 +30,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create an audit HoursLog entry for the approval (if any pending hours were approved)
     const approvedDelta = Number(user.pendingHours || 0);
+    const newApprovedTotal = user.approvedHours + user.pendingHours;
     if (approvedDelta > 0) {
       const performer = session?.user?.email ?? 'system';
       await prisma.hoursLog.create({
         data: {
           userId,
-          action: 'approve',
+          action: `Approved ${approvedDelta} pending hours (Total approved: ${newApprovedTotal})`,
           hours: approvedDelta,
           performedBy: performer,
         },

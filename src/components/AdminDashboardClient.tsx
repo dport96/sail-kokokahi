@@ -457,7 +457,7 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
               </th>
               <th>Last Name</th>
               <th>First Name</th>
-              <th>Approved Hours</th>
+              <th>Adjust Total</th>
               <th className="visually-hidden">Email</th>
               <th>Pending Hours</th>
               <th>Amount Due</th>
@@ -507,7 +507,9 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     variant="outline-secondary"
                     size="sm"
                     style={{ float: 'left' }}
+                    disabled={user.pendingHours > 0}
                     onClick={async () => {
+                      if (user.pendingHours > 0) return;
                       const newHours = (user.approvedHours > 0.5) ? (user.approvedHours - 0.5) : 0;
                       await updateApprovedHours(user.id, newHours);
                     }}
@@ -519,7 +521,9 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ users }) =>
                     variant="outline-secondary"
                     size="sm"
                     style={{ float: 'right' }}
+                    disabled={user.pendingHours > 0}
                     onClick={async () => {
+                      if (user.pendingHours > 0) return;
                       const newHours = user.approvedHours + 0.5;
                       await updateApprovedHours(user.id, newHours);
                     }}

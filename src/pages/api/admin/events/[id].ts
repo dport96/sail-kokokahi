@@ -71,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const ops = userEvents.map((ue) => prisma.hoursLog.create({
           data: {
             userId: ue.userId,
-            action: 'event-hours-audit',
+            action: `Event hours audit for: ${updated.title}`,
             hours: delta,
             performedBy: (session?.user as any)?.email ?? 'admin',
           },
@@ -119,7 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 tx.hoursLog.create({
                   data: {
                     userId: user.id,
-                    action: 'event-hours-adjust',
+                    action: `Event hours adjustment for: ${updated.title}`,
                     hours: delta,
                     performedBy: (session?.user as any)?.email ?? 'admin',
                   },

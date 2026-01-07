@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 
 export async function PATCH(req: NextRequest, context: any) {
   // Normalize params: Next.js may provide params as an object or a Promise depending on typings/runtime
@@ -144,6 +145,10 @@ export async function DELETE(req: NextRequest, context: any) {
       );
     }
 
+    // Get the current session to know who performed the action
+    const session = await getServerSession();
+    const performedBy = session?.user?.email || 'Unknown Admin';
+
     // First verify the attendee belongs to this event
     const attendee = await prisma.userEvent.findUnique({
       where: {
@@ -153,6 +158,7 @@ export async function DELETE(req: NextRequest, context: any) {
         User: {
           select: {
             pendingHours: true,
+            approvedHours: true,
           },
         },
       },
@@ -172,10 +178,10 @@ export async function DELETE(req: NextRequest, context: any) {
       );
     }
 
-    // Get event details to know how many hours to subtract
+    // Get event details to know how many hours to subtract and event title
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { hours: true },
+      select: { hours: true, title: true },
     });
 
     if (!event) {
@@ -197,7 +203,11 @@ export async function DELETE(req: NextRequest, context: any) {
       // Update user's hours (subtract the event hours)
       // First, try to subtract from pending hours
       const currentPendingHours = attendee.User.pendingHours;
+      const currentApprovedHours = attendee.User.approvedHours;
       const eventHours = event.hours;
+      let hoursSubtracted = 0;
+      let fromPending = 0;
+      let fromApproved = 0;
 
       if (currentPendingHours >= eventHours) {
         // If user has enough pending hours, subtract from pending hours
@@ -207,26 +217,33 @@ export async function DELETE(req: NextRequest, context: any) {
             pendingHours: currentPendingHours - eventHours,
           },
         });
+        hoursSubtracted = eventHours;
+        fromPending = eventHours;
       } else {
         // If not enough pending hours, subtract from pending first, then from approved
         const remainingToSubtract = eventHours - currentPendingHours;
 
-        // Get current approved hours
-        const currentUser = await tx.user.findUnique({
+        await tx.user.update({
           where: { id: attendee.userId },
-          select: { approvedHours: true },
+          data: {
+            pendingHours: 0, // Set pending hours to 0
+            approvedHours: Math.max(0, currentApprovedHours - remainingToSubtract),
+          },
         });
-
-        if (currentUser) {
-          await tx.user.update({
-            where: { id: attendee.userId },
-            data: {
-              pendingHours: 0, // Set pending hours to 0
-              approvedHours: Math.max(0, currentUser.approvedHours - remainingToSubtract),
-            },
-          });
-        }
+        fromPending = currentPendingHours;
+        fromApproved = Math.min(remainingToSubtract, currentApprovedHours);
+        hoursSubtracted = fromPending + fromApproved;
       }
+
+      // Log the removal in HoursLog
+      await tx.hoursLog.create({
+        data: {
+          userId: attendee.userId,
+          action: `Removed from event: ${event.title}`,
+          hours: -hoursSubtracted,
+          performedBy,
+        },
+      });
     });
 
     return NextResponse.json(
