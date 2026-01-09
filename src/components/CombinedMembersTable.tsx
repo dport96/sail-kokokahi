@@ -108,8 +108,11 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
     return 'warning';
   };
 
-  // Filter and sort
-  let filtered = updatedUsers;
+  const collator = new Intl.Collator('en', { sensitivity: 'base', ignorePunctuation: true });
+  const normalizeName = (value: string) => (value || '').trim();
+
+  // Filter and sort (clone to avoid mutating state during render)
+  let filtered = [...updatedUsers];
 
   if (filterBy === 'pending') {
     filtered = filtered.filter(u => hasPendingHours(u));
@@ -130,19 +133,15 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
     filtered.sort((a, b) => (b.approvedHours + b.pendingHours) - (a.approvedHours + a.pendingHours));
   } else if (sortBy === 'name-asc') {
     filtered.sort((a, b) => {
-      if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return -1;
-      if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return 1;
-      if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return -1;
-      if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
-      return 0;
+      const lastCompare = collator.compare(normalizeName(a.lastName), normalizeName(b.lastName));
+      if (lastCompare !== 0) return lastCompare;
+      return collator.compare(normalizeName(a.firstName), normalizeName(b.firstName));
     });
   } else if (sortBy === 'name-desc') {
     filtered.sort((a, b) => {
-      if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return -1;
-      if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return 1;
-      if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return -1;
-      if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return 1;
-      return 0;
+      const lastCompare = collator.compare(normalizeName(b.lastName), normalizeName(a.lastName));
+      if (lastCompare !== 0) return lastCompare;
+      return collator.compare(normalizeName(b.firstName), normalizeName(a.firstName));
     });
   }
 
