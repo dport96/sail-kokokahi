@@ -238,6 +238,36 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
     }
   };
 
+  const handleResetPassword = async (user: User) => {
+    try {
+      const confirmReset = await swal({
+        title: 'Reset Password',
+        text: `Reset password for ${user.firstName} ${user.lastName} to 'changeme!'?`,
+        icon: 'warning',
+        buttons: ['Cancel', 'Reset'],
+      });
+
+      if (!confirmReset) return;
+
+      const resp = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!resp.ok) throw new Error('Reset failed');
+
+      setUpdatedUsers((prevUsers) => prevUsers.map((u) => (
+        u.id === user.id ? { ...u, mustChangePassword: true } : u
+      )));
+
+      toast.success('Password reset to "changeme!"');
+    } catch (err) {
+      console.error('Reset error:', err);
+      toast.error('Failed to reset password');
+    }
+  };
+
   const handleHourChange = (userId: number, newValue: number) => {
     const clamped = clampHours(newValue);
     setUpdatedUsers(prevUsers =>
@@ -519,11 +549,21 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
                           </Button>
                         </>
                       )}
+                      {!user.mustChangePassword && (
+                        <Button
+                          size="sm"
+                          variant="warning"
+                          onClick={() => handleResetPassword(user)}
+                          title={`Reset ${user.firstName} ${user.lastName}'s password to 'changeme!' - User will be required to change it on next login`}
+                        >
+                          🔑
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="danger"
                         onClick={() => handleDeleteUser(user.id)}
-                        title="Delete member"
+                        title={`Permanently delete ${user.firstName} ${user.lastName} - This action cannot be undone`}
                       >
                         🗑️
                       </Button>
