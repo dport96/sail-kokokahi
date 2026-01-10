@@ -31,9 +31,10 @@ export const RuntimeQRCode = ({
   // Function to get the QR URL for the event
   const getQRUrl = (eventData: { id: number }) => {
     // Use NEXT_PUBLIC_APP_URL first, then fallback to window.location.origin
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
-    );
+    // Only use localhost:3000 as absolute last resort during SSR
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+      || (typeof window !== 'undefined' && window.location.origin) 
+      || 'http://localhost:3000';
     return `${baseUrl}/event-check-in/${eventData.id}`;
   };
 
@@ -95,11 +96,10 @@ export const RuntimeQRCode = ({
 // Hook to get the QR URL (useful for displaying the URL text)
 export const useQRUrl = (event: { id: number }) => {
   // Prefer NEXT_PUBLIC_APP_URL, then window origin, NEXTAUTH_URL, then localhost.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (
-    typeof window !== 'undefined'
-      ? window.location.origin
-      : process.env.NEXTAUTH_URL || 'http://localhost:3000'
-  );
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+    || (typeof window !== 'undefined' && window.location.origin) 
+    || process.env.NEXTAUTH_URL 
+    || 'http://localhost:3000';
   return `${baseUrl}/event-check-in/${event.id}`;
 };
 

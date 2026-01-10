@@ -68,7 +68,8 @@ export const EventList = ({
   // Function to get QR URL (moved from hook since we need it in callbacks)
   const getQRUrl = (event: any) => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+      || (typeof window !== 'undefined' && window.location.origin)
+      || 'http://localhost:3000';
     return `${baseUrl}/event-check-in/${event.id}`;
   };
 
