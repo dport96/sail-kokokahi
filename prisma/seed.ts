@@ -4,7 +4,29 @@ import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+async function ensureApplicationSettings() {
+  // Ensure default APPLICATION_SETTINGS exist
+  const defaultSettings = [
+    { key: 'HOURLY_RATE', value: '20' },
+    { key: 'MEMBERSHIP_BASE_AMOUNT', value: '120' },
+    { key: 'HOURS_REQUIRED', value: '6' },
+    { key: 'TIME_ZONE', value: 'Pacific/Honolulu' },
+  ];
+
+  for (const setting of defaultSettings) {
+    await prisma.applicationSettings.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: setting,
+    });
+  }
+  console.log('✓ Application settings ensured');
+}
+
 async function main() {
+  // Ensure application settings first (needed before users can use the app)
+  await ensureApplicationSettings();
+
   console.log('Seeding users with payment details...');
 
   const password = await hash('changeme', 10);
