@@ -42,6 +42,18 @@ const EventsPage = async () => {
     return eventDate < today;
   });
 
+  // Server current date/time (for display)
+  const serverNow = new Date();
+  const formattedServerNow = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+  }).format(serverNow);
+
   return (
     <main>
       <Container>
@@ -49,6 +61,13 @@ const EventsPage = async () => {
           <Col>
             <div className="mb-3">
               <h1 className="fw-bold pt-3">Events</h1>
+              <div className="text-muted" aria-live="polite">
+                <small>
+                  Server time:
+                  {' '}
+                  {formattedServerNow}
+                </small>
+              </div>
               <hr />
               <AdminEventsClient
                 upcomingEvents={upcomingEvents}
