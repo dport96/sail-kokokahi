@@ -21,8 +21,21 @@ const EventsPage = async () => {
     },
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+  // Server current date/time using configured time zone
+  const { TIME_ZONE } = await getApplicationSettingsNoCache();
+  const serverNow = new Date();
+  
+  // Get today's date in the configured TIME_ZONE
+  const todayFormatter = new Intl.DateTimeFormat('en-CA', { // 'en-CA' gives YYYY-MM-DD format
+    timeZone: TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  
+  const todayParts = todayFormatter.formatToParts(serverNow);
+  const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
+  const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
 
   // Helper function to parse MM/DD/YYYY date format
   const parseEventDate = (dateString: string) => {
@@ -44,8 +57,6 @@ const EventsPage = async () => {
   });
 
   // Server current date/time (for display) using configured time zone
-  const { TIME_ZONE } = await getApplicationSettingsNoCache();
-  const serverNow = new Date();
   const formattedServerNow = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
