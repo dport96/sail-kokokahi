@@ -29,7 +29,6 @@ const EventsAnalytics = ({ events }: { events: any[] }) => {
           { key: 'eventName', label: 'Event Name' },
           { key: 'signupCount', label: 'Member Signups' },
           { key: 'attendanceCount', label: 'Member Attendance' },
-          { key: 'status', label: 'Status' },
         ]}
         sortKey={sortKey}
         sortOrder={sortOrder}
@@ -55,11 +54,6 @@ const EventsAnalytics = ({ events }: { events: any[] }) => {
                 total={event.totalUsers}
                 label={`Members who Attended (${event.attendanceCount} of ${event.totalUsers} total members)`}
               />
-            </td>
-            <td>
-              {event.isUserSignedUp && (
-                <span className="badge bg-success">Signed Up</span>
-              )}
             </td>
           </tr>
         )}
