@@ -68,8 +68,7 @@ export const EventList = ({
   // Function to get QR URL (moved from hook since we need it in callbacks)
   const getQRUrl = (event: any) => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (typeof window !== 'undefined' && window.location.origin)
-      || 'http://localhost:3000';
+      || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     return `${baseUrl}/event-check-in/${event.id}`;
   };
 
@@ -413,6 +412,111 @@ export const EventList = ({
                 </Button>
               </RBModal.Footer>
             </RBModal>
+          </div>
+          <Col>
+            <DropdownButton title="Information" variant="light">
+              <p className="p-1">
+                Time:
+                {' '}
+                {event.time}
+                <br />
+                Potential Hours:
+                {' '}
+                {event.hours}
+                <br />
+                Description:
+                {' '}
+                {event.description}
+              </p>
+            </DropdownButton>
+            <div className="mt-2 mb-2">
+              <small className="text-muted">
+                <strong>QR URL:</strong>
+                {' '}
+                {getQRUrl(event)}
+              </small>
+            </div>
+            <RuntimeQRCode event={event} fluid />
+' }}>{event.title}</h5>
+            <div style={{ float: 'right' }}>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  // Create URL with event data for duplication
+                  const params = new URLSearchParams({
+                    title: event.title,
+                    description: event.description,
+                    location: event.location,
+                    hours: event.hours.toString(),
+                    time: event.time,
+                    signupReq: event.signupReq.toString(),
+                  });
+                  window.location.href = `/add-event?duplicate=true&${params.toString()}`;
+                }}
+                title="Duplicate this event"
+              >
+                📋 Duplicate
+              </Button>
+              {showAttendanceButton && onManageAttendance && (
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageAttendance(event)}
+                  title="Manage event attendance"
+                >
+                  👥 Attendance
+                </Button>
+              )}
+              {showSignupButton && event.signupReq && onManageSignup && (
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageSignup(event)}
+                  title="Manage event signups"
+                >
+                  📝 Signup
+                </Button>
+              )}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedEventId(event.id);
+                  setOpen(true);
+                }}
+                title="Delete this event"
+              >
+                🗑️ Delete
+              </Button>
+            </div>
+            <Modal open={open} onClose={() => setOpen(false)}>
+              <div
+                style={{
+                  borderRadius: '15px',
+                  textAlign: 'justify',
+                  background: 'white',
+                  padding: '20px',
+                  margin: '10% auto',
+                  width: '50%',
+                  height: 'auto',
+                }}
+              >
+                <h1 className="fw-bold">Delete Event</h1>
+                <hr />
+                <p className="text-center">
+                  Are you sure you want to delete this event? This action is not reversible.
+                </p>
+                <div className="d-flex flex-column align-items-center mt-4">
+                  <Button variant="danger" onClick={handleDelete}>
+                    Delete Event
+                  </Button>
+                </div>
+              </div>
+            </Modal>
           </div>
           <Col>
             <DropdownButton title="Information" variant="light">

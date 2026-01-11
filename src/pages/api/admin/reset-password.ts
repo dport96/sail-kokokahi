@@ -30,13 +30,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // doesn't have the column yet (migration not applied), fall back to
     // updating only the password so the reset still works.
     try {
-      // Use typed Prisma update now that the schema includes mustChangePassword
+      // Update password and require user to change it on next login
       await prisma.user.update({ where: { id: userId }, data: { password: hashed, mustChangePassword: true } });
     } catch (e) {
       // Keep a fallback to raw SQL in case of unexpected regressions in environments
       console.warn('Typed update failed, falling back to raw SQL password update.', e);
       try {
-        await prisma.$executeRawUnsafe('UPDATE "public"."User" SET password = $1 WHERE id = $2', hashed, userId);
+        await prisma.$executeRawUnsafe('UPDATE "public"."User" SET password = $1, "mustChangePassword" = true WHERE id = $2', hashed, userId);
       } catch (errFallback) {
         console.error('Fallback password update also failed:', errFallback);
         return res.status(500).json({ error: 'Failed to reset password' });

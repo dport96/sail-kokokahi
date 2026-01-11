@@ -12,10 +12,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 type ChangePasswordForm = {
-  oldpassword?: string;
   password: string;
   confirmPassword: string;
-  // acceptTerms: boolean;
 };
 
 /** Client-only change password component. */
@@ -30,28 +28,21 @@ const ChangePasswordClient = () => {
   const mustChangePassword = userWithRole?.mustChangePassword ?? false;
 
   // Local state to toggle password visibility
-  const [showOld, setShowOld] = React.useState(false);
   const [showNew, setShowNew] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
 
-  // Create validation schema dynamically based on mustChangePassword flag
+  // Validation: only require new password and confirmation
   const validationSchema = React.useMemo(() => {
-    const schema: any = {
+    return Yup.object().shape({
       password: Yup.string()
         .required('Password is required')
-        .min(6, 'Password must be at least 6 characters')
-        .max(40, 'Password must not exceed 40 characters'),
+        .min(1, 'Password must be at least 1 character')
+        .max(10, 'Password must not exceed 10 characters'),
       confirmPassword: Yup.string()
         .required('Confirm Password is required')
         .oneOf([Yup.ref('password'), ''], 'Confirm Password does not match'),
-    };
-
-    if (!mustChangePassword) {
-      schema.oldpassword = Yup.string().required('Current password is required');
-    }
-
-    return Yup.object().shape(schema);
-  }, [mustChangePassword]);
+    });
+  }, []);
 
   const {
     register,
@@ -64,14 +55,10 @@ const ChangePasswordClient = () => {
 
   const onSubmit = async (data: ChangePasswordForm) => {
     try {
-      const requestBody = mustChangePassword
-        ? { newPassword: data.password }
-        : { oldPassword: data.oldpassword, newPassword: data.password };
-
       const resp = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ newPassword: data.password }),
       });
 
       if (!resp.ok) {
@@ -116,28 +103,6 @@ const ChangePasswordClient = () => {
             <Card>
               <Card.Body>
                 <Form onSubmit={handleSubmit(onSubmit)}>
-                  {!mustChangePassword && (
-                    <Form.Group className="form-group">
-                      <Form.Label>Old Password</Form.Label>
-                      <div className="input-group">
-                        <input
-                          type={showOld ? 'text' : 'password'}
-                          {...register('oldpassword')}
-                          className={`form-control ${errors.oldpassword ? 'is-invalid' : ''}`}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary"
-                          onClick={() => setShowOld((v) => !v)}
-                          aria-label={showOld ? 'Hide old password' : 'Show old password'}
-                        >
-                          {showOld ? '🙈' : '👁️'}
-                        </button>
-                      </div>
-                      <div className="invalid-feedback">{errors.oldpassword?.message}</div>
-                    </Form.Group>
-                  )}
-
                   <Form.Group className="form-group">
                     <Form.Label>New Password</Form.Label>
                     <div className="input-group">
