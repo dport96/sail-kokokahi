@@ -19,5 +19,14 @@ fi
 
 echo "Building with NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-unset} NEXTAUTH_URL=${NEXTAUTH_URL:-unset}"
 
-prisma generate --schema=prisma/schema.prisma
-next build
+echo "Running database migrations..."
+npx prisma migrate deploy
+
+echo "Seeding database with defaults..."
+npx prisma db seed
+
+echo "Generating Prisma client..."
+npx prisma generate --schema=prisma/schema.prisma
+
+echo "Building Next.js application..."
+npx next build

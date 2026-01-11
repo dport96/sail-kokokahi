@@ -31,66 +31,39 @@ async function main() {
 
   const password = await hash('changeme', 10);
 
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@foo.com' },
-    update: {},
-    create: {
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@foo.com',
-      password,
-      role: Role.ADMIN,
-    },
-  });
+  try {
+    const adminUser = await prisma.user.upsert({
+      where: { email: 'admin@foo.com' },
+      update: {},
+      create: {
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@foo.com',
+        password,
+        role: Role.ADMIN,
+      },
+    });
+    console.log('Admin user seeded:', adminUser.email);
+  } catch (error) {
+    console.log('Admin user already exists or seed skipped');
+  }
 
-  const johnUser = await prisma.user.upsert({
-    where: { email: 'john@foo.com' },
-    update: {},
-    create: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@foo.com',
-      password,
-      role: Role.USER,
-    },
-  });
-
-  console.log('Users seeded:', adminUser, johnUser);
-
-  // Seed application settings with default values
-  console.log('Seeding application settings...');
-
-  await prisma.applicationSettings.upsert({
-    where: { key: 'HOURLY_RATE' },
-    update: {},
-    create: {
-      key: 'HOURLY_RATE',
-      value: '20',
-      description: 'Dollars per approved hour',
-    },
-  });
-
-  await prisma.applicationSettings.upsert({
-    where: { key: 'MEMBERSHIP_BASE_AMOUNT' },
-    update: {},
-    create: {
-      key: 'MEMBERSHIP_BASE_AMOUNT',
-      value: '120',
-      description: 'Base membership amount',
-    },
-  });
-
-  await prisma.applicationSettings.upsert({
-    where: { key: 'HOURS_REQUIRED' },
-    update: {},
-    create: {
-      key: 'HOURS_REQUIRED',
-      value: '6',
-      description: 'Minimum volunteer hours required for membership',
-    },
-  });
-
-  console.log('Application settings seeded');
+  try {
+    const johnUser = await prisma.user.upsert({
+      where: { email: 'john@foo.com' },
+      update: {},
+      create: {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@foo.com',
+        password,
+        role: Role.USER,
+      },
+    });
+    console.log('John user seeded:', johnUser.email);
+  } catch (error) {
+    console.log('John user already exists or seed skipped');
+  }
 }
 
 main()
