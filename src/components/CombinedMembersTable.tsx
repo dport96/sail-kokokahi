@@ -9,7 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { deleteUser } from '@/lib/dbActions';
 import swal from 'sweetalert';
-import { HOURS_REQUIRED } from '@/lib/constants';
+import { HOURS_REQUIRED, HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT } from '@/lib/constants';
 
 interface User {
   id: number;
@@ -102,6 +102,10 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
 
   const clampHours = (value: number) => Math.max(0, value);
 
+  const calculateAmountDue = (approvedHours: number): number => {
+    return approvedHours >= HOURS_REQUIRED ? 0 : MEMBERSHIP_BASE_AMOUNT - HOURLY_RATE * approvedHours;
+  };
+
   const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
     if (approvedHours >= HOURS_REQUIRED) return 'success';
     if (percentage >= 50) return 'info';
@@ -178,8 +182,9 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
         }
       }
 
+      const newApprovedHours = user.approvedHours + user.pendingHours;
       setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
-        ? { ...u, approvedHours: u.approvedHours + u.pendingHours, pendingHours: 0, status: 'approved' }
+        ? { ...u, approvedHours: newApprovedHours, pendingHours: 0, status: 'approved', amountDue: calculateAmountDue(newApprovedHours) }
         : u)));
 
       setOriginalApprovedHours((prevOriginal) => {
@@ -271,7 +276,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
   const handleHourChange = (userId: number, newValue: number) => {
     const clamped = clampHours(newValue);
     setUpdatedUsers(prevUsers =>
-      prevUsers.map(u => (u.id === userId ? { ...u, approvedHours: clamped } : u)),
+      prevUsers.map(u => (u.id === userId ? { ...u, approvedHours: clamped, amountDue: calculateAmountDue(clamped) } : u)),
     );
   };
 
@@ -451,6 +456,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
               <th style={{ minWidth: '300px' }}>Progress</th>
               <th>Adjust Total</th>
               <th>Pending</th>
+              <th>Amount Due</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -523,6 +529,9 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
                     ) : (
                       <span className="text-muted">—</span>
                     )}
+                  </td>
+                  <td className="text-end">
+                    ${user.amountDue.toFixed(2)}
                   </td>
                   <td>
                     {renderStatusBadge(user)}
