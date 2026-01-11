@@ -93,7 +93,7 @@ const ChangePasswordClient = () => {
     <main>
       <Container>
         <Row className="justify-content-center">
-          <Col xs={5}>
+          <Col xs={12} sm={10} md={8} lg={5}>
             <h1 className="text-center fw-bold">Change Password</h1>
             {mustChangePassword && (
               <div className="alert alert-warning text-center">

@@ -1,0 +1,552 @@
+/* eslint-disable react/require-default-props */
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button, DropdownButton, Row, Col, Modal as RBModal, Form } from 'react-bootstrap';
+import swal from 'sweetalert';
+import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
+import React from 'react';
+import { useSession } from 'next-auth/react';
+import { Role } from '@prisma/client';
+import Modal from '@mui/material/Modal';
+import { RuntimeQRCode } from './RuntimeQRCode';
+
+export const EventList = ({
+  events,
+  onManageAttendance,
+  onManageSignup,
+  showAttendanceButton = false,
+  showSignupButton = false,
+}: {
+  events: any[];
+  onManageAttendance?: (event: any) => void;
+  onManageSignup?: (event: any) => void;
+  showAttendanceButton?: boolean;
+  showSignupButton?: boolean;
+}) => {
+  const [eventList, setEventList] = useState(events);
+  const [open, setOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any | null>(null);
+  const [propagateMode, setPropagateMode] = useState<'none' | 'audit' | 'adjust-approved'>('none');
+  const { data: session } = useSession();
+
+  // Update local state when props change
+  useEffect(() => {
+    setEventList(events);
+  }, [events]);
+
+  const handleDelete = async () => {
+    if (selectedEventId === null) return;
+    console.log(`Deleting event with ID: ${selectedEventId}`);
+    try {
+      await deleteEvent(selectedEventId);
+      setEventList((prev) => prev.filter((event) => event.id !== selectedEventId));
+      swal('Success', 'Your event has been deleted', 'success', { timer: 2000 });
+      setSelectedEventId(null); // Reset selected ID
+      setOpen(false); // Close modal
+    } catch (error) {
+      console.error('Delete event error:', error);
+      swal('Error', 'Failed to delete event', 'error');
+    }
+  };
+
+  const sortedEvents = eventList.sort((a, b) => {
+    // Parse MM/DD/YYYY format properly
+    const parseEventDate = (dateString: string) => {
+      const [month, day, year] = dateString.split('/').map(Number);
+      return new Date(year, month - 1, day);
+    };
+
+    const dateA = parseEventDate(a.date).getTime();
+    const dateB = parseEventDate(b.date).getTime();
+    return dateA - dateB;
+  });
+
+  // Function to get QR URL (moved from hook since we need it in callbacks)
+  const getQRUrl = (event: any) => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    return `${baseUrl}/event-check-in/${event.id}`;
+  };
+
+  return (
+    <>
+      {sortedEvents.map((event) => (
+        <Row key={event.id} className="border p-3">
+          <div className="mb-1">
+            <h4 style={{ float: 'left' }}>{event.date}</h4>
+            <Button
+              variant="primary"
+              style={{ float: 'right' }}
+              onClick={async () => {
+                const qrUrl = getQRUrl(event);
+                try {
+                  // Generate QR code via API
+                  const response = await fetch(`/api/generate-qr?url=${encodeURIComponent(qrUrl)}`);
+                  const data = await response.json();
+
+                  if (data.qrCode) {
+                    const printWindow = window.open('', '', 'height=600,width=800');
+                    if (printWindow) {
+                      printWindow.document.write(`
+                        <html>
+                          <head>
+                            <title>Print QR Code</title>
+                            <style>
+                              body {
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100%;
+                                margin: 0;
+                              }
+                              h3 {
+                                text-align: center;
+                              }
+                              img {
+                                display: block;
+                                margin: 20px auto;
+                              }
+                            </style>
+                          </head>
+                          <body>
+                            <div>
+                              <h3>QR Code for Event: ${event.title}</h3>
+                              <p><strong>URL:</strong> ${qrUrl}</p>
+                              <img src="${data.qrCode}" alt="QR Code" style="width:400px;height:400px;" />
+                            </div>
+                          </body>
+                        </html>
+                      `);
+                      printWindow.document.close();
+                      printWindow.onload = () => printWindow.print();
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error generating QR for print:', error);
+                }
+              }}
+            >
+              Print QR Code
+            </Button>
+          </div>
+          <div>
+            <h5 style={{ float: 'left' }}>{event.title}</h5>
+            <div style={{ float: 'right' }}>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  // Create URL with event data for duplication
+                  const params = new URLSearchParams({
+                    title: event.title,
+                    description: event.description,
+                    location: event.location,
+                    hours: event.hours.toString(),
+                    time: event.time,
+                    signupReq: event.signupReq.toString(),
+                  });
+                  window.location.href = `/add-event?duplicate=true&${params.toString()}`;
+                }}
+                title="Duplicate this event"
+              >
+                📋 Duplicate
+              </Button>
+              {showAttendanceButton && onManageAttendance && (
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageAttendance(event)}
+                  disabled={(() => {
+                    const currentRole = (session?.user as any)?.role;
+                    return currentRole && currentRole !== Role.USER;
+                  })()}
+                  title="Manage event attendance"
+                >
+                  👥 Attendance
+                </Button>
+              )}
+              {showSignupButton && event.signupReq && onManageSignup && (
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageSignup(event)}
+                  disabled={(() => {
+                    const currentRole = (session?.user as any)?.role;
+                    return currentRole && currentRole !== Role.USER;
+                  })()}
+                  title="Manage event signups"
+                >
+                  📝 Signup
+                </Button>
+              )}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedEventId(event.id);
+                  setOpen(true);
+                }}
+                title="Delete this event"
+              >
+                🗑️ Delete
+              </Button>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  setEditingEvent(event);
+                  setEditOpen(true);
+                }}
+                title="Edit this event"
+              >
+                ✏️ Edit
+              </Button>
+            </div>
+            <Modal open={open} onClose={() => setOpen(false)}>
+              <div
+                style={{
+                  borderRadius: '15px',
+                  textAlign: 'justify',
+                  background: 'white',
+                  padding: '20px',
+                  margin: '10% auto',
+                  width: '50%',
+                  height: 'auto',
+                }}
+              >
+                <h1 className="fw-bold">Delete Event</h1>
+                <hr />
+                <p className="text-center">
+                  Are you sure you want to delete this event? This action is not reversible.
+                </p>
+                <div className="d-flex flex-column align-items-center mt-4">
+                  <Button variant="danger" onClick={handleDelete}>
+                    Delete Event
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+
+            {/* Edit modal (react-bootstrap) */}
+            <RBModal show={editOpen} onHide={() => { setEditOpen(false); setEditingEvent(null); }} centered>
+              <RBModal.Header closeButton>
+                <RBModal.Title>Edit Event</RBModal.Title>
+              </RBModal.Header>
+              <RBModal.Body>
+                {editingEvent && (
+                  <Form id="edit-event-form" onSubmit={(e) => { e.preventDefault(); }}>
+                    <Form.Group className="mb-3" controlId="eventTitle">
+                      <Form.Label>Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.title}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventDate">
+                      <Form.Label>Date (MM/DD/YYYY)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.date}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventTime">
+                      <Form.Label>Time</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.time}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, time: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventLocation">
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        defaultValue={editingEvent.location}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventHours">
+                      <Form.Label>Hours</Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.5"
+                        defaultValue={editingEvent.hours}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, hours: Number(e.target.value) })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventDescription">
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        defaultValue={editingEvent.description}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="eventSignupReq">
+                      <Form.Check
+                        type="checkbox"
+                        label="Requires signup"
+                        checked={!!editingEvent.signupReq}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, signupReq: e.target.checked })}
+                      />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="propagateMode">
+                      <Form.Label>Propagation mode (opt-in)</Form.Label>
+                      <div>
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-none-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="None"
+                          checked={propagateMode === 'none'}
+                          onChange={() => setPropagateMode('none')}
+                        />
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-audit-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="Audit only"
+                          checked={propagateMode === 'audit'}
+                          onChange={() => setPropagateMode('audit')}
+                        />
+                        <Form.Check
+                          inline
+                          type="radio"
+                          id={`prop-adjust-${event.id}`}
+                          name={`propagate-${event.id}`}
+                          label="Adjust approved/pending (destructive)"
+                          checked={propagateMode === 'adjust-approved'}
+                          onChange={() => setPropagateMode('adjust-approved')}
+                        />
+                      </div>
+                      <small className="text-muted d-block mt-1">
+                        &quot;Audit only&quot; will create HoursLog entries describing the hours delta.
+                        &quot;Adjust approved/pending&quot; will attempt to update member totals (heuristic).
+                        Use &quot;Adjust&quot; only when you understand the consequences.
+                      </small>
+                    </Form.Group>
+                  </Form>
+                )}
+              </RBModal.Body>
+              <RBModal.Footer>
+                <Button variant="secondary" onClick={() => { setEditOpen(false); setEditingEvent(null); }}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={async () => {
+                    if (!editingEvent) return;
+                    try {
+                      // If admin selected destructive adjust mode, ask for explicit confirmation
+                      if (propagateMode === 'adjust-approved') {
+                        const confirmed = await swal({
+                          title: 'Confirm destructive propagation',
+                          text:
+                            'You selected \'Adjust approved/pending\'. This will update members\' '
+                          + 'approved or pending hours and cannot be easily undone. Are you sure you '
+                          + 'want to proceed?',
+                          icon: 'warning',
+                          buttons: ['Cancel', 'Yes, adjust members'],
+                          dangerMode: true,
+                        });
+
+                        if (!confirmed) {
+                          // User cancelled the destructive action
+                          return;
+                        }
+                      }
+
+                      const body = {
+                        title: editingEvent.title,
+                        description: editingEvent.description,
+                        date: editingEvent.date,
+                        location: editingEvent.location,
+                        hours: Number(editingEvent.hours),
+                        time: editingEvent.time,
+                        signupReq: !!editingEvent.signupReq,
+                        propagateMode: propagateMode === 'none' ? undefined : propagateMode,
+                      };
+
+                      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                      });
+
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        console.error('Update failed', err);
+                        swal('Error', 'Failed to update event', 'error');
+                        return;
+                      }
+
+                      const data = await res.json();
+                      // Replace the event locally
+                      const updatedEvent = data.event ?? data;
+                      setEventList((prev) => prev.map((ev) => (ev.id === updatedEvent.id ? updatedEvent : ev)));
+                      setEditOpen(false);
+                      setEditingEvent(null);
+                      swal('Success', 'Event updated', 'success', { timer: 1500 });
+                    } catch (err) {
+                      console.error('Failed to update event', err);
+                      swal('Error', 'Failed to update event', 'error');
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+              </RBModal.Footer>
+            </RBModal>
+          </div>
+          <Col>
+            <DropdownButton title="Information" variant="light">
+              <p className="p-1">
+                Time:
+                {' '}
+                {event.time}
+                <br />
+                Potential Hours:
+                {' '}
+                {event.hours}
+                <br />
+                Description:
+                {' '}
+                {event.description}
+              </p>
+            </DropdownButton>
+            <div className="mt-2 mb-2">
+              <small className="text-muted">
+                <strong>QR URL:</strong>
+                {' '}
+                {getQRUrl(event)}
+              </small>
+            </div>
+            <RuntimeQRCode event={event} fluid />
+' }}>{event.title}</h5>
+            <div style={{ float: 'right' }}>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => {
+                  // Create URL with event data for duplication
+                  const params = new URLSearchParams({
+                    title: event.title,
+                    description: event.description,
+                    location: event.location,
+                    hours: event.hours.toString(),
+                    time: event.time,
+                    signupReq: event.signupReq.toString(),
+                  });
+                  window.location.href = `/add-event?duplicate=true&${params.toString()}`;
+                }}
+                title="Duplicate this event"
+              >
+                📋 Duplicate
+              </Button>
+              {showAttendanceButton && onManageAttendance && (
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageAttendance(event)}
+                  title="Manage event attendance"
+                >
+                  👥 Attendance
+                </Button>
+              )}
+              {showSignupButton && event.signupReq && onManageSignup && (
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onManageSignup(event)}
+                  title="Manage event signups"
+                >
+                  📝 Signup
+                </Button>
+              )}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedEventId(event.id);
+                  setOpen(true);
+                }}
+                title="Delete this event"
+              >
+                🗑️ Delete
+              </Button>
+            </div>
+            <Modal open={open} onClose={() => setOpen(false)}>
+              <div
+                style={{
+                  borderRadius: '15px',
+                  textAlign: 'justify',
+                  background: 'white',
+                  padding: '20px',
+                  margin: '10% auto',
+                  width: '50%',
+                  height: 'auto',
+                }}
+              >
+                <h1 className="fw-bold">Delete Event</h1>
+                <hr />
+                <p className="text-center">
+                  Are you sure you want to delete this event? This action is not reversible.
+                </p>
+                <div className="d-flex flex-column align-items-center mt-4">
+                  <Button variant="danger" onClick={handleDelete}>
+                    Delete Event
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+          </div>
+          <Col>
+            <DropdownButton title="Information" variant="light">
+              <p className="p-1">
+                Time:
+                {' '}
+                {event.time}
+                <br />
+                Potential Hours:
+                {' '}
+                {event.hours}
+                <br />
+                Description:
+                {' '}
+                {event.description}
+              </p>
+            </DropdownButton>
+            <div className="mt-2 mb-2">
+              <small className="text-muted">
+                <strong>QR URL:</strong>
+                {' '}
+                {getQRUrl(event)}
+              </small>
+            </div>
+            <RuntimeQRCode event={event} fluid />
+          </Col>
+        </Row>
+      ))}
+    </>
+  );
+};
+
+export default EventList;
