@@ -112,12 +112,16 @@ export const EventList = ({
                                 display: block;
                                 margin: 20px auto;
                               }
+                              .url {
+                                font-family: monospace;
+                                word-break: break-all;
+                              }
                             </style>
                           </head>
                           <body>
                             <div>
                               <h3>QR Code for Event: ${event.title}</h3>
-                              <p><strong>URL:</strong> ${qrUrl}</p>
+                              <p class="url"><strong>URL:</strong> ${qrUrl}</p>
                               <img src="${data.qrCode}" alt="QR Code" style="width:400px;height:400px;" />
                             </div>
                           </body>

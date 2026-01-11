@@ -28,13 +28,12 @@ export const RuntimeQRCode = ({
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to get the QR URL for the event
-  const getQRUrl = (eventData: { title: string; date: string }) => {
-    const eventIdentifier = `EVENT-${eventData.date.replace(/\//g, '')}-${eventData.title.trim().replace(/\s+/g, '-')}`;
-    // Use NEXT_PUBLIC_APP_URL first, then fallback to window.location.origin
+  // Function to get the QR URL for the event (numeric id only)
+  const getQRUrl = (eventData: { id: number }) => {
+    // Prefer NEXT_PUBLIC_APP_URL, fall back to window origin, then localhost
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
       || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-    return `${baseUrl}/event-check-in/${eventIdentifier}`;
+    return `${baseUrl}/event-check-in/${eventData.id}`;
   };
 
   // Generate QR code when component mounts or event changes
@@ -93,10 +92,9 @@ export const RuntimeQRCode = ({
 };
 
 // Hook to get the QR URL (useful for displaying the URL text)
-export const useQRUrl = (event: { title: string; date: string }) => {
-  const eventIdentifier = `EVENT-${event.date.replace(/\//g, '')}-${event.title.trim().replace(/\s+/g, '-')}`;
+export const useQRUrl = (event: { id: number; title: string; date: string }) => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-  return `${baseUrl}/event-check-in/${eventIdentifier}`;
+  return `${baseUrl}/event-check-in/${event.id}`;
 };
 
 export default RuntimeQRCode;
