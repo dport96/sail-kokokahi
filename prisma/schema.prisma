@@ -67,6 +67,14 @@ model Qr {
   createdAt   DateTime @default(now())
 }
 
+model ApplicationSettings {
+  id                    Int      @id @default(autoincrement())
+  key                   String   @unique
+  value                 String
+  description           String?
+  updatedAt             DateTime @updatedAt
+}
+
 enum Role {
   USER
   ADMIN

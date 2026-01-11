@@ -38,5 +38,11 @@
       "time": "12:00 PM - 1:30 PM",
       "owner": "john@foo.com"
     }
-  ]
+  ],
+
+  "applicationSettings": {
+    "HOURLY_RATE": 20,
+    "MEMBERSHIP_BASE_AMOUNT": 120,
+    "HOURS_REQUIRED": 6
+  }
 }

@@ -9,7 +9,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { deleteUser } from '@/lib/dbActions';
 import swal from 'sweetalert';
-import { HOURS_REQUIRED, HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT } from '@/lib/constants';
 
 interface User {
   id: number;
@@ -45,9 +44,15 @@ interface HoursLogEntry {
 
 interface CombinedMembersTableProps {
   users: User[];
+  settings: {
+    HOURLY_RATE: number;
+    MEMBERSHIP_BASE_AMOUNT: number;
+    HOURS_REQUIRED: number;
+    TIME_ZONE: string;
+  };
 }
 
-const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) => {
+const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, settings }) => {
   const router = useRouter();
   const [updatedUsers, setUpdatedUsers] = useState(users);
   const [showUserEvents, setShowUserEvents] = useState(false);
@@ -77,20 +82,23 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
   }, [users, originalApprovedHours.size]);
 
   const formatDate = (date: Date) => {
-    const mm = String(new Date(date).getMonth() + 1).padStart(2, '0');
-    const dd = String(new Date(date).getDate()).padStart(2, '0');
-    const yyyy = new Date(date).getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: settings.TIME_ZONE,
+    }).format(new Date(date));
   };
 
   const formatDateTime = (date: string | Date) => {
-    const d = new Date(date);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: settings.TIME_ZONE,
+    }).format(new Date(date));
   };
 
   const hasPendingHours = (user: User) => user.pendingHours > 0;
@@ -103,11 +111,11 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
   const clampHours = (value: number) => Math.max(0, value);
 
   const calculateAmountDue = (approvedHours: number): number => {
-    return approvedHours >= HOURS_REQUIRED ? 0 : MEMBERSHIP_BASE_AMOUNT - HOURLY_RATE * approvedHours;
+    return approvedHours >= settings.HOURS_REQUIRED ? 0 : settings.MEMBERSHIP_BASE_AMOUNT - settings.HOURLY_RATE * approvedHours;
   };
 
   const getProgressBarVariant = (approvedHours: number, percentage: number): string => {
-    if (approvedHours >= HOURS_REQUIRED) return 'success';
+    if (approvedHours >= settings.HOURS_REQUIRED) return 'success';
     if (percentage >= 50) return 'info';
     return 'warning';
   };
@@ -464,7 +472,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
           <tbody>
             {filtered.map((user) => {
               const approvedClamped = clampHours(user.approvedHours);
-              const progressPercentage = Math.min((approvedClamped / HOURS_REQUIRED) * 100, 100);
+              const progressPercentage = Math.min((approvedClamped / settings.HOURS_REQUIRED) * 100, 100);
               const registrationDate = formatDate(user.createdAt);
 
               return (
@@ -500,7 +508,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
                     <div style={{ minWidth: '300px' }}>
                       <ProgressBar
                         now={progressPercentage}
-                        label={`${approvedClamped}/${HOURS_REQUIRED} hrs`}
+                        label={`${approvedClamped}/${settings.HOURS_REQUIRED} hrs`}
                         variant={getProgressBarVariant(approvedClamped, progressPercentage)}
                         style={{ height: '24px' }}
                       />
@@ -531,7 +539,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users }) =>
                     )}
                   </td>
                   <td className="text-end">
-                    ${user.amountDue.toFixed(2)}
+                    ${calculateAmountDue(approvedClamped).toFixed(2)}
                   </td>
                   <td>
                     {renderStatusBadge(user)}

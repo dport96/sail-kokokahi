@@ -4,6 +4,7 @@ import { adminProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import AdminEventsClient from '@/components/AdminEventsClient';
+import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const EventsPage = async () => {
   const session = await getServerSession(authOptions);
@@ -42,7 +43,8 @@ const EventsPage = async () => {
     return eventDate < today;
   });
 
-  // Server current date/time (for display)
+  // Server current date/time (for display) using configured time zone
+  const { TIME_ZONE } = await getApplicationSettingsNoCache();
   const serverNow = new Date();
   const formattedServerNow = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -52,6 +54,7 @@ const EventsPage = async () => {
     minute: '2-digit',
     second: '2-digit',
     timeZoneName: 'short',
+    timeZone: TIME_ZONE,
   }).format(serverNow);
 
   return (

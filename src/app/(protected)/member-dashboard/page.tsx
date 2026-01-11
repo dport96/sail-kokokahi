@@ -3,9 +3,12 @@ import authOptions from '@/lib/authOptions';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import { Container, Row, Col, ProgressBar } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
-import { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED } from '@/lib/constants';
+import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const MemberDashboard = async () => {
+    // Fetch application settings from database (no cache to reflect updates immediately)
+    const { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED, TIME_ZONE } = await getApplicationSettingsNoCache();
+
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);
   loggedInProtectedPage(
@@ -58,10 +61,12 @@ const MemberDashboard = async () => {
   }) : [];
 
   const formatDate = (date: Date) => {
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const yyyy = date.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: TIME_ZONE,
+    }).format(date);
   };
 
   const events = await prisma.event.findMany({

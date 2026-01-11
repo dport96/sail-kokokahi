@@ -4,9 +4,12 @@ import { Role } from '@prisma/client';
 import { adminProtectedPage } from '@/lib/page-protection';
 import { prisma } from '@/lib/prisma';
 import AdminDashboardContent from '@/components/AdminDashboardContent';
-import { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED } from '@/lib/constants';
+import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const AdminDashboard = async () => {
+    // Fetch application settings from database (no cache to reflect updates immediately)
+    const { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED } = await getApplicationSettingsNoCache();
+
   const session = await getServerSession(authOptions);
   adminProtectedPage(
     session as {
@@ -73,6 +76,7 @@ const AdminDashboard = async () => {
     <main>
       <AdminDashboardContent
         usersWithAmountDue={usersWithAmountDue}
+        settings={{ HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED, TIME_ZONE }}
       />
     </main>
   );

@@ -17,14 +17,20 @@ interface AdminDashboardContentProps {
     createdAt: Date;
     mustChangePassword?: boolean;
   }>;
+  settings: {
+    HOURLY_RATE: number;
+    MEMBERSHIP_BASE_AMOUNT: number;
+    HOURS_REQUIRED: number;
+    TIME_ZONE: string;
+  };
 }
 
-const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWithAmountDue }) => {
+const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ usersWithAmountDue, settings }) => {
   return (
     <Container>
       <h1 className="fw-bolder pt-3">Admin Dashboard</h1>
       <hr />
-      <CombinedMembersTable users={usersWithAmountDue} />
+      <CombinedMembersTable users={usersWithAmountDue} settings={settings} />
     </Container>
   );
 };

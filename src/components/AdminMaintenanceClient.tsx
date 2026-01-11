@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,6 +13,75 @@ const AdminMaintenanceClient: React.FC = () => {
   const [showNewYearConfirm, setShowNewYearConfirm] = useState(false);
   const [newYearConfirmText, setNewYearConfirmText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [hourlyRate, setHourlyRate] = useState<number>(20);
+  const [membershipBase, setMembershipBase] = useState<number>(120);
+  const [hoursRequired, setHoursRequired] = useState<number>(6);
+  const [timeZone, setTimeZone] = useState<string>('Pacific/Honolulu');
+
+  // Common time zones (IANA)
+  const COMMON_TIME_ZONES: Array<{ label: string; value: string }> = [
+    { label: 'Pacific/Honolulu (Hawaii)', value: 'Pacific/Honolulu' },
+    { label: 'America/Anchorage (Alaska)', value: 'America/Anchorage' },
+    { label: 'America/Los_Angeles (Pacific)', value: 'America/Los_Angeles' },
+    { label: 'America/Denver (Mountain)', value: 'America/Denver' },
+    { label: 'America/Chicago (Central)', value: 'America/Chicago' },
+    { label: 'America/New_York (Eastern)', value: 'America/New_York' },
+    { label: 'UTC', value: 'UTC' },
+  ];
+
+  const timeZoneOptions = useMemo(() => {
+    const hasCurrent = COMMON_TIME_ZONES.some((tz) => tz.value === timeZone);
+    return hasCurrent
+      ? COMMON_TIME_ZONES
+      : [...COMMON_TIME_ZONES, { label: `${timeZone} (custom)`, value: timeZone }];
+  }, [timeZone]);
+
+  // Load application settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        setSettingsLoading(true);
+        const resp = await fetch('/api/admin/settings');
+        if (!resp.ok) throw new Error('Failed to fetch settings');
+        const data = await resp.json();
+        if (typeof data.HOURLY_RATE === 'number') setHourlyRate(data.HOURLY_RATE);
+        if (typeof data.MEMBERSHIP_BASE_AMOUNT === 'number') setMembershipBase(data.MEMBERSHIP_BASE_AMOUNT);
+        if (typeof data.HOURS_REQUIRED === 'number') setHoursRequired(data.HOURS_REQUIRED);
+        if (typeof data.TIME_ZONE === 'string') setTimeZone(data.TIME_ZONE);
+      } catch (e) {
+        console.error(e);
+        toast.error('Failed to load settings');
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const saveSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      const payload = {
+        HOURLY_RATE: hourlyRate,
+        MEMBERSHIP_BASE_AMOUNT: membershipBase,
+        HOURS_REQUIRED: hoursRequired,
+        TIME_ZONE: timeZone,
+      };
+      const resp = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error('Failed to save settings');
+      toast.success('Settings saved');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to save settings');
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
 
   const handleBackup = async () => {
     try {
@@ -168,6 +237,72 @@ const AdminMaintenanceClient: React.FC = () => {
             >
               Start New Year
             </Button>
+          </div>
+        </Col>
+      </Row>
+
+      {/* Application Settings */}
+      <Row className="mb-4">
+        <Col md={12}>
+          <div className="border rounded p-3">
+            <h5>Application Settings</h5>
+            <p className="small text-muted">Manage membership calculation values and time zone</p>
+            <Row className="g-3">
+              <Col sm={4}>
+                <Form.Label htmlFor="hourlyRate">Hourly Rate ($/hr)</Form.Label>
+                <Form.Control
+                  id="hourlyRate"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={hourlyRate}
+                  onChange={(e) => setHourlyRate(Number(e.target.value))}
+                  disabled={settingsLoading}
+                />
+              </Col>
+              <Col sm={4}>
+                <Form.Label htmlFor="membershipBase">Membership Base ($)</Form.Label>
+                <Form.Control
+                  id="membershipBase"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={membershipBase}
+                  onChange={(e) => setMembershipBase(Number(e.target.value))}
+                  disabled={settingsLoading}
+                />
+              </Col>
+              <Col sm={4}>
+                <Form.Label htmlFor="hoursRequired">Hours Required</Form.Label>
+                <Form.Control
+                  id="hoursRequired"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={hoursRequired}
+                  onChange={(e) => setHoursRequired(Number(e.target.value))}
+                  disabled={settingsLoading}
+                />
+              </Col>
+              <Col sm={8}>
+                <Form.Label htmlFor="timeZone">Time Zone</Form.Label>
+                <Form.Select
+                  id="timeZone"
+                  value={timeZone}
+                  onChange={(e) => setTimeZone(e.target.value)}
+                  disabled={settingsLoading}
+                >
+                  {timeZoneOptions.map((tz) => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                  ))}
+                </Form.Select>
+              </Col>
+            </Row>
+            <div className="mt-3">
+              <Button variant="primary" onClick={saveSettings} disabled={settingsLoading}>
+                {settingsLoading ? 'Saving...' : 'Save Settings'}
+              </Button>
+            </div>
           </div>
         </Col>
       </Row>

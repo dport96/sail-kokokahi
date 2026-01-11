@@ -34,6 +34,41 @@ async function main() {
   });
 
   console.log('Users seeded:', adminUser, johnUser);
+
+  // Seed application settings with default values
+  console.log('Seeding application settings...');
+
+  await prisma.applicationSettings.upsert({
+    where: { key: 'HOURLY_RATE' },
+    update: {},
+    create: {
+      key: 'HOURLY_RATE',
+      value: '20',
+      description: 'Dollars per approved hour',
+    },
+  });
+
+  await prisma.applicationSettings.upsert({
+    where: { key: 'MEMBERSHIP_BASE_AMOUNT' },
+    update: {},
+    create: {
+      key: 'MEMBERSHIP_BASE_AMOUNT',
+      value: '120',
+      description: 'Base membership amount',
+    },
+  });
+
+  await prisma.applicationSettings.upsert({
+    where: { key: 'HOURS_REQUIRED' },
+    update: {},
+    create: {
+      key: 'HOURS_REQUIRED',
+      value: '6',
+      description: 'Minimum volunteer hours required for membership',
+    },
+  });
+
+  console.log('Application settings seeded');
 }
 
 main()
