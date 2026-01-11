@@ -8,7 +8,7 @@ import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const AdminDashboard = async () => {
     // Fetch application settings from database (no cache to reflect updates immediately)
-    const { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED } = await getApplicationSettingsNoCache();
+    const { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED, TIME_ZONE } = await getApplicationSettingsNoCache();
 
   const session = await getServerSession(authOptions);
   adminProtectedPage(

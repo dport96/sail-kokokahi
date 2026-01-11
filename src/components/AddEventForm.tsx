@@ -4,13 +4,14 @@ import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import swal from 'sweetalert';
 import { AddEventSchema } from '@/lib/validationSchemas';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const AddEventForm: React.FC = () => {
+  const [timeZone, setTimeZone] = useState<string>('Pacific/Honolulu');
   const searchParams = useSearchParams();
   const isDuplicateMode = searchParams?.get('duplicate') === 'true';
 
@@ -27,6 +28,21 @@ const AddEventForm: React.FC = () => {
 
   // Check for duplication parameters and populate form
   useEffect(() => {
+    // Load TIME_ZONE from admin settings (admin-only route)
+    (async () => {
+      try {
+        const resp = await fetch('/api/admin/settings');
+        if (resp.ok) {
+          const data = await resp.json();
+          if (typeof data.TIME_ZONE === 'string' && data.TIME_ZONE) {
+            setTimeZone(data.TIME_ZONE);
+          }
+        }
+      } catch {
+        // ignore fetch errors and keep default
+      }
+    })();
+
     if (!searchParams) return;
 
     const isDuplicate = searchParams.get('duplicate');
@@ -79,6 +95,7 @@ const AddEventForm: React.FC = () => {
             month: '2-digit',
             day: '2-digit',
             year: 'numeric',
+            timeZone,
           })
           : data.date,
         time: data.time instanceof Date
@@ -86,6 +103,7 @@ const AddEventForm: React.FC = () => {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
+            timeZone,
           })
           : data.time,
       };
