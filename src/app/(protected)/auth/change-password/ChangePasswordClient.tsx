@@ -120,6 +120,7 @@ const ChangePasswordClient = () => {
                         {showNew ? '🙈' : '👁️'}
                       </button>
                     </div>
+                    <small className="text-muted">Password must be between 1 and 40 characters</small>
                     <div className="invalid-feedback">{errors.password?.message}</div>
                   </Form.Group>
                   <Form.Group className="form-group">

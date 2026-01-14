@@ -197,6 +197,7 @@ const RegisterForm: React.FC = () => {
                   {showPasswords ? '🙈' : '👁️'}
                 </button>
               </div>
+              <small className="text-muted">Password must be between 1 and 40 characters</small>
             </div>
 
             <div className="col-12">
