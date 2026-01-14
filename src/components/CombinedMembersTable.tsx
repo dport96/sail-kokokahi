@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Table, Button, Badge, Container, Modal, Spinner, Form } from 'react-bootstrap';
+import { Table, Button, Badge, Container, Modal, Spinner, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { ProgressBar } from 'react-bootstrap';
@@ -548,42 +548,58 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, sett
                     <div className="d-flex gap-1" style={{ fontSize: '0.85rem' }}>
                       {hasPendingChanges(user) && (
                         <>
-                          <Button
-                            size="sm"
-                            variant="success"
-                            onClick={() => handleApprove(user.id)}
-                            title="Approve pending hours"
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Approve pending hours</Tooltip>}
                           >
-                            ✓
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="warning"
-                            onClick={() => handleDeny(user.id)}
-                            title="Deny pending hours"
+                            <Button
+                              size="sm"
+                              variant="success"
+                              onClick={() => handleApprove(user.id)}
+                            >
+                              ✓
+                            </Button>
+                          </OverlayTrigger>
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Deny pending hours</Tooltip>}
                           >
-                            ✗
-                          </Button>
+                            <Button
+                              size="sm"
+                              variant="warning"
+                              onClick={() => handleDeny(user.id)}
+                            >
+                              ✗
+                            </Button>
+                          </OverlayTrigger>
                         </>
                       )}
                       {!user.mustChangePassword && (
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Reset {user.firstName} {user.lastName}&apos;s password to &apos;changeme!&apos; - User will be required to change it on next login</Tooltip>}
+                        >
+                          <Button
+                            size="sm"
+                            variant="warning"
+                            onClick={() => handleResetPassword(user)}
+                          >
+                            🔑
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                      <OverlayTrigger
+                        placement="top"
+                        overlay={<Tooltip>Permanently delete {user.firstName} {user.lastName} - This action cannot be undone</Tooltip>}
+                      >
                         <Button
                           size="sm"
-                          variant="warning"
-                          onClick={() => handleResetPassword(user)}
-                          title={`Reset ${user.firstName} ${user.lastName}'s password to 'changeme!' - User will be required to change it on next login`}
+                          variant="danger"
+                          onClick={() => handleDeleteUser(user.id)}
                         >
-                          🔑
+                          🗑️
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDeleteUser(user.id)}
-                        title={`Permanently delete ${user.firstName} ${user.lastName} - This action cannot be undone`}
-                      >
-                        🗑️
-                      </Button>
+                      </OverlayTrigger>
                     </div>
                   </td>
                 </tr>
