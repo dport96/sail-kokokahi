@@ -22,6 +22,21 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInP
   const [isLoading, setIsLoading] = useState(false);
   const [checkedInStatus, setCheckedInStatus] = useState(isAlreadyCheckedIn);
   const [statusLoading, setStatusLoading] = useState(true);
+  const [isEventToday, setIsEventToday] = useState(true);
+
+  // Function to check if event is today
+  const checkIfEventToday = useCallback(() => {
+    // Parse event date (MM/DD/YYYY format)
+    const [month, day, year] = event.date.split('/').map(Number);
+    const eventDate = new Date(year, month - 1, day);
+    const today = new Date();
+    
+    // Set time to midnight for accurate date comparison
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    
+    return eventDate.getTime() === today.getTime();
+  }, [event.date]);
 
   // Function to check current check-in status
   const checkStatus = useCallback(async () => {
@@ -48,7 +63,8 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInP
   // Check status when component mounts
   useEffect(() => {
     checkStatus();
-  }, [checkStatus]);
+    setIsEventToday(checkIfEventToday());
+  }, [checkStatus, checkIfEventToday]);
 
   const handleCheckIn = async (eventId: number) => {
     setIsLoading(true);
@@ -121,7 +137,21 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInP
                     </p>
                   </div>
                 )}
-                {!statusLoading && !checkedInStatus && (
+                {!statusLoading && !checkedInStatus && !isEventToday && (
+                  <div>
+                    <Button
+                      variant="danger"
+                      disabled
+                      className="mb-2"
+                    >
+                      Check-in Unavailable
+                    </Button>
+                    <p className="text-danger small">
+                      Check-in is only allowed on the day of the event ({event.date}).
+                    </p>
+                  </div>
+                )}
+                {!statusLoading && !checkedInStatus && isEventToday && (
                   <Button
                     onClick={() => handleCheckIn(event.id)}
                     disabled={isLoading}

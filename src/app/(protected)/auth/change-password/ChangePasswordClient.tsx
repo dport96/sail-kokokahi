@@ -71,13 +71,13 @@ const ChangePasswordClient = () => {
       reset();
 
       // Redirect user after password change
-      // Priority: callbackUrl (from QR scan) > role-based dashboard
+      // Priority: callbackUrl (from signin/QR) > role-based dashboard
       if (callbackUrl) {
         router.push(callbackUrl);
       } else if (role === 'ADMIN') {
         router.push('/admin-dashboard');
       } else {
-        router.push('/member-event-sign-up');
+        router.push('/member-dashboard');
       }
     } catch (error) {
       console.error('Change password error:', error);
