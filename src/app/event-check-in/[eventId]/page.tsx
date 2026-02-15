@@ -15,7 +15,7 @@ export default async function EventPage({ params }: { params: Promise<{ eventId:
   // If there's no session, redirect to the sign-in page and include a callbackUrl
   // that returns the user to this exact event check-in page after authentication.
   if (!session) {
-    const base = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? '';
+    const base = process.env.NEXTAUTH_URL ?? '';
     const callback = `${base}/event-check-in/${eventId}`;
     // Use a full absolute callback URL so NextAuth redirects back correctly.
     redirect(`/auth/signin?callbackUrl=${encodeURIComponent(callback)}`);

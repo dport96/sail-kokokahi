@@ -62,9 +62,6 @@ DATABASE_URL="postgresql://sail_user:your_password@localhost:5432/sail_kokokahi"
 # NextAuth
 NEXTAUTH_SECRET="generate-a-random-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
-
-# Application URL
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
 ### 4. Set up the database
@@ -144,7 +141,6 @@ Set these in your Vercel project settings:
 DATABASE_URL=postgresql://...
 NEXTAUTH_SECRET=<random-secret>
 NEXTAUTH_URL=https://your-app.vercel.app
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 ```
 
 ### Deployment Steps

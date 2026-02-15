@@ -30,8 +30,8 @@ export const RuntimeQRCode = ({
 
   // Function to get the QR URL for the event (numeric id only)
   const getQRUrl = (eventData: { id: number }) => {
-    // Prefer NEXT_PUBLIC_APP_URL, fall back to window origin, then localhost
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    // Prefer NEXTAUTH_URL, fall back to window origin, then localhost
+    const baseUrl = process.env.NEXTAUTH_URL
       || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     return `${baseUrl}/event-check-in/${eventData.id}`;
   };

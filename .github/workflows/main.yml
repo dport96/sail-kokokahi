@@ -13,8 +13,7 @@ env:
   # Ensure CI has a DATABASE_URL available for migrations/tests. Prefer secret, then repo env, then fallback localhost for quick runs.
   DATABASE_URL: ${{ secrets.DATABASE_URL || env.DATABASE_URL || 'postgresql://sail_user:your_password@localhost:5432/sail_kokokahi' }}
   # Provide BASE_URL so tests and other workflows can be run against the intended host.
-  # Use NEXT_PUBLIC_APP_URL when available, then NEXTAUTH_URL, otherwise localhost.
-  BASE_URL: ${{ env.NEXT_PUBLIC_APP_URL || env.NEXTAUTH_URL || 'http://localhost:3000' }}
+  BASE_URL: ${{ env.NEXTAUTH_URL || 'http://localhost:3000' }}
 
 jobs:
   lint-and-test:

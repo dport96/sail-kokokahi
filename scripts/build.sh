@@ -17,7 +17,7 @@ if [ -f .env.local ]; then
   set +a
 fi
 
-echo "Building with NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-unset} NEXTAUTH_URL=${NEXTAUTH_URL:-unset}"
+echo "Building with NEXTAUTH_URL=${NEXTAUTH_URL:-unset}"
 
 echo "Resolving any failed migrations..."
 npx prisma migrate resolve --rolled-back 20250718011153_init || echo "No failed migration to resolve"

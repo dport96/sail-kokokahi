@@ -15,9 +15,8 @@ test.describe('User Pages', () => {
 
   userPages.forEach((path) => {
     test(`should navigate to ${path}`, async ({ page }) => {
-      // Prefer BASE_URL, then NEXT_PUBLIC_APP_URL, then NEXTAUTH_URL, then localhost
+      // Prefer BASE_URL, then NEXTAUTH_URL, then localhost
       const baseUrl = process.env.BASE_URL
-        || process.env.NEXT_PUBLIC_APP_URL
         || process.env.NEXTAUTH_URL
         || 'http://localhost:3000';
       const pageUrl = `${baseUrl}${path}`;
