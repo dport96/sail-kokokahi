@@ -82,14 +82,17 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     redirect: async ({ url, baseUrl }) => {
+      // Use NEXTAUTH_URL if set, otherwise fall back to baseUrl
+      const redirectBase = process.env.NEXTAUTH_URL || baseUrl;
+      
       // If signing out, redirect to the base URL (original domain)
       if (url.includes('/auth/signout')) {
-        return baseUrl;
+        return redirectBase;
       }
       // Default behavior for other redirects
-      if (url.startsWith('/')) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      if (url.startsWith('/')) return `${redirectBase}${url}`;
+      if (new URL(url).origin === redirectBase) return url;
+      return redirectBase;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
