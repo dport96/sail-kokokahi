@@ -4,6 +4,7 @@ import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { Role } from '@prisma/client';
 import { getTimeZone } from '@/lib/settings';
+import { normalizeEventDate } from '@/lib/date';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -77,13 +78,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
     const todayDate = `${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`;
 
-    // Parse event date from MM/DD/YYYY format to YYYY-MM-DD
-    const [month, day, year] = event.date.split('/');
-    const eventDate = `${year}-${month}-${day}`;
+    // Parse event date from MM/DD/YYYY format to YYYY-MM-DD (zero-padded)
+    const eventDate = normalizeEventDate(event.date);
+
+    if (!eventDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid event date format',
+      });
+    }
 
     // Check if today matches the event date
     if (todayDate !== eventDate) {
-      const eventDateObj = new Date(`${year}-${month}-${day}`);
+      const eventDateObj = new Date(eventDate);
       const today = new Date(`${todayDate}`);
       
       let message = 'Check-in is only allowed on the day of the event. ';

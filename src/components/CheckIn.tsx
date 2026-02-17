@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Col, DropdownButton, Row, Container } from 'react-bootstrap';
 import swal from 'sweetalert';
+import { normalizeEventDate } from '@/lib/date';
 
 interface Event {
   id: number;
@@ -27,9 +28,14 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
 
   // Function to check if event is today (using the configured timezone)
   const checkIfEventToday = useCallback(() => {
-    // Parse event date (MM/DD/YYYY format)
-    const [month, day, year] = event.date.split('/').map(Number);
-    const eventDate = new Date(year, month - 1, day);
+    // Parse event date (MM/DD/YYYY format) with zero-padded components
+    const normalizedEventDate = normalizeEventDate(event.date);
+    if (!normalizedEventDate) {
+      return false;
+    }
+
+    const [year, month, day] = normalizedEventDate.split('-');
+    const eventDate = new Date(Number(year), Number(month) - 1, Number(day));
     
     // Get today's date in the configured timezone
     const now = new Date();
@@ -42,7 +48,10 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
     
     const todayParts = todayFormatter.formatToParts(now);
     const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
-    const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
+    const todayYear = Number(todayMap.get('year'));
+    const todayMonth = Number(todayMap.get('month'));
+    const todayDay = Number(todayMap.get('day'));
+    const today = new Date(todayYear, todayMonth - 1, todayDay);
     
     // Set time to midnight for accurate date comparison
     eventDate.setHours(0, 0, 0, 0);
