@@ -54,7 +54,7 @@ const EventsPage = async () => {
     const eventDate = parseEventDate(event.date);
     eventDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
     return eventDate < today;
-  });
+  }).reverse(); // Sort from most recent to least recent
 
   // Server current date/time (for display) using configured time zone
   const formattedServerNow = new Intl.DateTimeFormat('en-US', {

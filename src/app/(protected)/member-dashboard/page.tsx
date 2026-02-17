@@ -69,6 +69,12 @@ const MemberDashboard = async () => {
     }).format(date);
   };
 
+  // Helper function to parse MM/DD/YYYY date format
+  const parseEventDate = (dateString: string) => {
+    const [month, day, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const events = await prisma.event.findMany({
     where: {
       date: {
@@ -80,11 +86,23 @@ const MemberDashboard = async () => {
   },
   });
 
-  // Filter out past events by comparing with today's date
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Filter out past events by comparing with today's date (using configured timezone)
+  const now = new Date();
+  const todayFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  
+  const todayParts = todayFormatter.formatToParts(now);
+  const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
+  const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
+  
   const upcomingEvents = events.filter(event => {
-    const eventDate = new Date(event.date);
+    const eventDate = parseEventDate(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
     return eventDate >= today;
   });
 

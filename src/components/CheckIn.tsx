@@ -16,27 +16,40 @@ interface Event {
 interface CheckInProps {
   event: Event;
   isAlreadyCheckedIn: boolean;
+  timeZone?: string;
 }
 
-export default function CheckInComponent({ event, isAlreadyCheckedIn }: CheckInProps) {
+export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone = 'UTC' }: CheckInProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [checkedInStatus, setCheckedInStatus] = useState(isAlreadyCheckedIn);
   const [statusLoading, setStatusLoading] = useState(true);
   const [isEventToday, setIsEventToday] = useState(true);
 
-  // Function to check if event is today
+  // Function to check if event is today (using the configured timezone)
   const checkIfEventToday = useCallback(() => {
     // Parse event date (MM/DD/YYYY format)
     const [month, day, year] = event.date.split('/').map(Number);
     const eventDate = new Date(year, month - 1, day);
-    const today = new Date();
+    
+    // Get today's date in the configured timezone
+    const now = new Date();
+    const todayFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    
+    const todayParts = todayFormatter.formatToParts(now);
+    const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
+    const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
     
     // Set time to midnight for accurate date comparison
     eventDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     
     return eventDate.getTime() === today.getTime();
-  }, [event.date]);
+  }, [event.date, timeZone]);
 
   // Function to check current check-in status
   const checkStatus = useCallback(async () => {

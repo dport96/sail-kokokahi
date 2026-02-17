@@ -4,6 +4,7 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import CheckInComponent from '@/components/CheckIn';
+import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const prisma = new PrismaClient();
 
@@ -24,6 +25,9 @@ export default async function EventPage({ params }: { params: Promise<{ eventId:
   // For authenticated users, run the existing protection checks (authorization)
   // Cast via unknown to satisfy TypeScript when narrowing session to our expected shape
   loggedInProtectedPage(session as unknown as { user: { email: string; id: string; randomKey: string } } | null);
+
+  // Get the configured timezone
+  const { TIME_ZONE } = await getApplicationSettingsNoCache();
 
   // Try to resolve event by numeric ID first; fall back to legacy EVENT-<date>-<title> format
   let event = null as Awaited<ReturnType<typeof prisma.event.findUnique>> | null;
@@ -92,5 +96,5 @@ export default async function EventPage({ params }: { params: Promise<{ eventId:
     }
   }
 
-  return <CheckInComponent event={event} isAlreadyCheckedIn={isAlreadyCheckedIn} />;
+  return <CheckInComponent event={event} isAlreadyCheckedIn={isAlreadyCheckedIn} timeZone={TIME_ZONE} />;
 }

@@ -4,6 +4,7 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import SignUp from '@/app/(protected)/SignUp';
+import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 /** Render a list of stuff for the logged in user. */
 const EventsSignUp = async () => {
@@ -16,13 +17,16 @@ const EventsSignUp = async () => {
   // Fetch events from the database
   const events = await prisma.event.findMany();
 
+  // Get the configured timezone
+  const { TIME_ZONE } = await getApplicationSettingsNoCache();
+
   // Pass the events data as props to the EventsSignUp component
   return (
     <main>
       <Container>
         <Row>
           <Col>
-            <SignUp events={events} />
+            <SignUp events={events} timeZone={TIME_ZONE} />
           </Col>
         </Row>
       </Container>

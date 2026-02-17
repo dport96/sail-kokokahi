@@ -18,12 +18,14 @@ export const EventList = ({
   onManageSignup,
   showAttendanceButton = false,
   showSignupButton = false,
+  sortDescending = false,
 }: {
   events: any[];
   onManageAttendance?: (event: any) => void;
   onManageSignup?: (event: any) => void;
   showAttendanceButton?: boolean;
   showSignupButton?: boolean;
+  sortDescending?: boolean;
 }) => {
   const [eventList, setEventList] = useState(events);
   const [open, setOpen] = useState(false);
@@ -62,7 +64,7 @@ export const EventList = ({
 
     const dateA = parseEventDate(a.date).getTime();
     const dateB = parseEventDate(b.date).getTime();
-    return dateA - dateB;
+    return sortDescending ? dateB - dateA : dateA - dateB;
   });
 
   // Function to get QR URL (moved from hook since we need it in callbacks)

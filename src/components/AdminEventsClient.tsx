@@ -92,6 +92,7 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
               onManageSignup={handleManageSignup}
               showAttendanceButton
               showSignupButton
+              sortDescending
             />
           ) : (
             <Alert variant="info" className="text-center">

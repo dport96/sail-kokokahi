@@ -16,9 +16,10 @@ interface Event {
 
 interface EventsSignUpProps {
   events: Event[];
+  timeZone?: string;
 }
 
-const SignUp = ({ events }: EventsSignUpProps) => {
+const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
   const [eventList, setEventList] = useState<Event[]>([]);
 
   const handleSignUp = async (eventId: number) => {
@@ -42,19 +43,39 @@ const SignUp = ({ events }: EventsSignUpProps) => {
     }
   };
 
+  // Helper function to parse MM/DD/YYYY date format
+  const parseEventDate = (dateString: string) => {
+    const [month, day, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   useEffect(() => {
-    // Filter out past events
+    // Filter out past events (using configured timezone)
     const now = new Date();
-    const filteredEvents = events.filter(
-      (event) => new Date(event.date) >= now,
-    );
+    const todayFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    
+    const todayParts = todayFormatter.formatToParts(now);
+    const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
+    const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
+    today.setHours(0, 0, 0, 0);
+    
+    const filteredEvents = events.filter((event) => {
+      const eventDate = parseEventDate(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= today;
+    });
     setEventList(filteredEvents);
-  }, [events]);
+  }, [events, timeZone]);
 
   const sortedEvents = eventList.sort((a, b) => {
-    const dateA = new Date(a.date).getTime(); // Convert MM/DD/YYYY string to Date object
-    const dateB = new Date(b.date).getTime(); // Convert MM/DD/YYYY string to Date object
-    return dateA - dateB; // Sort by date descending
+    const dateA = parseEventDate(a.date).getTime();
+    const dateB = parseEventDate(b.date).getTime();
+    return dateA - dateB; // Sort by date ascending
   });
   return (
     <div className="mb-3">
