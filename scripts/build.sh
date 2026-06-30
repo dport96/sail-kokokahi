@@ -17,12 +17,19 @@ if [ -f .env.local ]; then
   set +a
 fi
 
-echo "Building with NEXTAUTH_URL=${NEXTAUTH_URL:-unset}"
+export DATABASE_URL="${DATABASE_URL}"
+
+echo "Building with NEXTAUTH_URL=${NEXTAUTH_URL:-unset}, DATABASE_URL=${DATABASE_URL:-unset}"
+
+npx prisma generate
 
 echo "Resolving any failed migrations..."
 npx prisma migrate resolve --rolled-back 20250718011153_init || echo "No failed migration to resolve"
 
 echo "Running database migrations..."
+npx prisma migrate deploy
+npx prisma db seed
+next build
 npx prisma migrate deploy
 
 echo "Seeding database with defaults..."
@@ -33,4 +40,6 @@ npx prisma generate --schema=prisma/schema.prisma
 
 echo "Building Next.js application..."
 npx prisma generate
+DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
+DATABASE_URL="$DATABASE_URL" npx prisma db seed
 next build
