@@ -76,7 +76,14 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
       const response = await fetch('/api/users');
       if (response.ok) {
         const data = await response.json();
-        setAllUsers(data);
+        const sortedUsers = (data as User[]).sort((a, b) => {
+          const lastNameComparison = a.lastName.localeCompare(b.lastName, undefined, { sensitivity: 'base' });
+          if (lastNameComparison !== 0) {
+            return lastNameComparison;
+          }
+          return a.firstName.localeCompare(b.firstName, undefined, { sensitivity: 'base' });
+        });
+        setAllUsers(sortedUsers);
       } else {
         console.error('Failed to fetch users');
       }
