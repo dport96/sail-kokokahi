@@ -99,6 +99,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     }
   }, []);
 
+  const collator = new Intl.Collator('en', { sensitivity: 'base', ignorePunctuation: true });
+  const normalizeName = (value: string) => (value || '').trim();
+
   // Helper to determine current session user's role
   const sessionUserRole = (session?.user as any)?.role as Role | undefined;
   const sessionUserIsNotRegular = !!sessionUserRole && sessionUserRole !== Role.USER;
@@ -208,19 +211,18 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     }
   };
 
-  const collator = new Intl.Collator('en', { sensitivity: 'base', ignorePunctuation: true });
-  const normalizeName = (value: string) => (value || '').trim();
-
   // Filter out users who are already attendees
-  const availableUsers = allUsers
-    .filter(user => !attendees.some(attendee => attendee.userId === user.id))
-    .sort((a, b) => {
-      const lastNameComparison = collator.compare(normalizeName(a.lastName), normalizeName(b.lastName));
-      if (lastNameComparison !== 0) {
-        return lastNameComparison;
-      }
-      return collator.compare(normalizeName(a.firstName), normalizeName(b.firstName));
-    });
+  const availableUsers = React.useMemo(() => {
+    return allUsers
+      .filter(user => !attendees.some(attendee => attendee.userId === user.id))
+      .sort((a, b) => {
+        const lastNameComparison = collator.compare(normalizeName(a.lastName), normalizeName(b.lastName));
+        if (lastNameComparison !== 0) {
+          return lastNameComparison;
+        }
+        return collator.compare(normalizeName(a.firstName), normalizeName(b.firstName));
+      });
+  }, [allUsers, attendees, collator, normalizeName]);
 
   return (
     <Modal show={isOpen} onHide={onClose} size="lg">
