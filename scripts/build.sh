@@ -32,4 +32,5 @@ echo "Generating Prisma client..."
 npx prisma generate --schema=prisma/schema.prisma
 
 echo "Building Next.js application..."
-npx next build
+npx prisma generate
+next build
