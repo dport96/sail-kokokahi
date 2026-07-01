@@ -29,6 +29,9 @@ echo "Building with NEXTAUTH_URL=${NEXTAUTH_URL:-unset}, DATABASE_URL=set"
 echo "Generating Prisma client..."
 npx prisma generate
 
+echo "Recovering known failed migration state if present..."
+npx prisma migrate resolve --rolled-back 20260701_add_event_pin || echo "No failed 20260701_add_event_pin migration to recover"
+
 echo "Running database migrations..."
 npx prisma migrate deploy
 
