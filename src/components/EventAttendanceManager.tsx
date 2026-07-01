@@ -50,6 +50,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
   const [attendees, setAttendees] = useState<EventAttendee[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [noteDrafts, setNoteDrafts] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
 
@@ -69,6 +70,12 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
           return a.User.firstName.localeCompare(b.User.firstName, undefined, { sensitivity: 'base' });
         });
         setAttendees(sortedAttendees);
+        setNoteDrafts(
+          sortedAttendees.reduce<Record<number, string>>((drafts, attendee) => {
+            drafts[attendee.id] = attendee.notes || '';
+            return drafts;
+          }, {}),
+        );
       } else {
         console.error('Failed to fetch attendees');
       }
@@ -212,6 +219,45 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
     }
   };
 
+  const saveAttendeeNotes = async (attendee: EventAttendee) => {
+    const nextNotes = noteDrafts[attendee.id] || '';
+
+    try {
+      const response = await fetch(`/api/events/${event.id}/attendees/${attendee.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: nextNotes }),
+      });
+
+      if (response.ok) {
+        swal('Success', 'Notes updated successfully', 'success');
+        fetchEventAttendees();
+        setTimeout(() => router.refresh(), 1000);
+      } else {
+        const error = await response.json();
+        swal('Error', error.message || 'Failed to update notes', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating attendee notes:', error);
+      swal('Error', 'Failed to update notes', 'error');
+    }
+  };
+
+  const handleAttendeeAction = async (attendee: EventAttendee) => {
+    const currentNotes = noteDrafts[attendee.id] || '';
+    const originalNotes = attendee.notes || '';
+
+    if (currentNotes !== originalNotes) {
+      await saveAttendeeNotes(attendee);
+      return;
+    }
+
+    await removeUserFromEvent(
+      attendee.id,
+      `${attendee.User.firstName} ${attendee.User.lastName}`,
+    );
+  };
+
   // Filter out users who are already attendees
   const availableUsers = React.useMemo(() => {
     return allUsers
@@ -319,7 +365,18 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                           </span>
                         </td>
                         {mode === 'signup' && (
-                          <td>{attendee.notes || '-'}</td>
+                          <td>
+                            <Form.Control
+                              as="textarea"
+                              rows={2}
+                              value={noteDrafts[attendee.id] ?? attendee.notes ?? ''}
+                              onChange={(e) => setNoteDrafts((prev) => ({
+                                ...prev,
+                                [attendee.id]: e.target.value,
+                              }))}
+                              placeholder="Add notes for this signup"
+                            />
+                          </td>
                         )}
                         {mode === 'signup' && (
                           <td>
@@ -341,14 +398,15 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                         )}
                         <td>
                           <Button
-                            variant="outline-danger"
+                            variant={mode === 'signup' && (noteDrafts[attendee.id] || '') !== (attendee.notes || '')
+                              ? 'primary'
+                              : 'outline-danger'}
                             size="sm"
-                            onClick={() => removeUserFromEvent(
-                              attendee.id,
-                              `${attendee.User.firstName} ${attendee.User.lastName}`,
-                            )}
+                            onClick={() => handleAttendeeAction(attendee)}
                           >
-                            Remove
+                            {mode === 'signup' && (noteDrafts[attendee.id] || '') !== (attendee.notes || '')
+                              ? 'Update'
+                              : 'Remove'}
                           </Button>
                         </td>
                       </tr>

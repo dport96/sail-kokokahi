@@ -11,7 +11,7 @@ export async function PATCH(req: NextRequest, context: any) {
   try {
     const eventId = parseInt(params.eventId, 10);
     const attendeeId = parseInt(params.attendeeId, 10);
-    const { attended } = await req.json();
+    const { attended, notes } = await req.json();
 
     if (Number.isNaN(eventId) || Number.isNaN(attendeeId)) {
       return NextResponse.json(
@@ -20,9 +20,35 @@ export async function PATCH(req: NextRequest, context: any) {
       );
     }
 
-    if (typeof attended !== 'boolean') {
+    const hasAttendedUpdate = typeof attended === 'boolean';
+    const hasNotesUpdate = notes !== undefined;
+
+    if (!hasAttendedUpdate && !hasNotesUpdate) {
+      return NextResponse.json(
+        { message: 'At least one field must be provided for update' },
+        { status: 400 },
+      );
+    }
+
+    if (hasNotesUpdate && typeof notes !== 'string') {
+      return NextResponse.json(
+        { message: 'Notes must be a string' },
+        { status: 400 },
+      );
+    }
+
+    if (hasAttendedUpdate && typeof attended !== 'boolean') {
       return NextResponse.json(
         { message: 'Attended status must be a boolean' },
+        { status: 400 },
+      );
+    }
+
+    const normalizedNotes = typeof notes === 'string' ? notes.trim() : undefined;
+
+    if (normalizedNotes !== undefined && normalizedNotes.length > 1000) {
+      return NextResponse.json(
+        { message: 'Notes must be 1000 characters or less' },
         { status: 400 },
       );
     }
@@ -72,17 +98,27 @@ export async function PATCH(req: NextRequest, context: any) {
     // Use a transaction to ensure both operations succeed or fail together
     await prisma.$transaction(async (tx) => {
       // Update the attendee's attended status
-      await tx.userEvent.update({
-        where: {
-          id: attendeeId,
-        },
-        data: {
-          attended,
-        },
-      });
+      const updateData: { attended?: boolean; notes?: string | null } = {};
 
-      // Update user's hours based on the change
-      if (attended && !attendee.attended) {
+      if (hasAttendedUpdate) {
+        updateData.attended = attended;
+      }
+
+      if (hasNotesUpdate) {
+        updateData.notes = normalizedNotes || null;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await tx.userEvent.update({
+          where: {
+            id: attendeeId,
+          },
+          data: updateData,
+        });
+      }
+
+      // Update user's hours only when attendance changes.
+      if (hasAttendedUpdate && attended && !attendee.attended) {
         // User is being marked as attended - add pending hours
         await tx.user.update({
           where: { id: attendee.userId },
@@ -90,7 +126,7 @@ export async function PATCH(req: NextRequest, context: any) {
             pendingHours: attendee.User.pendingHours + event.hours,
           },
         });
-      } else if (!attended && attendee.attended) {
+      } else if (hasAttendedUpdate && !attended && attendee.attended) {
         // User is being marked as not attended - subtract hours
         const currentPendingHours = attendee.User.pendingHours;
         const eventHours = event.hours;
