@@ -104,7 +104,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
 
   // Helper to determine current session user's role
   const sessionUserRole = (session?.user as any)?.role as Role | undefined;
-  const sessionUserIsNotRegular = !!sessionUserRole && sessionUserRole !== Role.USER;
+  const sessionUserIsRegular = sessionUserRole === Role.USER;
 
   // Fetch event attendees and all users when modal opens
   useEffect(() => {
@@ -269,8 +269,8 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
               <Button
                 variant="success"
                 onClick={addUserToEvent}
-                disabled={!selectedUserId || sessionUserIsNotRegular}
-                title={sessionUserIsNotRegular ? 'Admins cannot add members to events' : undefined}
+                disabled={!selectedUserId || sessionUserIsRegular}
+                title={sessionUserIsRegular ? 'Members cannot add users to events' : undefined}
               >
                 Add Member
               </Button>
