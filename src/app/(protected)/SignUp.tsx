@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import swal from 'sweetalert';
@@ -25,6 +25,7 @@ interface EventsSignUpProps {
 
 const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
   const [eventList, setEventList] = useState<Event[]>(events);
+  const [signupNotes, setSignupNotes] = useState<Record<number, string>>({});
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -82,18 +83,19 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
     return nowTotalMinutes >= eventTotalMinutes;
   };
 
-  const handleSignUp = async (eventId: number) => {
+  const handleSignUp = async (eventId: number, notes: string) => {
     try {
       const response = await fetch('/api/user/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ eventId }), // Pass eventId as a number
+        body: JSON.stringify({ eventId, notes }), // Pass eventId as a number
       });
 
       if (!response.ok) {
-        throw new Error('Failed to sign up for the event');
+        const errorResult = await response.json().catch(() => ({}));
+        throw new Error(errorResult.message || 'Failed to sign up for the event');
       }
 
       setEventList((prevEvents) => prevEvents.map((event) => (
@@ -101,10 +103,12 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
           ? { ...event, isSignedUp: true }
           : event
       )));
+      setSignupNotes((prev) => ({ ...prev, [eventId]: '' }));
       swal('Successfully signed up for the event');
     } catch (error) {
       console.error(error);
-      swal('You are already signed up for the event');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign up for the event';
+      swal(errorMessage);
     }
   };
 
@@ -194,7 +198,23 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
                   Unregister
                 </Button>
               ) : (
-                <Button onClick={() => handleSignUp(event.id)}>Sign Up</Button>
+                <>
+                  <Button onClick={() => handleSignUp(event.id, signupNotes[event.id] || '')}>Sign Up</Button>
+                  <Form.Group className="mt-2" controlId={`signup-notes-${event.id}`}>
+                    <Form.Label className="mb-1">Additional notes (optional)</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      maxLength={1000}
+                      value={signupNotes[event.id] || ''}
+                      onChange={(e) => setSignupNotes((prev) => ({
+                        ...prev,
+                        [event.id]: e.target.value,
+                      }))}
+                      placeholder="Add any details the organizers should know"
+                    />
+                  </Form.Group>
+                </>
               )
             )}
             {event.isCheckedIn ? (

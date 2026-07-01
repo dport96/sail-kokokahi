@@ -46,7 +46,9 @@ settings.production.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-/prisma/migrations
+/prisma/migrations/*
+!/prisma/migrations/20260701102730_add_user_event_notes
+!/prisma/migrations/20260701102730_add_user_event_notes/migration.sql
 
 # logs
 logs

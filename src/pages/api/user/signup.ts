@@ -16,9 +16,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { eventId } = req.body;
+    const { eventId, notes } = req.body;
     if (!eventId) {
       return res.status(400).json({ message: 'Event ID is required' });
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return res.status(400).json({ message: 'Notes must be a string' });
+    }
+
+    const normalizedNotes = typeof notes === 'string' ? notes.trim() : '';
+    if (normalizedNotes.length > 1000) {
+      return res.status(400).json({ message: 'Notes must be 1000 characters or less' });
     }
 
     // First get the user ID using the email from the session
@@ -57,6 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         userId: user.id,
         eventId: Number(eventId),
+        notes: normalizedNotes || null,
       },
     });
 

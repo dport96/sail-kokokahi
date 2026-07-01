@@ -22,6 +22,7 @@ interface EventAttendee {
   userId: number;
   eventId: number;
   attended: boolean;
+  notes: string | null;
   User: User;
 }
 
@@ -298,6 +299,7 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                       <th>Name</th>
                       <th>Email</th>
                       <th>Status</th>
+                      {mode === 'signup' && <th>Notes</th>}
                       {mode === 'signup' && <th>Attended</th>}
                       <th>Actions</th>
                     </tr>
@@ -316,6 +318,9 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
                             {attendee.attended ? 'Attended' : 'Registered'}
                           </span>
                         </td>
+                        {mode === 'signup' && (
+                          <td>{attendee.notes || '-'}</td>
+                        )}
                         {mode === 'signup' && (
                           <td>
                             <label htmlFor={`attendance-${attendee.id}`} className="visually-hidden">

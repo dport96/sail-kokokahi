@@ -45,6 +45,7 @@ model UserEvent {
   userId    Int
   eventId   Int
   attended  Boolean @default(false) // Tracks if the user attended the event
+  notes     String?
   User      User    @relation(fields: [userId], references: [id])
   Event     Event   @relation(fields: [eventId], references: [id])
 

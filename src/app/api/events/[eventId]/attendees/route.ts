@@ -57,11 +57,26 @@ export async function POST(req: NextRequest, context: any) {
   const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
   try {
     const eventId = parseInt(params.eventId, 10);
-    const { userId, attended = false } = await req.json(); // Default to false (registered, not attended)
+    const { userId, attended = false, notes } = await req.json(); // Default to false (registered, not attended)
 
     if (Number.isNaN(eventId) || !userId) {
       return NextResponse.json(
         { message: 'Invalid event ID or user ID' },
+        { status: 400 },
+      );
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return NextResponse.json(
+        { message: 'Notes must be a string' },
+        { status: 400 },
+      );
+    }
+
+    const normalizedNotes = typeof notes === 'string' ? notes.trim() : '';
+    if (normalizedNotes.length > 1000) {
+      return NextResponse.json(
+        { message: 'Notes must be 1000 characters or less' },
         { status: 400 },
       );
     }
@@ -116,6 +131,7 @@ export async function POST(req: NextRequest, context: any) {
           userId,
           eventId,
           attended,
+          notes: normalizedNotes || null,
         },
       });
 
