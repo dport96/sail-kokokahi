@@ -16,6 +16,7 @@ interface Event {
   description: string;
   isSignedUp?: boolean;
   isCheckedIn?: boolean;
+  signupNotes?: string | null;
 }
 
 interface EventsSignUpProps {
@@ -90,7 +91,7 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ eventId, notes }), // Pass eventId as a number
+        body: JSON.stringify({ eventId, notes }),
       });
 
       if (!response.ok) {
@@ -98,9 +99,15 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
         throw new Error(errorResult.message || 'Failed to sign up for the event');
       }
 
+      const result = await response.json().catch(() => ({}));
+
       setEventList((prevEvents) => prevEvents.map((event) => (
         event.id === eventId
-          ? { ...event, isSignedUp: true }
+          ? {
+            ...event,
+            isSignedUp: true,
+            signupNotes: result?.userEvent?.notes ?? (notes.trim() || null),
+          }
           : event
       )));
       setSignupNotes((prev) => ({ ...prev, [eventId]: '' }));
@@ -132,7 +139,7 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
 
       setEventList((prevEvents) => prevEvents.map((event) => (
         event.id === eventId
-          ? { ...event, isSignedUp: false }
+          ? { ...event, isSignedUp: false, signupNotes: null }
           : event
       )));
       swal('Successfully unregistered from the event');
@@ -194,9 +201,16 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
             <br />
             {event.signupReq && (
               event.isSignedUp ? (
-                <Button variant="danger" onClick={() => handleUnregister(event.id)}>
-                  Unregister
-                </Button>
+                <>
+                  <Button variant="danger" onClick={() => handleUnregister(event.id)}>
+                    Unregister
+                  </Button>
+                  {event.signupNotes && (
+                    <div className="mt-2 text-muted">
+                      {event.signupNotes}
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   <Button onClick={() => handleSignUp(event.id, signupNotes[event.id] || '')}>Sign Up</Button>
