@@ -45,6 +45,7 @@ const EventsSignUp = async () => {
           select: {
             userId: true,
             attended: true,
+            notes: true,
           },
         },
     },
@@ -54,6 +55,7 @@ const EventsSignUp = async () => {
     ...event,
     isSignedUp: Array.isArray(event.users) && event.users.length > 0,
     isCheckedIn: Array.isArray(event.users) && event.users.some((userEvent) => userEvent.attended),
+    signupNotes: Array.isArray(event.users) && event.users.length > 0 ? event.users[0].notes : null,
   }));
 
   const upcomingEventsOnly = eventsWithSignupStatus.filter((event) => {
