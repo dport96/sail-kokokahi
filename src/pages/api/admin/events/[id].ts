@@ -33,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       hours,
       time,
       signupReq,
+      pin,
       qr,
       propagateMode, // optional: 'audit' or 'adjust-approved' (currently we implement 'audit')
     } = req.body;
@@ -46,6 +47,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (typeof hours === 'number') data.hours = hours;
     if (typeof time === 'string') data.time = time;
     if (typeof signupReq === 'boolean') data.signupReq = signupReq;
+    if (typeof pin === 'string') {
+      const trimmedPin = pin.trim();
+      if (!/^\d{4}$/.test(trimmedPin)) {
+        return res.status(400).json({ error: 'PIN must be exactly 4 digits' });
+      }
+      data.pin = trimmedPin;
+    }
     if (typeof qr === 'string') data.qr = qr;
 
     if (Object.keys(data).length === 0) {

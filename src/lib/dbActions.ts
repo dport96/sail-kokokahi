@@ -3,6 +3,7 @@
 import { hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
+import { generateEventPin } from './eventPin';
 
 /**
  * Adds a new Event to the database.
@@ -19,6 +20,8 @@ export async function addEvent(event: {
   signupReq: boolean;
   qr: string;
 }) {
+  const pin = generateEventPin();
+
   await prisma.event.create({
     data: {
       title: event.title,
@@ -29,6 +32,7 @@ export async function addEvent(event: {
       time: event.time,
       signupReq: event.signupReq,
       qr: event.qr,
+      pin,
     },
   });
   // After adding, redirect to the event page
@@ -52,6 +56,8 @@ export async function createEventForImport(event: {
   qr?: string | null;
   ownerId?: number | null;
 }) {
+  const pin = generateEventPin();
+
   // Prisma schema currently marks some fields as required (non-nullable).
   // Provide safe defaults when values are missing in import data so the
   // import script can create events without causing type errors.
@@ -67,6 +73,7 @@ export async function createEventForImport(event: {
       time: event.time ?? '',
       signupReq: !!event.signupReq,
       qr: event.qr ?? undefined,
+      pin,
     },
   });
 

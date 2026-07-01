@@ -17,5 +17,11 @@ export const AddEventSchema = Yup.object({
     .mixed()
     .required('Time is required')
     .test('is-time', 'Please select a valid time', (value) => value instanceof Date || typeof value === 'string'),
+  pin: Yup.string()
+    .optional()
+    .test('is-optional-4-digit-pin', 'PIN must be exactly 4 digits', (value) => {
+      if (!value || value.trim() === '') return true;
+      return /^\d{4}$/.test(value.trim());
+    }),
   signupReq: Yup.boolean().default(false),
 });

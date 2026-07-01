@@ -1,12 +1,29 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { generateEventPin } from '@/lib/eventPin';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { title, description, date, location, hours, time, signupReq } = req.body;
+      const {
+        title,
+        description,
+        date,
+        location,
+        hours,
+        time,
+        signupReq,
+        pin: requestedPin,
+      } = req.body;
+
+      const trimmedPin = typeof requestedPin === 'string' ? requestedPin.trim() : '';
+      if (trimmedPin && !/^\d{4}$/.test(trimmedPin)) {
+        return res.status(400).json({ success: false, message: 'PIN must be exactly 4 digits.' });
+      }
+
+      const pin = trimmedPin || generateEventPin();
 
       // Save the event to the database
       const event = await prisma.event.create({
@@ -18,6 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           hours,
           time,
           signupReq,
+          pin,
         },
       });
       return res.status(200).json({ success: true, event });

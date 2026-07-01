@@ -33,6 +33,7 @@ model Event {
   location    String
   hours       Float
   time        String
+  pin         String?
   status      String @default("pending")
   qr          String? //field to store qr data (optional for runtime generation)
   users       UserEvent[]  // Connects events to the users signed up for them

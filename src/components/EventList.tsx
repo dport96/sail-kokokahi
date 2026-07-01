@@ -146,6 +146,8 @@ export const EventList = ({
     return `${baseUrl}/event-check-in/${event.id}`;
   };
 
+  const getDisplayPin = (event: AugmentedEvent) => event.pin || 'N/A';
+
   return (
     <>
       {sortedEvents.map((event) => (
@@ -194,6 +196,7 @@ export const EventList = ({
                           <body>
                             <div>
                               <h3>QR Code for Event: ${event.title}</h3>
+                              <p><strong>PIN:</strong> ${getDisplayPin(event)}</p>
                               <p class="url"><strong>URL:</strong> ${qrUrl}</p>
                               <img src="${data.qrCode}" alt="QR Code" style="width:400px;height=400px;" />
                             </div>
@@ -271,6 +274,7 @@ export const EventList = ({
                     location: event.location,
                     hours: event.hours.toString(),
                     time: event.time,
+                    pin: event.pin || '',
                     signupReq: event.signupReq.toString(),
                   });
                   window.location.href = `/add-event?duplicate=true&${params.toString()}`;
@@ -410,6 +414,24 @@ export const EventList = ({
                       />
                     </Form.Group>
 
+                    <Form.Group className="mb-3" controlId="eventPin">
+                      <Form.Label>PIN</Form.Label>
+                      <Form.Control
+                        type="text"
+                        maxLength={4}
+                        inputMode="numeric"
+                        value={editingEvent.pin || ''}
+                        onChange={(e) => {
+                          const pinValue = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          setEditingEvent({ ...editingEvent, pin: pinValue });
+                        }}
+                        placeholder="4-digit PIN"
+                      />
+                      <Form.Text className="text-muted">
+                        PIN must be exactly 4 digits.
+                      </Form.Text>
+                    </Form.Group>
+
                     <Form.Group className="mb-3" controlId="propagateMode">
                       <Form.Label>Propagation mode (opt-in)</Form.Label>
                       <div>
@@ -486,8 +508,14 @@ export const EventList = ({
                         hours: Number(editingEvent.hours),
                         time: editingEvent.time,
                         signupReq: !!editingEvent.signupReq,
+                        pin: String(editingEvent.pin || '').trim(),
                         propagateMode: propagateMode === 'none' ? undefined : propagateMode,
                       };
+
+                      if (!/^\d{4}$/.test(body.pin)) {
+                        swal('Error', 'PIN must be exactly 4 digits', 'error');
+                        return;
+                      }
 
                       const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
                         method: 'PATCH',
@@ -537,6 +565,11 @@ export const EventList = ({
               </p>
             </DropdownButton>
             <div className="mt-2 mb-2">
+              <div className="mb-1">
+                <strong>PIN:</strong>
+                {' '}
+                {getDisplayPin(event)}
+              </div>
               <small className="text-muted">
                 <strong>QR URL:</strong>
                 {' '}

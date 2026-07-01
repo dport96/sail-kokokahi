@@ -52,6 +52,7 @@ const AddEventForm: React.FC = () => {
       const location = searchParams.get('location');
       const hours = searchParams.get('hours');
       const time = searchParams.get('time');
+      const pin = searchParams.get('pin');
       const signupReq = searchParams.get('signupReq');
 
       // Pre-populate form fields (excluding date, but including time)
@@ -59,6 +60,7 @@ const AddEventForm: React.FC = () => {
       if (description) setValue('description', description);
       if (location) setValue('location', location);
       if (hours) setValue('hours', parseFloat(hours));
+      if (pin) setValue('pin', pin);
       if (signupReq) setValue('signupReq', signupReq === 'true');
 
       // Parse and set the time if provided
@@ -90,6 +92,7 @@ const AddEventForm: React.FC = () => {
       // Format date and time for API
       const formattedData = {
         ...data,
+        pin: typeof data.pin === 'string' ? data.pin.trim() : '',
         date: data.date instanceof Date
           ? data.date.toLocaleDateString('en-US', {
             month: '2-digit',
@@ -199,6 +202,19 @@ const AddEventForm: React.FC = () => {
                     className={`form-control ${errors.location ? 'is-invalid' : ''}`}
                   />
                   <div className="invalid-feedback">{errors.location?.message}</div>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>PIN (optional)</Form.Label>
+                  <input
+                    type="text"
+                    maxLength={4}
+                    inputMode="numeric"
+                    pattern="[0-9]{4}"
+                    placeholder="Leave blank to auto-generate"
+                    {...register('pin')}
+                    className={`form-control ${errors.pin ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.pin?.message as string}</div>
                 </Form.Group>
                 <Row>
                   <Col>

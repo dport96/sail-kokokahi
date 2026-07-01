@@ -18,4 +18,11 @@ fi
 export DATABASE_URL
 
 echo "Starting dev with DATABASE_URL=${DATABASE_URL}"
+
+# Keep Prisma Client in sync with schema changes before booting dev server.
+npx prisma generate
+
+# Apply checked-in migrations so new columns (for example Event.pin) exist locally.
+npx prisma migrate deploy
+
 exec next dev
