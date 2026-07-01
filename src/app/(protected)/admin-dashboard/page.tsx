@@ -11,6 +11,8 @@ const AdminDashboard = async () => {
     const { HOURLY_RATE, MEMBERSHIP_BASE_AMOUNT, HOURS_REQUIRED, TIME_ZONE } = await getApplicationSettingsNoCache();
 
   const session = await getServerSession(authOptions);
+  console.log('Session object in AdminDashboard:', session);
+  console.log('User role (randomKey):', (session?.user as any)?.randomKey);
   adminProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };

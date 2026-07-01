@@ -8,9 +8,13 @@ import swal from 'sweetalert';
 import { deleteEvent } from '@/lib/dbActions'; // Ensure this is client-safe
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { Role } from '@prisma/client';
+import { Role, Event } from '@prisma/client';
 import Modal from '@mui/material/Modal';
 import { RuntimeQRCode } from './RuntimeQRCode';
+
+interface AugmentedEvent extends Event {
+  isSignedUp?: boolean;
+}
 
 export const EventList = ({
   events,
@@ -19,15 +23,17 @@ export const EventList = ({
   showAttendanceButton = false,
   showSignupButton = false,
   sortDescending = false,
+  onRefreshEvents, // New prop
 }: {
-  events: any[];
-  onManageAttendance?: (event: any) => void;
-  onManageSignup?: (event: any) => void;
+  events: AugmentedEvent[];
+  onManageAttendance?: (event: AugmentedEvent) => void;
+  onManageSignup?: (event: AugmentedEvent) => void;
   showAttendanceButton?: boolean;
   showSignupButton?: boolean;
   sortDescending?: boolean;
+  onRefreshEvents?: () => void; // Type for new prop
 }) => {
-  const [eventList, setEventList] = useState(events);
+  const [eventList, setEventList] = useState<AugmentedEvent[]>(events);
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -67,8 +73,73 @@ export const EventList = ({
     return sortDescending ? dateB - dateA : dateA - dateB;
   });
 
-  // Function to get QR URL (moved from hook since we need it in callbacks)
-  const getQRUrl = (event: any) => {
+  const handleSignup = async (event: AugmentedEvent) => {
+    if (!session?.user?.id) {
+      swal('Error', 'You must be signed in to sign up for events', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/events/${event.id}/attendees`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: Number(session.user.id) }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        swal('Error', result.message || 'Failed to sign up for event', 'error');
+        return;
+      }
+
+      setEventList((prev) => prev.map((currentEvent) => (
+        currentEvent.id === event.id
+          ? { ...currentEvent, isSignedUp: true }
+          : currentEvent
+      )));
+      onRefreshEvents?.();
+      swal('Success', 'You are signed up for this event', 'success');
+    } catch (error) {
+      console.error('Error signing up for event:', error);
+      swal('Error', 'Failed to sign up for event', 'error');
+    }
+  };
+
+  const handleUnregister = async (event: AugmentedEvent) => {
+    if (!session?.user?.id) {
+      swal('Error', 'You must be signed in to unregister from events', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/events/${event.id}/attendees?userId=${Number(session.user.id)}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        swal('Error', result.message || 'Failed to unregister from event', 'error');
+        return;
+      }
+
+      setEventList((prev) => prev.map((currentEvent) => (
+        currentEvent.id === event.id
+          ? { ...currentEvent, isSignedUp: false }
+          : currentEvent
+      )));
+      onRefreshEvents?.();
+      swal('Success', 'You have been unregistered from this event', 'success');
+    } catch (error) {
+      console.error('Error unregistering from event:', error);
+      swal('Error', 'Failed to unregister from event', 'error');
+    }
+  };
+
+  const getQRUrl = (event: AugmentedEvent) => {
     const baseUrl = process.env.NEXTAUTH_URL
       || (typeof window !== 'undefined' && window.location.origin)
       || 'http://localhost:3000';
@@ -124,7 +195,7 @@ export const EventList = ({
                             <div>
                               <h3>QR Code for Event: ${event.title}</h3>
                               <p class="url"><strong>URL:</strong> ${qrUrl}</p>
-                              <img src="${data.qrCode}" alt="QR Code" style="width:400px;height:400px;" />
+                              <img src="${data.qrCode}" alt="QR Code" style="width:400px;height=400px;" />
                             </div>
                           </body>
                         </html>
@@ -135,7 +206,7 @@ export const EventList = ({
                   }
                 } catch (error) {
                   console.error('Error generating QR for print:', error);
-                }
+                };
               }}
             >
               Print QR Code
@@ -144,6 +215,50 @@ export const EventList = ({
           <div>
             <h5 style={{ float: 'left' }}>{event.title}</h5>
             <div style={{ float: 'right' }}>
+              {(() => {
+                const currentRole = session?.user?.role;
+                const isMemberView = currentRole === Role.USER;
+
+                if (showSignupButton && event.signupReq && onManageSignup && !isMemberView) {
+                  return (
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => onManageSignup(event)}
+                      title="Manage event signups"
+                    >
+                      📝 Signup
+                    </Button>
+                  );
+                }
+
+                if (showSignupButton && event.signupReq && isMemberView) {
+                  return event.isSignedUp ? (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleUnregister(event)}
+                      title="Unregister from event"
+                    >
+                      ❌ Unregister
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleSignup(event)}
+                      title="Sign up for event"
+                    >
+                      📝 Signup
+                    </Button>
+                  );
+                }
+
+                return null;
+              })()}
               <Button
                 variant="outline-success"
                 size="sm"
@@ -171,27 +286,12 @@ export const EventList = ({
                   className="me-2"
                   onClick={() => onManageAttendance(event)}
                   disabled={(() => {
-                    const currentRole = (session?.user as any)?.role;
+                    const currentRole = session?.user?.role;
                     return currentRole && currentRole !== Role.USER;
                   })()}
                   title="Manage event attendance"
                 >
                   👥 Attendance
-                </Button>
-              )}
-              {showSignupButton && event.signupReq && onManageSignup && (
-                <Button
-                  variant="outline-success"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => onManageSignup(event)}
-                  disabled={(() => {
-                    const currentRole = (session?.user as any)?.role;
-                    return currentRole && currentRole !== Role.USER;
-                  })()}
-                  title="Manage event signups"
-                >
-                  📝 Signup
                 </Button>
               )}
               <Button

@@ -14,11 +14,50 @@ const EventsSignUp = async () => {
     session as { user: { email: string; id: string; randomKey: string } } | null,
   );
 
-  // Fetch events from the database
-  const events = await prisma.event.findMany();
+  const userId = Number(session?.user?.id);
 
-  // Get the configured timezone
   const { TIME_ZONE } = await getApplicationSettingsNoCache();
+
+  const now = new Date();
+  const todayFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  const todayParts = todayFormatter.formatToParts(now);
+  const todayMap = new Map(todayParts.map((part) => [part.type, part.value]));
+  const today = `${todayMap.get('month')}/${todayMap.get('day')}/${todayMap.get('year')}`;
+
+  // Fetch events from the database
+  const events = await prisma.event.findMany({
+    orderBy: {
+      date: 'asc',
+    },
+    include: {
+      users: Number.isNaN(userId)
+        ? false
+        : {
+          where: {
+            userId,
+          },
+          select: {
+            userId: true,
+          },
+        },
+    },
+  });
+
+  const eventsWithSignupStatus = events.map((event) => ({
+    ...event,
+    isSignedUp: Array.isArray(event.users) && event.users.length > 0,
+  }));
+
+  const upcomingEventsOnly = eventsWithSignupStatus.filter((event) => {
+    const normalizedEventDate = event.date.trim();
+    return normalizedEventDate >= today;
+  });
 
   // Pass the events data as props to the EventsSignUp component
   return (
@@ -26,7 +65,7 @@ const EventsSignUp = async () => {
       <Container>
         <Row>
           <Col>
-            <SignUp events={events} timeZone={TIME_ZONE} />
+            <SignUp events={upcomingEventsOnly} timeZone={TIME_ZONE} />
           </Col>
         </Row>
       </Container>

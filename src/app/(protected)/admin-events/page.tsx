@@ -8,18 +8,7 @@ import { getApplicationSettingsNoCache } from '@/lib/settings';
 
 const EventsPage = async () => {
   const session = await getServerSession(authOptions);
-  adminProtectedPage(
-    session as {
-      user: { email: string; id: string; randomKey: string };
-    } | null,
-  );
-
-  // Get all events and sort by date
-  const allEvents = await prisma.event.findMany({
-    orderBy: {
-      date: 'asc',
-    },
-  });
+  adminProtectedPage(session);
 
   // Server current date/time using configured time zone
   const { TIME_ZONE } = await getApplicationSettingsNoCache();
@@ -43,14 +32,37 @@ const EventsPage = async () => {
     return new Date(year, month - 1, day); // month is 0-indexed in JS Date
   };
 
+  const allEvents = await prisma.event.findMany({
+    orderBy: {
+      date: 'asc',
+    },
+    include: {
+      users: session?.user?.id
+        ? {
+          where: {
+            userId: parseInt(session.user.id, 10),
+          },
+          select: {
+            userId: true,
+          },
+        }
+        : false,
+    },
+  });
+
+  const eventsWithSignupStatus = allEvents.map(event => ({
+    ...event,
+    isSignedUp: event.users && event.users.length > 0,
+  }));
+
   // Separate current/upcoming events from past events
-  const upcomingEvents = allEvents.filter(event => {
+  const upcomingEvents = eventsWithSignupStatus.filter(event => {
     const eventDate = parseEventDate(event.date);
     eventDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
     return eventDate >= today;
   });
 
-  const pastEvents = allEvents.filter(event => {
+  const pastEvents = eventsWithSignupStatus.filter(event => {
     const eventDate = parseEventDate(event.date);
     eventDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
     return eventDate < today;

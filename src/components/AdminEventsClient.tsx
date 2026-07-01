@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button, Alert } from 'react-bootstrap';
 import { EventList } from '@/components/EventList';
 import EventAttendanceManager from '@/components/EventAttendanceManager';
+import { useRouter } from 'next/navigation';
 
 interface AdminEventsClientProps {
   upcomingEvents: any[];
@@ -19,6 +20,11 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
   const [showAttendanceManager, setShowAttendanceManager] = useState(false);
   const [showSignupManager, setShowSignupManager] = useState(false);
   const [managerMode, setManagerMode] = useState<'attendance' | 'signup'>('attendance');
+  const router = useRouter();
+
+  const refreshEvents = () => {
+    router.refresh();
+  };
 
   const togglePastEvents = () => {
     setShowPastEvents(!showPastEvents);
@@ -93,6 +99,7 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
               showAttendanceButton
               showSignupButton
               sortDescending
+              onRefreshEvents={refreshEvents}
             />
           ) : (
             <Alert variant="info" className="text-center">
@@ -110,6 +117,7 @@ const AdminEventsClient: React.FC<AdminEventsClientProps> = ({
               onManageSignup={handleManageSignup}
               showAttendanceButton
               showSignupButton
+              onRefreshEvents={refreshEvents}
             />
           ) : (
             <Alert variant="warning" className="text-center">

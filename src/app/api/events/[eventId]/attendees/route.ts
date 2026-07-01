@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import authOptions from '@/lib/authOptions';
 
 export async function GET(req: NextRequest, context: any) {
   const paramsSource = context?.params;
@@ -105,47 +107,129 @@ export async function POST(req: NextRequest, context: any) {
         { message: 'User not found' },
         { status: 404 },
       );
-    }
+    };
 
-    // Use a transaction to ensure both operations succeed or fail together
-    const result = await prisma.$transaction(async (tx) => {
-      // Add user to event
-      const newAttendee = await tx.userEvent.create({
+    // Create UserEvent record and update pending hours in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.userEvent.create({
         data: {
           userId,
           eventId,
           attended,
         },
-        include: {
-          User: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+      });
+
+      if (attended === false) {
+        // Only add hours to pending if they are just signing up
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            pendingHours: {
+              increment: event.hours,
             },
+          },
+        });
+      }
+    });
+
+    return NextResponse.json({
+      message: 'User successfully associated with event',
+    });
+  } catch (error) {
+    console.error('Error associating user with event:', error);
+    return NextResponse.json(
+      { message: 'Failed to associate user with event' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest, context: any) {
+  const paramsSource = context?.params;
+  const params = typeof paramsSource?.then === 'function' ? await paramsSource : paramsSource;
+  try {
+    const eventId = parseInt(params.eventId, 10);
+    const { searchParams } = new URL(req.url);
+    const userId = parseInt(searchParams.get('userId') || '', 10);
+
+    if (Number.isNaN(eventId) || Number.isNaN(userId)) {
+      return NextResponse.json(
+        { message: 'Invalid event ID or user ID' },
+        { status: 400 },
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+
+    const sessionUserId = Number(session?.user?.id);
+
+    if (!session || (sessionUserId !== userId && session.user.role !== 'ADMIN')) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Find the userEvent to get the attended status before deleting
+    const userEvent = await prisma.userEvent.findUnique({
+      where: {
+        userId_eventId: {
+          userId,
+          eventId,
+        },
+      },
+      select: { attended: true },
+    });
+
+    if (!userEvent) {
+      return NextResponse.json(
+        { message: 'User not signed up for this event' },
+        { status: 404 },
+      );
+    }
+
+    // Get event details to know how many hours to deduct
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { hours: true },
+    });
+
+    if (!event) {
+      return NextResponse.json(
+        { message: 'Event not found' },
+        { status: 404 },
+      );
+    }
+
+    // Delete UserEvent record and update pending hours in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.userEvent.delete({
+        where: {
+          userId_eventId: {
+            userId,
+            eventId,
           },
         },
       });
 
-      // Only update user's pending hours if they are marked as attended
-      if (attended) {
+      if (userEvent.attended === false) {
+        // Only deduct hours from pending if they were just signed up (not attended)
         await tx.user.update({
           where: { id: userId },
           data: {
-            pendingHours: currentUser.pendingHours + event.hours,
+            pendingHours: {
+              decrement: event.hours,
+            },
           },
         });
       }
-
-      return newAttendee;
     });
 
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json({ message: 'User successfully unregistered from event' });
   } catch (error) {
-    console.error('Error adding user to event:', error);
+    console.error('Error unregistering user from event:', error);
     return NextResponse.json(
-      { message: 'Failed to add user to event' },
+      { message: 'Failed to unregister user from event' },
       { status: 500 },
     );
   }

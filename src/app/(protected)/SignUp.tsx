@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
+import { useSession } from 'next-auth/react';
 import swal from 'sweetalert';
 
 interface Event {
@@ -12,6 +13,7 @@ interface Event {
   signupReq: boolean;
   hours: number;
   description: string;
+  isSignedUp?: boolean;
 }
 
 interface EventsSignUpProps {
@@ -20,7 +22,8 @@ interface EventsSignUpProps {
 }
 
 const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
-  const [eventList, setEventList] = useState<Event[]>([]);
+  const [eventList, setEventList] = useState<Event[]>(events);
+  const { data: session } = useSession();
 
   const handleSignUp = async (eventId: number) => {
     try {
@@ -36,6 +39,11 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
         throw new Error('Failed to sign up for the event');
       }
 
+      setEventList((prevEvents) => prevEvents.map((event) => (
+        event.id === eventId
+          ? { ...event, isSignedUp: true }
+          : event
+      )));
       swal('Successfully signed up for the event');
     } catch (error) {
       console.error(error);
@@ -43,14 +51,38 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
     }
   };
 
-  // Helper function to parse MM/DD/YYYY date format
-  const parseEventDate = (dateString: string) => {
-    const [month, day, year] = dateString.split('/').map(Number);
-    return new Date(year, month - 1, day);
+  const handleUnregister = async (eventId: number) => {
+    if (!session?.user?.id) {
+      swal('Please sign in again to unregister from the event');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/events/${eventId}/attendees?userId=${Number(session.user.id)}`,
+        { method: 'DELETE' },
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to unregister from the event');
+      }
+
+      setEventList((prevEvents) => prevEvents.map((event) => (
+        event.id === eventId
+          ? { ...event, isSignedUp: false }
+          : event
+      )));
+      swal('Successfully unregistered from the event');
+    } catch (error) {
+      console.error(error);
+      swal('Failed to unregister from the event');
+    }
   };
 
-  useEffect(() => {
-    // Filter out past events (using configured timezone)
+  // Helper function to parse MM/DD/YYYY date format
+  const formatToday = () => {
     const now = new Date();
     const todayFormatter = new Intl.DateTimeFormat('en-CA', {
       timeZone,
@@ -58,24 +90,23 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
       month: '2-digit',
       day: '2-digit',
     });
-    
-    const todayParts = todayFormatter.formatToParts(now);
-    const todayMap = new Map(todayParts.map(part => [part.type, part.value]));
-    const today = new Date(`${todayMap.get('year')}-${todayMap.get('month')}-${todayMap.get('day')}`);
-    today.setHours(0, 0, 0, 0);
-    
-    const filteredEvents = events.filter((event) => {
-      const eventDate = parseEventDate(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate >= today;
-    });
-    setEventList(filteredEvents);
-  }, [events, timeZone]);
 
-  const sortedEvents = eventList.sort((a, b) => {
-    const dateA = parseEventDate(a.date).getTime();
-    const dateB = parseEventDate(b.date).getTime();
-    return dateA - dateB; // Sort by date ascending
+    const todayParts = todayFormatter.formatToParts(now);
+    const todayMap = new Map(todayParts.map((part) => [part.type, part.value]));
+    return `${todayMap.get('month')}/${todayMap.get('day')}/${todayMap.get('year')}`;
+  };
+
+  useEffect(() => {
+    setEventList(events);
+  }, [events]);
+
+  const visibleEvents = eventList.filter((event) => {
+    const today = formatToday();
+    return event.date.trim() >= today;
+  });
+
+  const sortedEvents = [...visibleEvents].sort((a, b) => {
+    return a.date.localeCompare(b.date);
   });
   return (
     <div className="mb-3">
@@ -101,7 +132,13 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
             {event.description}
             <br />
             {event.signupReq && (
-              <Button onClick={() => handleSignUp(event.id)}>Sign Up</Button>
+              event.isSignedUp ? (
+                <Button variant="danger" onClick={() => handleUnregister(event.id)}>
+                  Unregister
+                </Button>
+              ) : (
+                <Button onClick={() => handleSignUp(event.id)}>Sign Up</Button>
+              )
             )}
           </Col>
         </Row>
