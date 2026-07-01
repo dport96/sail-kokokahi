@@ -12,6 +12,7 @@ interface Event {
   time: string;
   hours: number;
   description: string;
+  pin: string | null;
 }
 
 interface CheckInProps {
@@ -24,10 +25,11 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
   const [isLoading, setIsLoading] = useState(false);
   const [checkedInStatus, setCheckedInStatus] = useState(isAlreadyCheckedIn);
   const [statusLoading, setStatusLoading] = useState(true);
-  const [isEventToday, setIsEventToday] = useState(true);
+  const [isCheckInOpen, setIsCheckInOpen] = useState(true);
+  const [pin, setPin] = useState('');
 
-  // Function to check if event is today (using the configured timezone)
-  const checkIfEventToday = useCallback(() => {
+  // Function to check if event check-in is open (event day and at/after event time)
+  const checkIfCheckInOpen = useCallback(() => {
     // Parse event date (MM/DD/YYYY format) with zero-padded components
     const normalizedEventDate = normalizeEventDate(event.date);
     if (!normalizedEventDate) {
@@ -57,8 +59,39 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
     eventDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     
-    return eventDate.getTime() === today.getTime();
-  }, [event.date, timeZone]);
+    const sameDay = eventDate.getTime() === today.getTime();
+    if (!sameDay) {
+      return false;
+    }
+
+    const parsed = event.time.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+    if (!parsed) {
+      return false;
+    }
+
+    let eventHour = Number(parsed[1]);
+    const eventMinute = Number(parsed[2]);
+    const meridiem = parsed[3].toUpperCase();
+
+    if (meridiem === 'PM' && eventHour !== 12) eventHour += 12;
+    if (meridiem === 'AM' && eventHour === 12) eventHour = 0;
+
+    const nowTimeParts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(now);
+
+    const nowTimeMap = new Map(nowTimeParts.map((part) => [part.type, part.value]));
+    const nowHour = Number(nowTimeMap.get('hour'));
+    const nowMinute = Number(nowTimeMap.get('minute'));
+
+    const eventTotalMinutes = (eventHour * 60) + eventMinute;
+    const nowTotalMinutes = (nowHour * 60) + nowMinute;
+
+    return nowTotalMinutes >= eventTotalMinutes;
+  }, [event.date, event.time, timeZone]);
 
   // Function to check current check-in status
   const checkStatus = useCallback(async () => {
@@ -85,16 +118,22 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
   // Check status when component mounts
   useEffect(() => {
     checkStatus();
-    setIsEventToday(checkIfEventToday());
-  }, [checkStatus, checkIfEventToday]);
+    setIsCheckInOpen(checkIfCheckInOpen());
+  }, [checkStatus, checkIfCheckInOpen]);
 
   const handleCheckIn = async (eventId: number) => {
+    const trimmedPin = pin.trim();
+    if (!/^\d{4}$/.test(trimmedPin)) {
+      swal('Error', 'Please enter a valid 4-digit PIN.', 'error');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/user/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId }),
+        body: JSON.stringify({ eventId, pin: trimmedPin }),
       });
 
       const result = await response.json();
@@ -103,6 +142,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
         swal('Success', 'Successfully checked in!', 'success');
         // Update the status immediately after successful check-in
         setCheckedInStatus(true);
+        setPin('');
       } else {
         throw new Error(result.message || 'Check-in failed');
       }
@@ -159,7 +199,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
                     </p>
                   </div>
                 )}
-                {!statusLoading && !checkedInStatus && !isEventToday && (
+                {!statusLoading && !checkedInStatus && !isCheckInOpen && (
                   <div>
                     <Button
                       variant="danger"
@@ -169,17 +209,28 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
                       Check-in Unavailable
                     </Button>
                     <p className="text-danger small">
-                      Check-in is only allowed on the day of the event ({event.date}).
+                      Check-in opens on {event.date} at {event.time}.
                     </p>
                   </div>
                 )}
-                {!statusLoading && !checkedInStatus && isEventToday && (
-                  <Button
-                    onClick={() => handleCheckIn(event.id)}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Checking in...' : 'Check In'}
-                  </Button>
+                {!statusLoading && !checkedInStatus && isCheckInOpen && (
+                  <div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="form-control mb-2"
+                      placeholder="Enter 4-digit PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    />
+                    <Button
+                      onClick={() => handleCheckIn(event.id)}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Checking in...' : 'Check In'}
+                    </Button>
+                  </div>
                 )}
               </Col>
             </Row>

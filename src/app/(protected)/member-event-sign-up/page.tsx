@@ -44,6 +44,7 @@ const EventsSignUp = async () => {
           },
           select: {
             userId: true,
+            attended: true,
           },
         },
     },
@@ -52,6 +53,7 @@ const EventsSignUp = async () => {
   const eventsWithSignupStatus = events.map((event) => ({
     ...event,
     isSignedUp: Array.isArray(event.users) && event.users.length > 0,
+    isCheckedIn: Array.isArray(event.users) && event.users.some((userEvent) => userEvent.attended),
   }));
 
   const upcomingEventsOnly = eventsWithSignupStatus.filter((event) => {

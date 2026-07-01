@@ -291,7 +291,7 @@ export const EventList = ({
                   onClick={() => onManageAttendance(event)}
                   disabled={(() => {
                     const currentRole = session?.user?.role;
-                    return currentRole && currentRole !== Role.USER;
+                    return currentRole !== Role.ADMIN;
                   })()}
                   title="Manage event attendance"
                 >

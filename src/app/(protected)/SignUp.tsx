@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import swal from 'sweetalert';
 
 interface Event {
@@ -14,6 +15,7 @@ interface Event {
   hours: number;
   description: string;
   isSignedUp?: boolean;
+  isCheckedIn?: boolean;
 }
 
 interface EventsSignUpProps {
@@ -24,6 +26,61 @@ interface EventsSignUpProps {
 const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
   const [eventList, setEventList] = useState<Event[]>(events);
   const { data: session } = useSession();
+  const router = useRouter();
+
+  const isCheckInOpen = (event: Event) => {
+    const dateParts = event.date.trim().split('/').map(Number);
+    if (dateParts.length !== 3 || dateParts.some(Number.isNaN)) {
+      return false;
+    }
+
+    const [eventMonth, eventDay, eventYear] = dateParts;
+
+    const todayFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const todayParts = todayFormatter.formatToParts(new Date());
+    const todayMap = new Map(todayParts.map((part) => [part.type, part.value]));
+
+    const todayYear = Number(todayMap.get('year'));
+    const todayMonth = Number(todayMap.get('month'));
+    const todayDay = Number(todayMap.get('day'));
+
+    if (todayYear !== eventYear || todayMonth !== eventMonth || todayDay !== eventDay) {
+      return false;
+    }
+
+    const parsedTime = event.time.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+    if (!parsedTime) {
+      return false;
+    }
+
+    let eventHour = Number(parsedTime[1]);
+    const eventMinute = Number(parsedTime[2]);
+    const meridiem = parsedTime[3].toUpperCase();
+
+    if (meridiem === 'PM' && eventHour !== 12) eventHour += 12;
+    if (meridiem === 'AM' && eventHour === 12) eventHour = 0;
+
+    const nowFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const nowParts = nowFormatter.formatToParts(new Date());
+    const nowMap = new Map(nowParts.map((part) => [part.type, part.value]));
+    const nowHour = Number(nowMap.get('hour'));
+    const nowMinute = Number(nowMap.get('minute'));
+
+    const eventTotalMinutes = (eventHour * 60) + eventMinute;
+    const nowTotalMinutes = (nowHour * 60) + nowMinute;
+
+    return nowTotalMinutes >= eventTotalMinutes;
+  };
 
   const handleSignUp = async (eventId: number) => {
     try {
@@ -138,6 +195,21 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
                 </Button>
               ) : (
                 <Button onClick={() => handleSignUp(event.id)}>Sign Up</Button>
+              )
+            )}
+            {event.isCheckedIn ? (
+              <Button className="ms-2" variant="success" disabled>
+                Checked In
+              </Button>
+            ) : (
+              isCheckInOpen(event) && (
+                <Button
+                  className="ms-2"
+                  variant="primary"
+                  onClick={() => router.push(`/event-check-in/${event.id}`)}
+                >
+                  Check In
+                </Button>
               )
             )}
           </Col>

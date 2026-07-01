@@ -24,12 +24,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const { eventId } = req.body;
+    const { eventId, pin } = req.body;
 
     if (!eventId) {
       return res.status(400).json({
         success: false,
         message: 'Event ID is required',
+      });
+    }
+
+    if (typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid 4-digit PIN is required',
       });
     }
 
@@ -53,13 +60,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch the event details
     const event = await prisma.event.findUnique({
       where: { id: Number(eventId) },
-      select: { hours: true, date: true, title: true },
+      select: { hours: true, date: true, title: true, time: true, pin: true },
     });
 
     if (!event) {
       return res.status(404).json({
         success: false,
         message: 'Event not found',
+      });
+    }
+
+    if (!event.pin) {
+      return res.status(400).json({
+        success: false,
+        message: 'This event does not have a check-in PIN configured',
+      });
+    }
+
+    if (event.pin !== pin.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid PIN',
       });
     }
 
@@ -103,6 +124,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({
         success: false,
         message,
+      });
+    }
+
+    // Parse event time (e.g. 09:00 AM) and allow check-in only at/after that time.
+    const parsed = event.time.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+    if (!parsed) {
+      return res.status(400).json({ success: false, message: 'Invalid event time format' });
+    }
+
+    let hour = Number(parsed[1]);
+    const minute = Number(parsed[2]);
+    const meridiem = parsed[3].toUpperCase();
+
+    if (meridiem === 'PM' && hour !== 12) hour += 12;
+    if (meridiem === 'AM' && hour === 12) hour = 0;
+
+    const eventMinutes = (hour * 60) + minute;
+
+    const nowParts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(new Date());
+
+    const nowMap = new Map(nowParts.map((part) => [part.type, part.value]));
+    const nowHour = Number(nowMap.get('hour'));
+    const nowMinute = Number(nowMap.get('minute'));
+    const nowMinutes = (nowHour * 60) + nowMinute;
+
+    if (nowMinutes < eventMinutes) {
+      return res.status(400).json({
+        success: false,
+        message: `Check-in opens at ${event.time} on ${event.date}`,
       });
     }
 
