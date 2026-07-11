@@ -127,30 +127,17 @@ export async function PATCH(req: NextRequest, context: any) {
           },
         });
       } else if (hasAttendedUpdate && !attended && attendee.attended) {
-        // User is being marked as not attended - subtract hours
+        // User is being marked as not attended - reverse only pending event hours.
+        // Never touch approved hours here because per-event approval attribution is not tracked.
         const currentPendingHours = attendee.User.pendingHours;
         const eventHours = event.hours;
 
-        if (currentPendingHours >= eventHours) {
-          // If user has enough pending hours, subtract from pending hours
-          await tx.user.update({
-            where: { id: attendee.userId },
-            data: {
-              pendingHours: currentPendingHours - eventHours,
-            },
-          });
-        } else {
-          // If not enough pending hours, subtract from pending first, then from approved
-          const remainingToSubtract = eventHours - currentPendingHours;
-
-          await tx.user.update({
-            where: { id: attendee.userId },
-            data: {
-              pendingHours: 0, // Set pending hours to 0
-              approvedHours: Math.max(0, attendee.User.approvedHours - remainingToSubtract),
-            },
-          });
-        }
+        await tx.user.update({
+          where: { id: attendee.userId },
+          data: {
+            pendingHours: Math.max(0, currentPendingHours - eventHours),
+          },
+        });
       }
     });
 
@@ -236,40 +223,18 @@ export async function DELETE(req: NextRequest, context: any) {
         },
       });
 
-      // Update user's hours (subtract the event hours)
-      // First, try to subtract from pending hours
+      // Update user's hours by reversing pending event hours only.
       const currentPendingHours = attendee.User.pendingHours;
-      const currentApprovedHours = attendee.User.approvedHours;
       const eventHours = event.hours;
-      let hoursSubtracted = 0;
-      let fromPending = 0;
-      let fromApproved = 0;
+      const nextPendingHours = Math.max(0, currentPendingHours - eventHours);
+      const hoursSubtracted = currentPendingHours - nextPendingHours;
 
-      if (currentPendingHours >= eventHours) {
-        // If user has enough pending hours, subtract from pending hours
-        await tx.user.update({
-          where: { id: attendee.userId },
-          data: {
-            pendingHours: currentPendingHours - eventHours,
-          },
-        });
-        hoursSubtracted = eventHours;
-        fromPending = eventHours;
-      } else {
-        // If not enough pending hours, subtract from pending first, then from approved
-        const remainingToSubtract = eventHours - currentPendingHours;
-
-        await tx.user.update({
-          where: { id: attendee.userId },
-          data: {
-            pendingHours: 0, // Set pending hours to 0
-            approvedHours: Math.max(0, currentApprovedHours - remainingToSubtract),
-          },
-        });
-        fromPending = currentPendingHours;
-        fromApproved = Math.min(remainingToSubtract, currentApprovedHours);
-        hoursSubtracted = fromPending + fromApproved;
-      }
+      await tx.user.update({
+        where: { id: attendee.userId },
+        data: {
+          pendingHours: nextPendingHours,
+        },
+      });
 
       // Log the removal in HoursLog
       await tx.hoursLog.create({

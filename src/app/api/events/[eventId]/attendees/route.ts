@@ -135,17 +135,16 @@ export async function POST(req: NextRequest, context: any) {
         },
       });
 
-      if (attended === false) {
-        // Only add hours to pending if they are just signing up
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            pendingHours: {
-              increment: event.hours,
-            },
+      // Any new attendee association should contribute event hours to pending.
+      // Approval moves pending to approved in a separate admin action.
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          pendingHours: {
+            increment: event.hours,
           },
-        });
-      }
+        },
+      });
     });
 
     return NextResponse.json({
