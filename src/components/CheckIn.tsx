@@ -27,6 +27,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
   const [statusLoading, setStatusLoading] = useState(true);
   const [isCheckInOpen, setIsCheckInOpen] = useState(true);
   const [pin, setPin] = useState('');
+  const requiresPin = !!event.pin;
 
   // Function to check if event check-in is open (event day and at/after event time)
   const checkIfCheckInOpen = useCallback(() => {
@@ -123,7 +124,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
 
   const handleCheckIn = async (eventId: number) => {
     const trimmedPin = pin.trim();
-    if (!/^\d{4}$/.test(trimmedPin)) {
+    if (requiresPin && !/^\d{4}$/.test(trimmedPin)) {
       swal('Error', 'Please enter a valid 4-digit PIN.', 'error');
       return;
     }
@@ -133,7 +134,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
       const response = await fetch('/api/user/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, pin: trimmedPin }),
+        body: JSON.stringify(requiresPin ? { eventId, pin: trimmedPin } : { eventId }),
       });
 
       const result = await response.json();
@@ -215,15 +216,17 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
                 )}
                 {!statusLoading && !checkedInStatus && isCheckInOpen && (
                   <div>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={4}
-                      className="form-control mb-2"
-                      placeholder="Enter 4-digit PIN"
-                      value={pin}
-                      onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    />
+                    {requiresPin && (
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={4}
+                        className="form-control mb-2"
+                        placeholder="Enter 4-digit PIN"
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      />
+                    )}
                     <Button
                       onClick={() => handleCheckIn(event.id)}
                       disabled={isLoading}

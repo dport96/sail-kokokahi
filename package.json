@@ -8,6 +8,7 @@
     "dev-local": "bash ./scripts/dev.sh",
     "dev-https": "NEXT_DEV_HTTPS=1 bash ./scripts/dev.sh --experimental-https",
     "build": "bash ./scripts/build.sh",
+    "backfill:event-pins": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/backfill-event-pins.ts",
     "start": "export DATABASE_URL=${DATABASE_URL:-'postgresql://sail_user:your_password@localhost:5432/sail_kokokahi'} && npx prisma migrate deploy && npx prisma db seed && next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "test": "playwright test",

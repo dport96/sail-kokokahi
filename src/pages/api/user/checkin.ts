@@ -33,13 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
-      return res.status(400).json({
-        success: false,
-        message: 'A valid 4-digit PIN is required',
-      });
-    }
-
     // Get the user from the database
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -70,18 +63,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (!event.pin) {
-      return res.status(400).json({
-        success: false,
-        message: 'This event does not have a check-in PIN configured',
-      });
-    }
+    if (event.pin) {
+      if (typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
+        return res.status(400).json({
+          success: false,
+          message: 'A valid 4-digit PIN is required',
+        });
+      }
 
-    if (event.pin !== pin.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid PIN',
-      });
+      if (event.pin !== pin.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid PIN',
+        });
+      }
     }
 
     // Validate that check-in is only allowed on the day of the event

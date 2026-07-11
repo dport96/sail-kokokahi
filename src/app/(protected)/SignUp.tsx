@@ -91,7 +91,7 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ eventId, notes }), // Pass eventId as a number
+        body: JSON.stringify({ eventId, notes }),
       });
 
       if (!response.ok) {
