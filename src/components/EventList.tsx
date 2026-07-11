@@ -428,7 +428,7 @@ export const EventList = ({
                         placeholder="4-digit PIN"
                       />
                       <Form.Text className="text-muted">
-                        PIN must be exactly 4 digits.
+                        Leave blank to remove PIN. If provided, PIN must be exactly 4 digits.
                       </Form.Text>
                     </Form.Group>
 
@@ -512,7 +512,7 @@ export const EventList = ({
                         propagateMode: propagateMode === 'none' ? undefined : propagateMode,
                       };
 
-                      if (!/^\d{4}$/.test(body.pin)) {
+                      if (body.pin && !/^\d{4}$/.test(body.pin)) {
                         swal('Error', 'PIN must be exactly 4 digits', 'error');
                         return;
                       }
