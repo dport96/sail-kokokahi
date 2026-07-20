@@ -283,16 +283,12 @@ export const EventList = ({
               >
                 📋 Duplicate
               </Button>
-              {showAttendanceButton && onManageAttendance && (
+                {showAttendanceButton && onManageAttendance && session?.user?.role === Role.ADMIN && (
                 <Button
                   variant="outline-primary"
                   size="sm"
                   className="me-2"
                   onClick={() => onManageAttendance(event)}
-                  disabled={(() => {
-                    const currentRole = session?.user?.role;
-                    return currentRole !== Role.ADMIN;
-                  })()}
                   title="Manage event attendance"
                 >
                   👥 Attendance

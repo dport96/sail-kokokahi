@@ -313,14 +313,15 @@ const EventAttendanceManager: React.FC<EventAttendanceManagerProps> = ({
               </Form.Select>
             </Col>
             <Col md={4}>
-              <Button
-                variant="success"
-                onClick={addUserToEvent}
-                disabled={!selectedUserId || sessionUserIsRegular}
-                title={sessionUserIsRegular ? 'Members cannot add users to events' : undefined}
-              >
-                Add Member
-              </Button>
+              {!sessionUserIsRegular && (
+                <Button
+                  variant="success"
+                  onClick={addUserToEvent}
+                  disabled={!selectedUserId}
+                >
+                  Add Member
+                </Button>
+              )}
             </Col>
           </Row>
         </div>
