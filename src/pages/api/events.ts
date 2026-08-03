@@ -19,11 +19,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } = req.body;
 
       const trimmedPin = typeof requestedPin === 'string' ? requestedPin.trim() : '';
-      if (trimmedPin && !/^\d{4}$/.test(trimmedPin)) {
-        return res.status(400).json({ success: false, message: 'PIN must be exactly 4 digits.' });
-      }
+      let pin: string | null = null;
 
-      const pin = trimmedPin || generateEventPin();
+      if (trimmedPin !== '') {
+        const normalizedPin = trimmedPin.toLowerCase();
+        if (normalizedPin === 'auto') {
+          pin = generateEventPin();
+        } else if (/^\d{4}$/.test(trimmedPin)) {
+          pin = trimmedPin;
+        } else {
+          return res.status(400).json({ success: false, message: 'PIN must be blank, "auto", or exactly 4 digits.' });
+        }
+      }
 
       // Save the event to the database
       const event = await prisma.event.create({

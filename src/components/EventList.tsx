@@ -418,13 +418,13 @@ export const EventList = ({
                         inputMode="numeric"
                         value={editingEvent.pin || ''}
                         onChange={(e) => {
-                          const pinValue = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const pinValue = e.target.value;
                           setEditingEvent({ ...editingEvent, pin: pinValue });
                         }}
-                        placeholder="4-digit PIN"
+                        placeholder="Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN"
                       />
                       <Form.Text className="text-muted">
-                        Leave blank to remove PIN. If provided, PIN must be exactly 4 digits.
+                        Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN
                       </Form.Text>
                     </Form.Group>
 
@@ -508,8 +508,9 @@ export const EventList = ({
                         propagateMode: propagateMode === 'none' ? undefined : propagateMode,
                       };
 
-                      if (body.pin && !/^\d{4}$/.test(body.pin)) {
-                        swal('Error', 'PIN must be exactly 4 digits', 'error');
+                      const normalizedPin = body.pin.toLowerCase();
+                      if (body.pin !== '' && normalizedPin !== 'auto' && !/^\d{4}$/.test(body.pin)) {
+                        swal('Error', 'PIN must be blank, "auto", or exactly 4 digits', 'error');
                         return;
                       }
 

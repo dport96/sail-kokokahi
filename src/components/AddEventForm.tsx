@@ -209,11 +209,13 @@ const AddEventForm: React.FC = () => {
                     type="text"
                     maxLength={4}
                     inputMode="numeric"
-                    pattern="[0-9]{4}"
-                    placeholder="Leave blank to auto-generate"
+                    placeholder="Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN"
                     {...register('pin')}
                     className={`form-control ${errors.pin ? 'is-invalid' : ''}`}
                   />
+                  <Form.Text className="text-muted">
+                    Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN
+                  </Form.Text>
                   <div className="invalid-feedback">{errors.pin?.message as string}</div>
                 </Form.Group>
                 <Row>

@@ -52,10 +52,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (trimmedPin === '') {
         data.pin = null;
       } else {
-        if (!/^\d{4}$/.test(trimmedPin)) {
-          return res.status(400).json({ error: 'PIN must be exactly 4 digits' });
+        const normalizedPin = trimmedPin.toLowerCase();
+        if (normalizedPin === 'auto') {
+          data.pin = null;
+        } else if (/^\d{4}$/.test(trimmedPin)) {
+          data.pin = trimmedPin;
+        } else {
+          return res.status(400).json({ error: 'PIN must be blank, "auto", or exactly 4 digits' });
         }
-        data.pin = trimmedPin;
       }
     }
     if (typeof qr === 'string') data.qr = qr;
