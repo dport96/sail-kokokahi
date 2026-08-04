@@ -5,6 +5,7 @@ import { Button, Col, Form, Row } from 'react-bootstrap';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import swal from 'sweetalert';
+import { MarkdownText } from '@/components/MarkdownText';
 
 interface Event {
   id: number;
@@ -197,7 +198,7 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
             <br />
             Description:
             {' '}
-            {event.description}
+            <MarkdownText>{event.description}</MarkdownText>
             <br />
             {event.signupReq && (
               event.isSignedUp ? (

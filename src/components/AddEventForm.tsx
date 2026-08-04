@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import swal from 'sweetalert';
 import { AddEventSchema } from '@/lib/validationSchemas';
 import 'react-datepicker/dist/react-datepicker.css';
+import { MarkdownText } from './MarkdownText';
 
 const AddEventForm: React.FC = () => {
   const [timeZone, setTimeZone] = useState<string>('Pacific/Honolulu');
@@ -187,11 +188,15 @@ const AddEventForm: React.FC = () => {
                 </Row>
                 <Form.Group>
                   <Form.Label>Description</Form.Label>
-                  <input
-                    type="text"
+                  <textarea
+                    rows={4}
                     {...register('description')}
                     className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                    placeholder="You can use markdown, including links like [Register](https://example.com)"
                   />
+                  <Form.Text className="text-muted">
+                    Links are supported. Example: [Register](https://example.com)
+                  </Form.Text>
                   <div className="invalid-feedback">{errors.description?.message}</div>
                 </Form.Group>
                 <Form.Group>
@@ -209,12 +214,12 @@ const AddEventForm: React.FC = () => {
                     type="text"
                     maxLength={4}
                     inputMode="numeric"
-                    placeholder="Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN"
+                    placeholder="Leave blank for no PIN, &quot;auto&quot; to automatically generate, or enter exactly 4 digits to use as the PIN"
                     {...register('pin')}
                     className={`form-control ${errors.pin ? 'is-invalid' : ''}`}
                   />
                   <Form.Text className="text-muted">
-                    Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN
+                    Leave blank for no PIN, "auto" to automatically generate, or enter exactly 4 digits to use as the PIN
                   </Form.Text>
                   <div className="invalid-feedback">{errors.pin?.message as string}</div>
                 </Form.Group>

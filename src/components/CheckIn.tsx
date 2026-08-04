@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button, Col, DropdownButton, Row, Container } from 'react-bootstrap';
 import swal from 'sweetalert';
 import { normalizeEventDate } from '@/lib/date';
+import { MarkdownText } from './MarkdownText';
 
 interface Event {
   id: number;
@@ -175,10 +176,10 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
                       Potential Hours:
                       {event.hours}
                     </p>
-                    <p>
-                      Description:
-                      {event.description}
-                    </p>
+                    <div>
+                      <div className="fw-bold">Description:</div>
+                      <MarkdownText>{event.description}</MarkdownText>
+                    </div>
                   </div>
                 </DropdownButton>
                 {statusLoading && (

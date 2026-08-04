@@ -4,6 +4,7 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import { Container, Row, Col, ProgressBar } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
 import { getApplicationSettingsNoCache } from '@/lib/settings';
+import { MarkdownText } from '@/components/MarkdownText';
 
 const MemberDashboard = async () => {
     // Fetch application settings from database (no cache to reflect updates immediately)
@@ -177,7 +178,7 @@ const MemberDashboard = async () => {
                   <div className="card">
                     <div className="card-body">
                       <h5 className="card-title">{userEvent.Event.title}</h5>
-                      <p className="card-text">{userEvent.Event.description}</p>
+                      <MarkdownText className="card-text">{userEvent.Event.description}</MarkdownText>
                       <p className="card-text">
                         <small className="text-muted">
                           Date:

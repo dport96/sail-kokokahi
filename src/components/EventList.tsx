@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 import { Role, Event } from '@prisma/client';
 import Modal from '@mui/material/Modal';
 import { RuntimeQRCode } from './RuntimeQRCode';
+import { MarkdownText } from './MarkdownText';
 
 interface AugmentedEvent extends Event {
   isSignedUp?: boolean;
@@ -396,10 +397,13 @@ export const EventList = ({
                       <Form.Label>Description</Form.Label>
                       <Form.Control
                         as="textarea"
-                        rows={3}
+                        rows={4}
                         defaultValue={editingEvent.description}
                         onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
                       />
+                      <Form.Text className="text-muted">
+                        Supports markdown links such as [Register](https://example.com)
+                      </Form.Text>
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="eventSignupReq">
                       <Form.Check
@@ -421,10 +425,10 @@ export const EventList = ({
                           const pinValue = e.target.value;
                           setEditingEvent({ ...editingEvent, pin: pinValue });
                         }}
-                        placeholder="Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN"
+                        placeholder="Leave blank for no PIN, &quot;auto&quot; to automatically generate, or enter exactly 4 digits to use as the PIN"
                       />
                       <Form.Text className="text-muted">
-                        Leave blank for no PIN, auto to automatically generate, or enter exactly 4 digits to use as the PIN
+                        Leave blank for no PIN, "auto" to auto"atically generate, or enter exactly 4 digits to use as the PIN
                       </Form.Text>
                     </Form.Group>
 
@@ -546,21 +550,41 @@ export const EventList = ({
             </RBModal>
           </div>
           <Col>
-            <DropdownButton title="Information" variant="light">
-              <p className="p-1">
-                Time:
-                {' '}
-                {event.time}
-                <br />
-                Potential Hours:
-                {' '}
-                {event.hours}
-                <br />
-                Description:
-                {' '}
-                {event.description}
-              </p>
-            </DropdownButton>
+            {session?.user?.role === Role.ADMIN ? (
+              <div className="mb-2">
+                <div>
+                  <strong>Time:</strong>
+                  {' '}
+                  {event.time}
+                </div>
+                <div>
+                  <strong>Potential Hours:</strong>
+                  {' '}
+                  {event.hours}
+                </div>
+                <div>
+                  <strong>Description:</strong>
+                  {' '}
+                  <MarkdownText>{event.description}</MarkdownText>
+                </div>
+              </div>
+            ) : (
+              <DropdownButton title="Information" variant="light">
+                <p className="p-1">
+                  Time:
+                  {' '}
+                  {event.time}
+                  <br />
+                  Potential Hours:
+                  {' '}
+                  {event.hours}
+                  <br />
+                  Description:
+                  {' '}
+                  <MarkdownText>{event.description}</MarkdownText>
+                </p>
+              </DropdownButton>
+            )}
             <div className="mt-2 mb-2">
               <div className="mb-1">
                 <strong>PIN:</strong>
