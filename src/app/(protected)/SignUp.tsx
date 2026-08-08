@@ -172,7 +172,7 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
   }, [events]);
 
   useEffect(() => {
-    const rawFocusEventId = searchParams.get('focusEventId');
+    const rawFocusEventId = searchParams?.get('focusEventId');
     if (!rawFocusEventId) {
       setFocusedEventId(null);
       return;
