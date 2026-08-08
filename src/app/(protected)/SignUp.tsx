@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import swal from 'sweetalert';
 import { MarkdownText } from '@/components/MarkdownText';
 
@@ -28,8 +28,10 @@ interface EventsSignUpProps {
 const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
   const [eventList, setEventList] = useState<Event[]>(events);
   const [signupNotes, setSignupNotes] = useState<Record<number, string>>({});
+  const [focusedEventId, setFocusedEventId] = useState<number | null>(null);
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const isCheckInOpen = (event: Event) => {
     const dateParts = event.date.trim().split('/').map(Number);
@@ -169,6 +171,30 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
     setEventList(events);
   }, [events]);
 
+  useEffect(() => {
+    const rawFocusEventId = searchParams.get('focusEventId');
+    if (!rawFocusEventId) {
+      setFocusedEventId(null);
+      return;
+    }
+
+    const parsedFocusEventId = Number(rawFocusEventId);
+    if (Number.isNaN(parsedFocusEventId)) {
+      setFocusedEventId(null);
+      return;
+    }
+
+    setFocusedEventId(parsedFocusEventId);
+
+    // Delay to ensure the event rows are rendered before trying to scroll to the focused item.
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById(`event-${parsedFocusEventId}`);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+
+    return () => window.clearTimeout(timer);
+  }, [searchParams, eventList]);
+
   const visibleEvents = eventList.filter((event) => {
     const today = formatToday();
     return event.date.trim() >= today;
@@ -183,7 +209,11 @@ const SignUp = ({ events, timeZone = 'UTC' }: EventsSignUpProps) => {
       <h6>To check into an event scan the QR code at the event, open up the link, login and click Check In</h6>
       <hr />
       {sortedEvents.map((event) => (
-        <Row key={event.id} className="border p-3">
+        <Row
+          key={event.id}
+          id={`event-${event.id}`}
+          className={`border p-3 ${focusedEventId === event.id ? 'border-primary border-3 bg-light' : ''}`}
+        >
           <h4>{event.date}</h4>
           <h5>{event.title}</h5>
           <Col>

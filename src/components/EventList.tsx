@@ -147,6 +147,13 @@ export const EventList = ({
     return `${baseUrl}/event-check-in/${event.id}`;
   };
 
+  const getDirectEventUrl = (event: AugmentedEvent) => {
+    const baseUrl = process.env.NEXTAUTH_URL
+      || (typeof window !== 'undefined' && window.location.origin)
+      || 'http://localhost:3000';
+    return `${baseUrl}/event/${event.id}`;
+  };
+
   const getDisplayPin = (event: AugmentedEvent) => event.pin || 'N/A';
 
   return (
@@ -566,6 +573,11 @@ export const EventList = ({
                   <strong>Description:</strong>
                   {' '}
                   <MarkdownText>{event.description}</MarkdownText>
+                </div>
+                <div className="mt-1">
+                  <strong>Direct link:</strong>
+                  {' '}
+                  <a href={getDirectEventUrl(event)}>{getDirectEventUrl(event)}</a>
                 </div>
               </div>
             ) : (
