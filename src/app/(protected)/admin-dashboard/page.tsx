@@ -19,16 +19,9 @@ const AdminDashboard = async () => {
     } | null,
   );
 
-  // Get the date one year ago from now
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
   const users = await prisma.user.findMany({
     where: {
       role: Role.USER,
-      createdAt: {
-        gte: oneYearAgo, // Only get users created after this date
-      },
     },
     orderBy: [
       {
