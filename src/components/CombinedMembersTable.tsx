@@ -102,6 +102,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, sett
   };
 
   const hasPendingHours = (user: User) => user.pendingHours > 0;
+  const getTotalHours = (user: User) => user.approvedHours + Math.max(0, user.pendingHours);
   const hasChangedApprovedHours = (user: User) => {
     const originalHours = originalApprovedHours.get(user.id) || 0;
     return user.approvedHours !== originalHours;
@@ -140,9 +141,9 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, sett
   }
 
   if (sortBy === 'hours-asc') {
-    filtered.sort((a, b) => (a.approvedHours + a.pendingHours) - (b.approvedHours + b.pendingHours));
+    filtered.sort((a, b) => getTotalHours(a) - getTotalHours(b));
   } else if (sortBy === 'hours-desc') {
-    filtered.sort((a, b) => (b.approvedHours + b.pendingHours) - (a.approvedHours + a.pendingHours));
+    filtered.sort((a, b) => getTotalHours(b) - getTotalHours(a));
   } else if (sortBy === 'name-asc') {
     filtered.sort((a, b) => {
       const lastCompare = collator.compare(normalizeName(a.lastName), normalizeName(b.lastName));
@@ -190,18 +191,25 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, sett
         }
       }
 
-      const newApprovedHours = user.approvedHours + user.pendingHours;
+      const pendingHoursToApprove = Math.max(0, user.pendingHours);
+      const newApprovedHours = user.approvedHours + pendingHoursToApprove;
       setUpdatedUsers((prevUsers) => prevUsers.map((u) => (u.id === userId
-        ? { ...u, approvedHours: newApprovedHours, pendingHours: 0, status: 'approved', amountDue: calculateAmountDue(newApprovedHours) }
+        ? {
+          ...u,
+          approvedHours: newApprovedHours,
+          pendingHours: pendingHoursToApprove > 0 ? 0 : u.pendingHours,
+          status: pendingHoursToApprove > 0 ? 'approved' : u.status,
+          amountDue: calculateAmountDue(newApprovedHours),
+        }
         : u)));
 
       setOriginalApprovedHours((prevOriginal) => {
         const updatedOriginal = new Map(prevOriginal);
-        updatedOriginal.set(userId, user.approvedHours + user.pendingHours);
+        updatedOriginal.set(userId, newApprovedHours);
         return updatedOriginal;
       });
 
-      toast.success('Hours approved');
+      toast.success(pendingHoursToApprove > 0 ? 'Hours approved' : 'Approved hours updated');
     } catch (error) {
       console.error(error);
       toast.error('Failed to approve');
@@ -363,7 +371,7 @@ const CombinedMembersTable: React.FC<CombinedMembersTableProps> = ({ users, sett
       'Last Name': u.lastName,
       'Approved Hours': u.approvedHours,
       'Pending Hours': u.pendingHours,
-      'Total Hours': u.approvedHours + u.pendingHours,
+      'Total Hours': getTotalHours(u),
       'Registered': formatDate(u.createdAt),
       Status: u.status,
     }));
