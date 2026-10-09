@@ -5,3 +5,4 @@
 3. Touch only what you must. Clean up only your own mess.
 4. Define success criteria. Loop until verified.
 5. Add useful concise comments to code blocks.
+6. Do not change or remove interface features unless specifically asked.
