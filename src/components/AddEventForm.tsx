@@ -209,17 +209,17 @@ const AddEventForm: React.FC = () => {
                   <div className="invalid-feedback">{errors.location?.message}</div>
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label>PIN (optional)</Form.Label>
+                  <Form.Label>Check-in code (optional)</Form.Label>
                   <input
                     type="text"
                     maxLength={4}
                     inputMode="numeric"
-                    placeholder="Leave blank for no PIN, &quot;auto&quot; to automatically generate, or enter exactly 4 digits to use as the PIN"
+                    placeholder="Leave blank for no code, enter 4 digits, or type &quot;auto&quot; to generate a code"
                     {...register('pin')}
                     className={`form-control ${errors.pin ? 'is-invalid' : ''}`}
                   />
                   <Form.Text className="text-muted">
-                    Leave blank for no PIN, "auto" to automatically generate, or enter exactly 4 digits to use as the PIN
+                    Leave blank for no code, enter a 4-digit check-in code, or type "auto" to generate one
                   </Form.Text>
                   <div className="invalid-feedback">{errors.pin?.message as string}</div>
                 </Form.Group>

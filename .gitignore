@@ -55,3 +55,4 @@ yarn-debug.log*
 yarn-error.log*
 logs/*
 .env_local
+.env*

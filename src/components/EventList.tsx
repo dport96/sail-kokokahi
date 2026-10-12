@@ -204,7 +204,7 @@ export const EventList = ({
                           <body>
                             <div>
                               <h3>QR Code for Event: ${event.title}</h3>
-                              <p><strong>PIN:</strong> ${getDisplayPin(event)}</p>
+                              <p><strong>Check-in code:</strong> ${getDisplayPin(event)}</p>
                               <p class="url"><strong>URL:</strong> ${qrUrl}</p>
                               <img src="${data.qrCode}" alt="QR Code" style="width:400px;height=400px;" />
                             </div>
@@ -422,7 +422,7 @@ export const EventList = ({
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="eventPin">
-                      <Form.Label>PIN</Form.Label>
+                      <Form.Label>Check-in code</Form.Label>
                       <Form.Control
                         type="text"
                         maxLength={4}
@@ -432,10 +432,10 @@ export const EventList = ({
                           const pinValue = e.target.value;
                           setEditingEvent({ ...editingEvent, pin: pinValue });
                         }}
-                        placeholder="Leave blank for no PIN, &quot;auto&quot; to automatically generate, or enter exactly 4 digits to use as the PIN"
+                        placeholder="Leave blank for no code or enter a 4-digit check-in code"
                       />
                       <Form.Text className="text-muted">
-                        Leave blank for no PIN, "auto" to auto"atically generate, or enter exactly 4 digits to use as the PIN
+                        Leave blank for no code or enter a 4-digit check-in code
                       </Form.Text>
                     </Form.Group>
 
@@ -521,7 +521,7 @@ export const EventList = ({
 
                       const normalizedPin = body.pin.toLowerCase();
                       if (body.pin !== '' && normalizedPin !== 'auto' && !/^\d{4}$/.test(body.pin)) {
-                        swal('Error', 'PIN must be blank, "auto", or exactly 4 digits', 'error');
+                        swal('Error', 'Check-in code must be blank or exactly 4 digits', 'error');
                         return;
                       }
 
@@ -599,7 +599,7 @@ export const EventList = ({
             )}
             <div className="mt-2 mb-2">
               <div className="mb-1">
-                <strong>PIN:</strong>
+                <strong>Check-in code:</strong>
                 {' '}
                 {getDisplayPin(event)}
               </div>

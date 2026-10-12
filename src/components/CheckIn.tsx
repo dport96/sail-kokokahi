@@ -126,7 +126,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
   const handleCheckIn = async (eventId: number) => {
     const trimmedPin = pin.trim();
     if (requiresPin && !/^\d{4}$/.test(trimmedPin)) {
-      swal('Error', 'Please enter a valid 4-digit PIN.', 'error');
+      swal('Error', 'Please enter a valid 4-digit check-in code.', 'error');
       return;
     }
 
@@ -223,7 +223,7 @@ export default function CheckInComponent({ event, isAlreadyCheckedIn, timeZone =
                         inputMode="numeric"
                         maxLength={4}
                         className="form-control mb-2"
-                        placeholder="Enter 4-digit PIN"
+                        placeholder="Enter 4-digit check-in code"
                         value={pin}
                         onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                       />

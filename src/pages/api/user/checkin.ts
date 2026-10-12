@@ -67,14 +67,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (typeof pin !== 'string' || !/^\d{4}$/.test(pin.trim())) {
         return res.status(400).json({
           success: false,
-          message: 'A valid 4-digit PIN is required',
+          message: 'A valid 4-digit check-in code is required',
         });
       }
 
       if (event.pin !== pin.trim()) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid PIN',
+          message: 'Invalid check-in code',
         });
       }
     }

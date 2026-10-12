@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } else if (/^\d{4}$/.test(trimmedPin)) {
           pin = trimmedPin;
         } else {
-          return res.status(400).json({ success: false, message: 'PIN must be blank, "auto", or exactly 4 digits.' });
+          return res.status(400).json({ success: false, message: 'Check-in code must be blank, "auto", or exactly 4 digits.' });
         }
       }
 

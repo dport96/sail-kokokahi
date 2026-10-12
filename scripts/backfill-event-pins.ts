@@ -92,7 +92,7 @@ const generateUniquePin = (usedPins: Set<string>): string => {
     }
   }
 
-  throw new Error('Unable to generate a unique 4-digit PIN');
+  throw new Error('Unable to generate a unique 4-digit check-in code');
 };
 
 async function main() {
@@ -141,7 +141,7 @@ async function main() {
     });
 
     updatedCount += 1;
-    console.log(`Assigned PIN ${pin} to event ${event.id} (${event.title})`);
+    console.log(`Assigned check-in code ${pin} to event ${event.id} (${event.title})`);
   }
 
   if (events.length === 0) {

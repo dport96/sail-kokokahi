@@ -19,7 +19,7 @@ export const AddEventSchema = Yup.object({
     .test('is-time', 'Please select a valid time', (value) => value instanceof Date || typeof value === 'string'),
   pin: Yup.string()
     .optional()
-    .test('is-optional-pin', 'PIN must be blank, "auto", or exactly 4 digits', (value) => {
+    .test('is-optional-pin', 'Check-in code must be blank, "auto", or exactly 4 digits', (value) => {
       if (!value || value.trim() === '') return true;
       const normalizedValue = value.trim().toLowerCase();
       if (normalizedValue === 'auto') return true;
